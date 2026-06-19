@@ -1,0 +1,560 @@
+# ABBA-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio-Generation on Networks of 360° Images  
+## Introduction  
+Welcome to the ABBA-360 research sandbox.  
+This system is designed as a **strictly agnostic orchestration engine** for AI generation of spatial audio from interconnected 360° images.  
+The system is setup to run from GitHub Pages using zrok to connect to the server, however it can be configured to run locally through the `.env` configuration file.  
+
+The purpose of the system is to be a research sandbox to study audio generation in networks of 360 images.  
+The sandbox is aimed to explore:  
+
+**I. AI & Algorithmic Optimization**  
+Node Selection: Minimizing jarring transitions via strategies (e.g., Acoustic Horizon).  
+Prompting & Taxonomies: Experiment with linguistic constraints and registries to prevent AI hallucination  
+
+**II. Human Perception & Cognition**  
+Acoustic Clutter: Defining the cognitive threshold for sensory overload in VR.  
+Spatial Discrepancies: Finding the human tolerance for AI errors in sound generation.  
+Biome Authenticity: Find the most perceptually realistic environment parameters.  
+
+**III. Computational & Graph-Theoretic Efficiency.**  
+Distance Attenuation: Finding optimal mathematical weights for acoustic horizons.  
+Acoustic Modeling: Exploring satellite data (e.g. NASA Landsat, ESA Sentinel) to automatically model acoustic parameters for different biomes  
+
+**IV. User Agency & Accessibility**
+Evolutionary AI: Using real-time user feedback loops to train reinforcement learning models.  
+Sensory Translation: Automating visual-to-audio sonification for visually impaired users.  
+
+The sandbox can be used to explore research quesitons, such as:  
+**What approaches to selecting nodes return the most realistic and consistent ambient sounds?**  
+**Which graph-theoretic node selection models minimize "acoustic flickering" (jarring or sudden soundscape changes) when a user navigates a high-density spatial network rapidly?**  
+Because the topological radar uses pluggable strategies, researchers can easily test different node-selection algorithms—e.g. mathematically based VS acoustic environment based—to empirically measure which distributions minimize jarring acoustic transitions.  
+
+**How do we categorize biomes and their acoustic properties?**  
+The concrete implementation of the framework externalizes this into dictionaries. Researchers can define and tweak parameters, like reverb limits and diffusion scales, in a single file to test what definitions feel most authentic to users, without touching a single line of backend code.  
+
+**What approach to prompting the VLM and latent diffusion models returns the most consistent results?**  
+By forcing the Vision Language Model to adhere to strict constraints, and by utilizing a real-time user feedback loop, ABBA-360 gives us a controlled environment to study exactly which linguistic structures prevent or minimise hallucination in visual interpretation and sound generation.  
+
+**How do we establish standardized parameters and labeling for generated spatial sounds?**  
+The framework acts as a central registry that translates visual intents into 3D audio generation. This provides a testbed to evaluate different Foley taxonomies and measure their perceptual accuracy within a VR headset
+
+
+## Project Structure
+
+```text
+abba360_v0/
+├── client/                     # Frontend Environment
+│   ├── index.html              
+│   └── js/
+│       ├── client.js           # Bootstrapper & Dependency Injection
+│       ├── NavigationManager.js# Core Orchestrator
+│       ├── NetworkService.js   # WebSocket client
+│       ├── SpatialAudioPlayer.js
+│       ├── UIManager.js
+│       ├── TopologyRadar.js
+│       ├── AcousticTreadmill.js
+│       ├── VR/                 # WebXR & A-Frame lifecycle
+│       └── strategies/         # <-- IMPLEMENT CLIENT STRATEGIES HERE
+│           ├── nodeselectionstrategies/
+│           ├── semanticproviders/
+│           ├── topologyproviders/
+│           ├── viewproviders/
+│           └── vrproviders/
+├── server/                     # Backend Environment
+│   ├── server.js               # Bootstrapper
+│   ├── PipelineService.js      # Core Orchestrator
+│   ├── SocketController.js     # WebSocket server
+│   ├── CacheManager.js
+│   ├── GPUResourceManager.js
+│   ├── .env                    # <-- IMPLEMENT ACTIVE STRATEGIES CONFIG
+│   └── AIEngine/
+│       ├── AIEngine.js         # Strategy Delegator
+│       ├── pythonscripts/      # Python code go here
+│       └── strategies/         # <-- IMPLEMENT SERVER STRATEGIES HERE
+│           ├── audio/
+│           ├── context/
+│           ├── imagesource/
+│           └── vision/
+└── docs/                       # Auto-generated Documentation
+```
+
+**You do not need to edit the core orchestration files** (like `PipelineService`, `NavigationManager`, `NetworkService`, `SoketController` etc).  The entire system is built on the **Strategy Pattern**. You simply need to write new Strategy classes to connect your own image sources, node selection algorithms, models, APIs, or mapping SDKs, and then activate them in the `.env` file.  
+You should only implement the concrete strategies for the strategy pattern, you should not need to change any other file other than the `.env` and the `TUNNEL` constant at the top of the `client.js` file. 
+
+---
+## Connection Configuration
+
+The frontend dynamically resolves the backend connection URL. It prioritizes the connection in the following order:
+
+1. **Localhost:** If accessed via `localhost` or `127.0.0.1`, it defaults to `http://localhost:3000`.
+
+2. **Custom Tunnel:** If the `?tunnel=` parameter is present in the URL (e.g., `?tunnel=https://your-ngrok-url`), it uses the provided URL.
+
+3. **Zrok Token:** If the `?token=` parameter is provided, or if a default `ZROK_UNIQUE_NAME_HERE` is configured in `client.js`, it defaults to `https://<token>.shares.zrok.io`.
+
+### Error Handling
+
+If none of the above criteria are met (no local host, no custom tunnel, no valid Zrok token configured), the application will throw an error to the browser console:
+
+> **ABBA-360 Error:** No valid backend connection found. Please provide a `?tunnel=` URL parameter, use a `?token=` parameter, or set your `ZROK_UNIQUE_NAME_HERE` in `client.js`.
+---
+## Local Installation & Testing
+ 
+ ABAA-360 can be run entirely locally for testing, development, and peer review.
+ However, ABBA-360 is designed to be hosted via GitHub Pages and connected to a backend via secure tunnels (like zrok or ngrok). 
+ Zrok is the falback tunnel service if none is provided via the `?tuneel` URL parameter. 
+ To use zrok set the `?token=` URL parameter to pass the random zrok token, or, if you prefer a static token, set a unique name in zrok and replace `ZROK_UNIQUE_NAME_HERE` in `client.js`.   
+
+### 1. Local Backend Setup (Node.js)
+
+1. Clone the repository and navigate to the root directory.
+
+2. Install the backend dependencies:
+
+   ```
+   npm install
+   ```
+
+3. Duplicate the `.env.example` file, rename it to `.env`, and configure it for local mode:
+
+   ```
+   LOCAL_MODE=true
+   PORT=3000
+   ```    
+   
+   *NOTE: If are running the out-of-the-box pipeline implementation, ensure you add your required API keys/tokens for Mapillary and Geoapify and install LM Studio and Pinokio with Stable Audio. Also ensure you launch the LM Studio Server and that the `LM_STUDIO_API` and `STABLE_AUDIO_API` variables are set to the correct ports in the `.env` file, they are pre-set in `.env.example` to `1234` for LM Studio and `7860` for Pinokio.*
+  
+4. Start the backend orchestration server:
+
+   ```
+   npm start
+   ```
+
+   The server will now be listening for WebSocket connections and API requests on `http://localhost:3000`.
+
+   *NOTE: If you want to run the application from your own host (such as GitHub Pages) set `LOCAL_MODE` to `false` and set the `ALLOWED_ORIGIN` to the host page url in the `.env` file*  
+   
+   *NOTE: If you intend to run your own generation pipeline implementation, remember add your own API keys/tokens for the services your are using and your configuration parameters in the `.env` file.*  
+
+   *NOTE: If are not using the out-of-the-box implementation and you are using your own python concrete implementation via the python adapters provided, please specify your python executable (e.g., 'python3' for Linux/macOS, 'python' for Windows)*
+   ```
+   PYTHON_EXEC=python3 
+   ```
+### 2. Frontend Setup (Client)
+
+Because the frontend utilizes ES6 modules (`type="module"`), the `index.html` file cannot simply be double-clicked to open in a browser due to strict CORS policies. It must be served via a local web server.
+
+1. Serve the `client` directory using any standard local web server. For example, using VS Code Live Server or Python's built-in server:
+
+   ```bash
+   cd client
+   python -m http.server 8080
+   ```
+
+2. Open your browser and navigate to `http://localhost:8080` or whatever port you set. The client will automatically handshake with your local Node.js backend.
+
+---
+
+## How to Configure Strategies (`.env`)
+
+The system uses dynamic dependency injection. It reads your `.env` file at boot and dynamically imports the exact JavaScript classes you request.  To use a custom strategy, place your file in the appropriate directory, **ensure the class name matches the filename exactly**, and update your `.env`:
+
+```env
+# ==========================================
+# SERVER STRATEGIES (AI ENGINE)
+# ==========================================
+IMAGE_PROVIDER="MapillarySource"
+CONTEXT_PROVIDER="GeoapifyContextProvider"
+VISION_PROVIDER="LMStudioVisionProvider"
+AUDIO_PROVIDER="StableAudioGradioProvider"
+
+# ==========================================
+# CLIENT STRATEGIES (MAPS/360 IMAGE NETWORK/VR 360 IMAGE SOURCE etc)
+# ==========================================
+CLIENT_VIEWER_PROVIDER="MapillaryViewerProvider"
+CLIENT_TOPOLOGY_PROVIDER="MapillaryTopologyProvider"
+CLIENT_VR_LOADER_PROVIDER="MapillaryVRLoader"
+CLIENT_NODE_SELECTION_STRATEGY="AcousticHorizonStrategy"
+CLIENT_SEMANTIC_PROVIDER="DefaultSemanticProvider"
+CLIENT_SEMANTIC_LAYERS="spatial, horizon"
+
+# ==========================================
+# PYTHON SCRIPTS [OPTIONAL, set to "" if unused]
+# ==========================================
+PYTHON_VISION_SCRIPT="vision_adapter.py"
+PYTHON_AUDIO_SCRIPT="audio_adapter.py"
+PYTHON_EXEC = "python3"
+```
+---
+
+## Provided Concrete Examples (Out of the Box)
+
+To help you get started, the repository includes several fully functional, concrete implementations of the strategy interfaces.  These demonstrate how to wrap real-world APIs and local models. The system is configured to run with the client hosted on GitHub pages. Change pinokioconfig.json adding your domain.
+
+**Place your API keys in the `.env` file**. The out of the box code requires a Mapillary API token and a Geoapify API key, you can get them from `https://www.mapillary.com/dashboard/developers` and `https://www.geoapify.com/get-started-with-maps-api/`. Once the keys are in the `.env` file the system is setup to pass them to the client.
+
+### 1. Mapillary & MapLibre GL (Visuals & Topology)
+The system uses Mapillary as the default provider for 360-degree street-level imagery and graph navigation.
+* **`MapillaryViewerProvider` (Client):** Wraps MapLibre GL JS to render the 2D map and WebGL viewer, translating user clicks into agnostic `pov_changed` and `node_changed` events.
+* **`MapillaryTopologyProvider` (Client):** Queries the Mapillary API to extract the navigation graph (edges/links) so the Acoustic Treadmill can calculate distances to neighboring panoramas.
+* **`MapillaryVRLoader` (Client):** Progressively downloads high-resolution equirectangular tiles to paint onto the WebXR A-Frame sphere.
+* **`MapillarySource` (Server):** Fetches the raw image buffer for the current panorama ID and passes it to the AI Engine for VLM analysis. Image providers must match in client and server.
+
+### 2. Geoapify (Context Grounding)
+* **`GeoapifyContextProvider` (Server):** A reverse-geocoding adapter. It takes the raw Lat/Lng coordinates from the client and converts them into a human-readable location string (e.g., "Times Square, New York"). This string grounds the VLM prompt to ensure region-accurate sonic generation.
+
+### 3. LM Studio (Vision-Language Analysis)
+* **`LMStudioVisionProvider` (Server):** An adapter for communicating with locally hosted Vision-Language Models (like LLaVA or Qwen-VL) via LM Studio's local server. It structures system prompts based on semantic layers (spatial, ambient, horizon) and parses the JSON output to locate sound sources in the 360 frame.
+
+### 4. Stable Audio / Gradio / Pinokio (Audio Synthesis)
+* **`StableAudioGradioProvider` (Server):** Connects via WebSockets to a local Gradio API endpoint (commonly managed via Pinokio). It passes the text prompts generated by the VLM to Stable Audio Open, streams the generation progress back to the UI, and captures the resulting `.wav` buffer.
+
+### 5. Python Adapters (Custom AI Fallbacks)
+If you prefer writing your AI inference logic in Python instead of Node.js, the system provides standard subprocess adapters:
+* **`PythonVisionProvider` & `PythonAudioAdapter` (Server):** These strategies use `child_process.spawn` to execute standard Python scripts (`vision_adapter.py` and `audio_adapter.py`). They pipe the base64 image data and prompts via `stdin` and parse the JSON outputs from `stdout`. Mock python scripts are included in the `pythonscripts/` directory as templates.
+
+---
+
+## Core Payload Contracts
+
+The architecture is strictly decoupled. These payloads act as the universal language between the Client, the Node.js Core, and your custom Strategies. Example payloads below. 
+
+### 1. The Vision Payload (`VisionProvider.analyse()`)
+Your Vision Provider must return an object with an `intents` array. Every intent must contain the strict routing keys (`eventName`, `identity`, `prompt`, `type`) to pass validation.
+
+```json
+{
+  "intents": [
+    {
+      "layer": "spatial",                 
+      "label": "Dog, Barking, Slapback",  
+      "prompt": "Dog, Barking, Slapback, recorded at London, UK...",
+      "type": "object_organic",           
+      "eventName": "instance_ready",      
+      "identity": "instance",             
+      "persistent": false,                
+      "positional": true,                 
+      "envType": "organic",               
+      "h": 270,                           
+      "p": 0,                             
+      "dist": 5                           
+    },
+    {
+      "layer": "ambient",                 
+      "label": "Ambient",                 
+      "prompt": "Low rumble of distant traffic, dry acoustics...",
+      "type": "ambient",                 
+      "eventName": "node_ready",          
+      "identity": "node",                 
+      "persistent": true,                 
+      "positional": false,                
+      "envType": "city"                   
+    }
+  ]
+}
+```
+
+### 2. The Audio Task Payload (`AudioProvider.generate()`)
+The `AIEngine` takes the vision intents and appends internal caching and queueing identifiers before sending it to the `AudioProvider`.
+
+```json
+{
+  "layer": "spatial",               
+  "label": "Dog, Barking, Slapback",
+  "prompt": "Dog, Barking, Slapback...",
+  "type": "object_organic",         
+  "eventName": "instance_ready",    
+  "identity": "instance",           
+  "persistent": false,              
+  "positional": true,               
+  "envType": "organic",             
+  "h": 270,                         
+  "p": 0,                           
+  "dist": 5,                        
+  
+  "id": "london_uk_dog_barking_v1_34985734985_0", 
+  "nodeId": "34985734985",                                 
+  "audioContentId": "london_uk_dog_barking_v1",   
+  "locationContext": "London, UK",                         
+  "displayName": "Dog, Barking, Slapback",                 
+  "visualMetadata": { /* raw copy of original intent */ }  
+}
+```
+
+### 3. The Client-to-Server Payload (`spatial_sync`)
+Emitted by `NetworkService` when navigating to a new panorama.
+
+```json
+{
+  "nodeId": "34985734985",          
+  "fromId": "12938471293",          
+  "navEpoch": 14,                   
+  "isAnchor": true,                 
+  "location": { "lat": 40.7128, "lng": -74.0060 },
+  "requestedLayers": ["spatial", "ambient"],
+  "nearbyAnchors": [                
+    {
+      "nodeId": "98237498237",
+      "hops": 1,                    
+      "requestedLayers": ["horizon"]
+    }
+  ],
+  "dbPayload": { /* cached graph geometry */ }                 
+}
+```
+
+### 4. The Server-to-Client Completion Payload (`instance_ready` / `node_ready`)
+Emitted by `PipelineService` when audio generation is finished.
+
+```json
+{
+  "url": "/audio/stream.wav?id=london_uk_dog_barking_v1", 
+  "nodeId": "34985734985",                   
+  "navEpoch": 14,                            
+  "taskData": {                              
+    "id": "london_uk_dog_barking_v1_34985734985_0",
+    "prompt": "Dog, Barking, Slapback...",
+    "displayName": "Dog, Barking, Slapback",
+    "persistent": false,
+    "positional": true,
+    "envType": "organic",
+    "audioContentId": "london_uk_dog_barking_v1"
+  }
+}
+```
+
+### 5. The Topology Graph Payload (`BaseTopologyProvider.getNode()`)
+The expected return shape for topology map spidering.
+
+```json
+{
+  "id": "34985734985",
+  "lat": 40.7128,
+  "lng": -74.0060,
+  "links": [
+    { "id": "neighbor_1_id", "heading": 90 },
+    { "id": "neighbor_2_id", "heading": 270 }
+  ]
+}
+```
+
+---
+
+## Server-Side Strategies (The AI Engine)
+
+Server strategies live in `server/AIEngine/strategies/`. They dictate how the backend fetches 360 images, evaluates them with VLMs, and generates audio.
+
+### 1. `ImageSourceProvider`
+**Location:** `server/AIEngine/strategies/imagesource/`  
+**Purpose:** Fetches raw equirectangular image buffers from a mapping service.
+
+```javascript
+import { ImageSourceProvider } from './ImageSourceProvider.js';
+
+export class MyCustomImageSource extends ImageSourceProvider {
+    /**
+     * @param {string} id - The agnostic node identifier.
+     * @returns {Promise<Buffer>} - The raw binary image data.
+     */
+    async getImage(id) {
+        // Fetch image bytes from your API
+        return Buffer.from(arrayBuffer); 
+    }
+}
+```
+
+### 2. `ContextProvider`
+**Location:** `server/AIEngine/strategies/context/`  
+**Purpose:** Converts raw Lat/Lng coordinates into a human-readable location string.
+
+```javascript
+import { ContextProvider } from './ContextProvider.js';
+
+export class MyContextProvider extends ContextProvider {
+    /**
+     * @param {number} lat 
+     * @param {number} lng 
+     * @returns {Promise<string>} - Human readable location (e.g., "Urban Street, London")
+     */
+    async resolve(lat, lng) {
+        return "Custom Location String";
+    }
+
+    /**
+     * @returns {Object} - Safe config pushed to the client on boot
+     */
+    getPublicConfig() {
+        return { customApiKey: process.env.MY_API_KEY };
+    }
+}
+```
+
+### 3. `VisionProvider`
+**Location:** `server/AIEngine/strategies/vision/`  
+**Purpose:** Evaluates visual buffers to extract sonic intents.
+
+```javascript
+import { VisionProvider } from './VisionProvider.js';
+
+export class MyVisionProvider extends VisionProvider {
+    async init() {}
+
+    /**
+     * @param {Buffer} buffer - The 360 image buffer
+     * @param {string} context - The resolved location string
+     * @param {Object} options - Dictionary parameters (layers, max objects, etc.)
+     * @returns {Promise<Object>} - Must return an object containing an 'intents' array.
+     */
+    async analyse(buffer, context, options) {
+        // Evaluate buffer, generate intents based on the payload schema above
+        return {
+            intents: [
+                {
+                    layer: "spatial",
+                    label: "Dog",
+                    prompt: "A dog barking...",
+                    type: "object_organic",
+                    eventName: "instance_ready",
+                    identity: "instance",
+                    persistent: false,
+                    positional: true,
+                    envType: "organic",
+                    h: 270, p: 0, dist: 5
+                }
+            ]
+        };
+    }
+}
+```
+
+### 4. `AudioProvider`
+**Location:** `server/AIEngine/strategies/audio/`  
+**Purpose:** Synthesizes text prompts into `.wav` audio buffers.
+
+```javascript
+import { AudioProvider } from './AudioProvider.js';
+
+export class MyAudioProvider extends AudioProvider {
+    /**
+     * @param {Object} task - The intent payload
+     * @param {Object} context - Execution hooks: { signal, socket, progressCallback }
+     * @returns {Promise<{buffer: Buffer, duration: string}>}
+     */
+    async generate(task, context) {
+        // Return raw WAV buffer and duration (in seconds)
+        return {
+            buffer: generatedWavBuffer,
+            duration: "10.0"
+        };
+    }
+}
+```
+
+---
+
+## Client-Side Strategies (UI & Map Abstractions)
+
+Client strategies live in `client/js/strategies/`. They wrap proprietary SDKs so the core engine never touches external code.
+
+### 1. `BaseViewerProvider`
+**Location:** `client/js/strategies/viewproviders/`  
+**Purpose:** Wraps 2D Panoramas (StreetView, MapillaryJS). Must emit standard events.
+
+```javascript
+import { BaseViewerProvider } from './BaseViewerProvider.js';
+
+export class MyViewerProvider extends BaseViewerProvider {
+    async init() {
+        // Boot your 2D Viewer SDK (e.g., attach to this.containerId)
+        
+        // CONTRACT: You MUST emit these 3 events when the SDK interacts:
+        // this.trigger('visible_changed', boolean);
+        // this.trigger('node_changed', { id: "newNodeId", location: { lat, lng } });
+        // this.trigger('pov_changed', { heading: 180, pitch: 0 });
+    }
+
+    getCurrentNodeId() { return "current_id"; }
+    getLocation() { return { lat: 0, lng: 0 }; }
+    isVisible() { return true; }
+    getNativeViewer() { return this.myNativeMapObject; }
+}
+```
+
+### 2. `BaseTopologyProvider`
+**Location:** `client/js/strategies/topologyproviders/`  
+**Purpose:** Retrieves the graph mapping data for neighbors.
+
+```javascript
+import { BaseTopologyProvider } from './BaseTopologyProvider.js';
+
+export class MyTopologyProvider extends BaseTopologyProvider {
+    /**
+     * @param {string} nodeId
+     * @returns {Promise<Object>}
+     */
+    async getNode(nodeId) {
+        return {
+            id: nodeId,
+            lat: 40.7128,
+            lng: -74.0060,
+            links: [
+                { id: "neighbor_id_1", heading: 90 }
+            ]
+        };
+    }
+}
+```
+
+### 3. `NodeSelectionStrategy`
+**Location:** `client/js/strategies/nodeselectionstrategies/`  
+**Purpose:** Math logic to determine if a node acts as a background acoustic anchor.
+
+```javascript
+import { NodeSelectionStrategy } from './NodeSelectionStrategy.js';
+
+export class MySelectionStrategy extends NodeSelectionStrategy {
+    /**
+     * @param {string} nodeId 
+     * @param {TopologyRadar} radar 
+     * @returns {Promise<boolean>}
+     */
+    async isAnchor(nodeId, radar) {
+        return true; 
+    }
+    reset() {}
+}
+```
+
+### 4. `BaseSemanticProvider`
+**Location:** `client/js/strategies/semanticproviders/`  
+**Purpose:** Defines the semantic layers the system should look for.
+
+```javascript
+import { BaseSemanticProvider } from './BaseSemanticProvider.js';
+
+export class MySemanticProvider extends BaseSemanticProvider {
+    getActiveLayers() { return ['spatial', 'ambient']; }
+    getBackgroundLayers() { return ['horizon']; }
+    requiresBackgroundProcessing() { return true; }
+}
+```
+
+### 5. `BaseVRLoader`
+**Location:** `client/js/strategies/vrproviders/`  
+**Purpose:** Fetches and paints image tiles to a canvas for WebXR environments.
+
+```javascript
+import { BaseVRLoader } from './BaseVRLoader.js';
+
+export class MyVRLoader extends BaseVRLoader {
+    async getLowResBase(nodeId, ctx, width, height) {
+        // Draw low-res placeholder to ctx
+    }
+
+    async stitchProgressively(nodeId, zoom, ctx, width, height, onTileDrawn) {
+        // Draw HD tiles
+        onTileDrawn();
+        return true; 
+    }
+}
+```

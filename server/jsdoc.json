@@ -1,0 +1,13 @@
+{
+    "plugins": ["node_modules/jsdoc-babel"],
+    "babel": {
+        "presets": [
+            ["@babel/preset-env", {
+                "targets": {
+                    "node": "10"
+                }
+            }]
+        ]
+    },
+    "sourceType": "module"
+}
