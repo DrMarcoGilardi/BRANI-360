@@ -1,0 +1,5 @@
+cache/
+node_modules/
+.exe
+.env
+zrok2.exe
