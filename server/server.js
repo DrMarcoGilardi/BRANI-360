@@ -46,7 +46,7 @@ import { log } from 'console';
 dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const logger = new LogManager(); 
+const logger = new LogManager();
 
 const isLocal = process.env.LOCAL_MODE === 'true';
 const allowedOrigin = isLocal ? '*' : process.env.ALLOWED_ORIGIN;
@@ -58,34 +58,38 @@ const allowedOrigin = isLocal ? '*' : process.env.ALLOWED_ORIGIN;
  * @returns {Promise<void>}
  */
 async function startServer() {
-    const absoluteDbPath = process.env.DB_PATH 
-        ? path.resolve(__dirname, process.env.DB_PATH) 
+    const absoluteDbPath = process.env.DB_PATH
+        ? path.resolve(__dirname, process.env.DB_PATH)
         : undefined;
-        
-    const cacheManager = new CacheManager( 
-        {dbPath: process.env.DB_PATH, audioFormat:process.env.AUDIO_FORMAT}, 
-        logger 
+
+    const cacheManager = new CacheManager(
+        { dbPath: process.env.DB_PATH, audioFormat: process.env.AUDIO_FORMAT },
+        logger
     );
     await cacheManager.init();
     const gpuManager = new GPUResourceManager(process.env.GPU_MAX_WORKERS);
 
     // The Engine receives the raw process.env and manages its own providers.
-    const aiEngine = new AIEngine({ 
+    const aiEngine = new AIEngine({
         config: process.env,
-        cacheManager, 
+        cacheManager,
         logger
     });
 
     // Triggers internal AI Engine instantiation
     await aiEngine.init();
-    
+
     const app = express();
-    app.use(cors({origin: allowedOrigin}));
+    app.use(cors({ origin: allowedOrigin }));
     app.use(express.json());
-    
+
     const server = http.createServer(app);
-    const io = new Server(server, { cors: { origin: allowedOrigin,
-        methods: ["GET", "POST"] } });
+    const io = new Server(server, {
+        cors: {
+            origin: allowedOrigin,
+            methods: ["GET", "POST"]
+        }
+    });
 
     const pipelineService = new PipelineService(aiEngine, gpuManager, cacheManager, logger);
     new SocketController(io, pipelineService, gpuManager, logger);
@@ -128,21 +132,21 @@ async function startServer() {
         try {
             // Express automatically decodes the query string. 
             // 'id' perfectly matches the raw database key (including '_' and '.')
-            const id = req.query.id; 
-            
+            const id = req.query.id;
+
             if (!id) {
                 return res.status(400).send("Missing audio ID payload.");
             }
 
             const filePath = await cacheManager.getAudioPath(id);
-            
+
             if (!filePath) {
                 return res.status(404).send("Audio not found in database.");
             }
-            
+
             res.sendFile(filePath);
-        } catch (e) { 
-            res.status(404).send("Not found"); 
+        } catch (e) {
+            res.status(404).send("Not found");
         }
     });
 

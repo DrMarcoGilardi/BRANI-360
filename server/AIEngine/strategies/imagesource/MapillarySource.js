@@ -26,7 +26,7 @@
  * -------------------------------------------------------------------------
  */
 
-import {ImageSourceProvider} from './ImageSourceProvider.js'
+import { ImageSourceProvider } from './ImageSourceProvider.js'
 import axios from 'axios';
 import fs from 'fs';
 
@@ -72,7 +72,7 @@ export class MapillarySource extends ImageSourceProvider {
             const cachedPath = await this.cacheManager.getImage(id);
             if (cachedPath) {
                 this.logger.log(`[MapillarySource] Cache hit for image: ${id}`);
-                return await fs.readFileSync(cachedPath); 
+                return await fs.readFileSync(cachedPath);
             }
         }
 

@@ -1,10 +1,10 @@
-import {ContextProvider} from './ContextProvider.js'
+import { ContextProvider } from './ContextProvider.js'
 import axios from 'axios';
 
 export class GoogleContextProvider extends ContextProvider {
-    constructor(key, logger) { 
-        super(); 
-        this.key = key.GOOGLE_MAPS_API_KEY; 
+    constructor(key, logger) {
+        super();
+        this.key = key.GOOGLE_MAPS_API_KEY;
         this.logger = logger;
     }
 

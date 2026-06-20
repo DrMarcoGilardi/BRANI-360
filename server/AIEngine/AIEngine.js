@@ -66,12 +66,12 @@ export class AIEngine {
         this.config = options.config || {};
         this.cacheManager = options.cacheManager;
         this.logger = options.logger || console;
-        
+
         this.dictionary = {};
         this.activeNodeId = null;
         this.activeBase64 = null;
         this.targetFormat = (this.config.AUDIO_FORMAT || 'wav').toLowerCase();
-        
+
         this.imageSource = null;
         this.vision = null;
         this.synthesis = null;
@@ -87,9 +87,9 @@ export class AIEngine {
      */
     async init() {
         try {
-            const imgClassStr = this.config.IMAGE_PROVIDER; 
-            const ctxClassStr = this.config.CONTEXT_PROVIDER; 
-            const visClassStr = this.config.VISION_PROVIDER; 
+            const imgClassStr = this.config.IMAGE_PROVIDER;
+            const ctxClassStr = this.config.CONTEXT_PROVIDER;
+            const visClassStr = this.config.VISION_PROVIDER;
             const audClassStr = this.config.AUDIO_PROVIDER;
 
             const [ImageModule, ContextModule, VisionModule, AudioModule] = await Promise.all([
@@ -109,7 +109,7 @@ export class AIEngine {
             }
 
             const providerOptions = { ...this.config, cacheManager: this.cacheManager };
-            
+
             this.imageSource = new ImageClass(providerOptions, this.logger);
             this.context = new ContextClass(providerOptions, this.logger);
             this.vision = new VisionClass(this.config, this.logger);
@@ -121,7 +121,7 @@ export class AIEngine {
             }
 
             this.logger.log(`[AIEngine] Auto-Discovery complete. Active stack: [${imgClassStr}, ${ctxClassStr}, ${visClassStr}, ${audClassStr}]`);
-            
+
         } catch (e) {
             this.logger.error(`[AIEngine] Auto-Discovery Failed: ${e.message}`);
         }
@@ -138,6 +138,14 @@ export class AIEngine {
         const baseConfig = this.context ? this.context.getPublicConfig() : {};
         const semanticString = this.config.CLIENT_SEMANTIC_LAYERS;
         const semanticLayers = semanticString.split(',').map(s => s.trim());
+
+        const strategyOptions = {};
+        for (const [key, value] of Object.entries(this.config)) {
+            if (key.startsWith('CLIENT_OPT_')) {
+                const cleanKey = key.replace('CLIENT_OPT_', '');
+                strategyOptions[cleanKey] = value;
+            }
+        }
 
         return {
             ...baseConfig,
@@ -172,11 +180,11 @@ export class AIEngine {
      */
     async getTasksForMovement(nodeId, lat, lng, isAnchor, locationContext, requestedLayers) {
         let sceneData = await this.cacheManager.getVLMData(nodeId) || {};
-        
+
         if (!sceneData.intents || sceneData.intents.length === 0) {
             const res = await this.process(nodeId, lat, lng, { isAnchor, requestedLayers });
             sceneData = res.sceneData;
-            this.logger.log(`[AI ENGINE VLM RESULT] TasksForMovement: ${JSON.stringify(sceneData, null, 2).toString().replace(/_/g," ")}`);
+            this.logger.log(`[AI ENGINE VLM RESULT] TasksForMovement: ${JSON.stringify(sceneData, null, 2).toString().replace(/_/g, " ")}`);
             await this.cacheManager.saveVLMData(nodeId, sceneData);
         }
 
@@ -191,12 +199,12 @@ export class AIEngine {
         }
 
         (sceneData.intents || []).forEach((intent, index) => {
-            const isPersistent = !!intent.persistent; 
-            
+            const isPersistent = !!intent.persistent;
+
             const label = intent.label || "sound";
             const labelSlug = label.toLowerCase().replace(/[^a-z0-9]+/g, '_');
             labelCounts[labelSlug] = (labelCounts[labelSlug] || 0) + 1;
-            
+
             const audioKey = isPersistent ? nodeId : `${locSlug}_${labelSlug}_v${labelCounts[labelSlug]}`;
             const instanceId = isPersistent ? nodeId : `${audioKey}_${cleanNodeId}_${index}`;
 
@@ -209,7 +217,7 @@ export class AIEngine {
                 audioContentId: audioKey,
                 locationContext,
                 displayName: label,
-                visualMetadata: { ...intent } 
+                visualMetadata: { ...intent }
             });
         });
 
@@ -217,25 +225,25 @@ export class AIEngine {
     }
 
 
-   /**
-     * @async
-     * @method getTasksForHorizon
-     * @memberof AIEngine
-     * @description Evaluates VLM data for background/neighboring nodes to support the acoustic treadmill.
-     * @param {string} nodeId - Target panorama ID.
-     * @param {number} lat - Latitude.
-     * @param {number} lng - Longitude.
-     * @param {string} locationContext - Geocoded contextual string.
-     * @param {Array<string>} requestedLayers - Target semantic layers.
-     * @returns {Promise<Array<Object>>} Array of configured background tasks.
-     */
+    /**
+      * @async
+      * @method getTasksForHorizon
+      * @memberof AIEngine
+      * @description Evaluates VLM data for background/neighboring nodes to support the acoustic treadmill.
+      * @param {string} nodeId - Target panorama ID.
+      * @param {number} lat - Latitude.
+      * @param {number} lng - Longitude.
+      * @param {string} locationContext - Geocoded contextual string.
+      * @param {Array<string>} requestedLayers - Target semantic layers.
+      * @returns {Promise<Array<Object>>} Array of configured background tasks.
+      */
     async getTasksForHorizon(nodeId, lat, lng, locationContext, requestedLayers) {
         let sceneData = await this.cacheManager.getVLMData(nodeId) || {};
-        
+
         if (!sceneData.intents || sceneData.intents.length === 0) {
             const res = await this.process(nodeId, lat, lng, { isAnchor: true, requestedLayers });
             sceneData = res.sceneData;
-            this.logger.log(`[AI ENGINE VLM RESULT] TasksForHorizon: ${JSON.stringify(sceneData, null, 2).toString().replace("_"," ")}`);
+            this.logger.log(`[AI ENGINE VLM RESULT] TasksForHorizon: ${JSON.stringify(sceneData, null, 2).toString().replace("_", " ")}`);
             await this.cacheManager.saveVLMData(nodeId, sceneData);
         }
 
@@ -246,11 +254,11 @@ export class AIEngine {
                 id: nodeId,
                 nodeId,
                 eventName: 'node_ready',
-                persistent: true, 
+                persistent: true,
                 audioContentId: nodeId,
                 locationContext
             }));
-            
+
     }
 
     /**
@@ -267,18 +275,18 @@ export class AIEngine {
         const fromScratch = !!feedbackData.fromScratch;
         const audioKey = taskData.audioContentId || taskData.id;
         if (fromScratch) await this.cacheManager.deleteAudio(audioKey);
-        
-        return { 
-            ...taskData, 
+
+        return {
+            ...taskData,
             navEpoch: epoch,
             forceBypassCache: true,
-            regenOpts: { 
-                useInit: !fromScratch, 
+            regenOpts: {
+                useInit: !fromScratch,
                 path: (!fromScratch && taskData.audioContentId) ? await this.cacheManager.getAudioPath(taskData.audioContentId) : null,
                 feedback: feedbackData.text,
                 rating: feedbackData.rating,
                 fromScratch: fromScratch
-            } 
+            }
         };
     }
 
@@ -303,9 +311,9 @@ export class AIEngine {
                 this.activeNodeId = nodeId;
                 this.activeBase64 = buffer.toString('base64');
             }
-            
+
             const locationString = await this.context.resolve(lat, lng);
-            
+
             const sceneData = await this.vision.analyse(buffer, locationString, options);
             return { sceneData, locationString };
         } catch (e) {
@@ -331,7 +339,7 @@ export class AIEngine {
         if (result?.buffer) {
             result.buffer = await Utils.transcode(result.buffer, this.targetFormat, task.type, this.logger);
         }
-        
+
         return result;
     }
 }

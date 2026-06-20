@@ -6,208 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ABBA-360</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <style>
-        body,
-        html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #000;
-            font-family: sans-serif;
-        }
-
-        #map-layer {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            z-index: 10;
-            /* Put map in background */
-        }
-
-        #search-container {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            z-index: 1000;
-            width: 300px;
-        }
-
-        #drop-prompt {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid #00f0ff;
-            color: #00f0ff;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            text-transform: uppercase;
-            z-index: 500;
-            pointer-events: none;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
-            text-align: center;
-        }
-
-        #hud {
-            position: fixed;
-            bottom: 30px;
-            left: 20px;
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.85);
-            padding: 15px;
-            border-left: 4px solid #00f0ff;
-            color: #fff;
-            pointer-events: auto;
-            width: 280px;
-            max-height: 45vh;
-            overflow-y: auto;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-            scrollbar-width: thin;
-            scrollbar-color: #00f0ff #111;
-        }
-
-        #hud::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        #hud::-webkit-scrollbar-track {
-            background: #111;
-        }
-
-        #hud::-webkit-scrollbar-thumb {
-            background: #00f0ff;
-        }
-
-        #xr-btn {
-            position: fixed;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 101;
-            background: #00f0ff;
-            color: #000;
-            border: none;
-            padding: 15px 35px;
-            border-radius: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            display: none;
-        }
-
-        #vr-engine {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 20;
-            opacity: 0;
-            transition: opacity 1s;
-            pointer-events: none;
-        }
-
-        .pulse {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #00f0ff;
-            border-radius: 50%;
-            margin-right: 8px;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.3;
-            }
-
-            100% {
-                opacity: 1;
-            }
-        }
-
-        /* Agnostic Task UI Styling used by UIManager */
-        .task-item {
-            margin-top: 10px;
-            font-size: 12px;
-            color: #aaa;
-            padding-bottom: 5px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            transition: opacity 0.3s ease;
-        }
-
-        .task-item:last-child {
-            border-bottom: none;
-        }
-
-        .task-item span {
-            color: #fff;
-            float: right;
-        }
-
-        .task-item.complete {
-            opacity: 1 !important;
-        }
-
-        /* Force full opacity when done */
-        .task-item.error {
-            opacity: 1 !important;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: #333;
-            margin-top: 5px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: #00f0ff;
-            width: 0%;
-            transition: width 0.3s;
-        }
-
-        .mute-btn {
-            background: transparent;
-            color: #00ffaa;
-            border: 1px solid #00ffaa;
-            border-radius: 3px;
-            font-size: 9px;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 2px 6px;
-            margin-left: 10px;
-            transition: all 0.2s;
-        }
-
-        .mute-btn:hover {
-            background: rgba(0, 255, 170, 0.2);
-        }
-
-        #node-info {
-            font-size: 11px;
-            margin-top: 8px;
-            margin-bottom: 4px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            position: sticky;
-            top: 0;
-            background: rgba(0, 0, 0, 0.85);
-            padding: 2px 0;
-            z-index: 10;
-        }
-    </style>
+    <link rel="stylesheet" href="./css/styles.css">
 </head>
 
 <body>
@@ -226,7 +25,8 @@
     <button id="xr-btn">ENTER VR</button>
 
     <!-- a-scene for the XR module -->
-    <div id="vr-engine" style="display: none; opacity: 0; position: absolute; width: 100%; height: 100%; z-index: 20; pointer-events: none; transition: opacity 1s;">
+    <div id="vr-engine"
+        style="display: none; opacity: 0; position: absolute; width: 100%; height: 100%; z-index: 20; pointer-events: none; transition: opacity 1s;">
         <a-scene xr-mode-ui="enabled: false">
             <a-entity id="vr-sky"></a-entity>
             <a-entity id="audio-treadmill"></a-entity>
@@ -234,10 +34,11 @@
 
             <a-entity id="rig" position="0 0 0">
                 <a-entity id="camera" camera position="0 1.6 0" look-controls="pointerLockEnabled: false">
-                    <!-- <a-cursor raycaster="objects: .raycastable" color="#00f0ff"></a-cursor> -->
+                    <a-cursor raycaster="objects: .raycastable" color="#00f0ff"></a-cursor>
                 </a-entity>
 
-                <a-entity id="left-hand" hand-controls="hand: left" hand-tracking-controls="hand: left" raycaster="objects: .raycastable">
+                <a-entity id="left-hand" hand-controls="hand: left" hand-tracking-controls="hand: left"
+                    raycaster="objects: .raycastable">
                     <a-entity wrist-ui></a-entity>
                 </a-entity>
 

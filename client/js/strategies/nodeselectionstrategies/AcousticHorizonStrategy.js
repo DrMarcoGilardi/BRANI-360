@@ -45,11 +45,13 @@ export class AcousticHorizonStrategy extends NodeSelectionStrategy {
      * @constructor
      * @param {number} [minSpacing=3] - Minimum allowed graph distance between anchors.
      * @param {number} [maxGap=6] - Maximum allowed empty hops before forcing a filler anchor.
+     * @param {boolean} [isSpatiallyContinuous=true] - Whether to consider spatial continuity in anchor selection.
      */
-    constructor(minSpacing = 3, maxGap = 6) {
+    constructor(minSpacing = 3, maxGap = 6, isSpatiallyContinuous = true) {
         super();
         this.MIN_SPACING = minSpacing;
         this.MAX_GAP = maxGap;
+        this.isSpatiallyContinuous = isSpatiallyContinuous;
         this.gapFillerCache = new Map();
         this.MAX_STRATEGY_CACHE = 1000;
     }
@@ -120,7 +122,7 @@ export class AcousticHorizonStrategy extends NodeSelectionStrategy {
      */
     async _getScore(id, radar) {
         const data = await radar._getNode(id);
-        if (data?.links?.length <= 1) return Infinity; 
+        if (data?.links?.length <= 1) return Infinity;
         return radar.hashNodeId(id);
     }
 
@@ -157,7 +159,7 @@ export class AcousticHorizonStrategy extends NodeSelectionStrategy {
      */
     async _isGapFiller(currentId, radar) {
         if (this.gapFillerCache.has(currentId)) return this.gapFillerCache.get(currentId);
-        
+
         const gapSearchRadius = Math.floor(this.MAX_GAP / 2);
         const localNhood = await radar._getNeighborhood(currentId, gapSearchRadius);
 

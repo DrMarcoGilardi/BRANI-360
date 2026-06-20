@@ -47,13 +47,13 @@ const urlParams = new URLSearchParams(window.location.search);
 const nodeToken = urlParams.get('token') || ZROK_UNIQUE_NAME; // <--- Looks for the random zrok token in the url, if not provided it defaults to the unique name
 const tunnel = urlParams.get('tunnel');
 const TUNNEL_URL = isLocalhost ? 'http://localhost:3000' :
-                   tunnel ? tunnel :
-                   (nodeToken && nodeToken !== "ZROK_UNIQUE_NAME") ? `https://${nodeToken}.shares.zrok.io` : //<--- If not custon tunnel is provided it defaults to a zrok tunnel
-                   (() => {
-                       const errorMsg = "ABBA-360 Error: No valid backend connection found. Please set your ZROK_UNIQUE_NAME_HERE, provide a ?tunnel= URL parameter, or use a ?token= parameter.";
-                       console.error(errorMsg);
-                       throw new Error(errorMsg); //<--- If neither token or unique name are set then it throws an error
-                   })();  
+    tunnel ? tunnel :
+        (nodeToken && nodeToken !== "ZROK_UNIQUE_NAME") ? `https://${nodeToken}.shares.zrok.io` : //<--- If not custon tunnel is provided it defaults to a zrok tunnel
+            (() => {
+                const errorMsg = "ABBA-360 Error: No valid backend connection found. Please set your ZROK_UNIQUE_NAME_HERE, provide a ?tunnel= URL parameter, or use a ?token= parameter.";
+                console.error(errorMsg);
+                throw new Error(errorMsg); //<--- If neither token or unique name are set then it throws an error
+            })();
 
 const networkService = new NetworkService(TUNNEL_URL);
 
@@ -85,10 +85,10 @@ async function bootstrap() {
         const treadmill = new AcousticTreadmill(player, ui);
 
         // --- DYNAMIC AGNOSTIC STRATEGY INJECTION --
-        const { 
-            viewerProvider: vName, 
-            topologyProvider: tName, 
-            nodeSelectionStrategy: nName, 
+        const {
+            viewerProvider: vName,
+            topologyProvider: tName,
+            nodeSelectionStrategy: nName,
             semanticProvider: sName,
             vrLoaderProvider: vrName,
             semanticLayers
@@ -123,7 +123,7 @@ async function bootstrap() {
         const topologyProvider = new TopologyClass(config.key);
         const nodeSelectionStrategy = new SelectionClass();
         const radar = new TopologyRadar(topologyProvider, nodeSelectionStrategy);
-        
+
         const vrLoaderProvider = new VRLoaderClass(config.key);
         const vrSceneController = new VRSceneController(ui, vrLoaderProvider);
 
@@ -162,13 +162,13 @@ async function bootstrap() {
         ui.xrBtn.innerText = "ENTER VR";
         ui.showStartButton(async () => {
             const nodeId = navManager.currentNodeId;
-            
+
             if (!nodeId) {
                 console.warn("[Boot] VR Entry blocked: Map has not initialized a location yet.");
-                ui.showXrButton(); 
+                ui.showXrButton();
                 return;
             }
-            
+
             const nodeData = await radar._getNode(nodeId);
             vrSceneController.enterVR(nodeId, nodeData?.links || []);
         });
