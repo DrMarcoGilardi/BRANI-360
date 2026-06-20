@@ -98,7 +98,7 @@ If none of the above criteria are met (no local host, no custom tunnel, no valid
 
 > **ABBA-360 Error:** No valid backend connection found. Please provide a `?tunnel=` URL parameter, use a `?token=` parameter, or set your `ZROK_UNIQUE_NAME_HERE` in `client.js`.
 ---
-## Local Installation & Testing
+## Local Installation & Testing with Out-Of-The-Box Implementation
  
  ABAA-360 can be run entirely locally for testing, development, and peer review.
  However, ABBA-360 is designed to be hosted via GitHub Pages and connected to a backend via secure tunnels (like zrok or ngrok). 
@@ -127,7 +127,7 @@ If none of the above criteria are met (no local host, no custom tunnel, no valid
 4. Start the backend orchestration server:
 
    ```
-   npm start
+   node server.js
    ```
 
    The server will now be listening for WebSocket connections and API requests on `http://localhost:3000`.
@@ -144,7 +144,7 @@ If none of the above criteria are met (no local host, no custom tunnel, no valid
 
 Because the frontend utilizes ES6 modules (`type="module"`), the `index.html` file cannot simply be double-clicked to open in a browser due to strict CORS policies. It must be served via a local web server.
 
-1. Serve the `client` directory using any standard local web server. For example, using VS Code Live Server or Python's built-in server:
+1. Serve the `client` directory using any standard local web server. For example, using VS Code Live Server or Python's built-in server like below:
 
    ```bash
    cd client
