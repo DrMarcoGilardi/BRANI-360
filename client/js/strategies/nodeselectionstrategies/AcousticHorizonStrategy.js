@@ -49,9 +49,9 @@ export class AcousticHorizonStrategy extends NodeSelectionStrategy {
      */
     constructor(clientConfig = {}) {
         super();
-        this.MIN_SPACING = parseInt(clientConfig.MIN_SPACING, 10);
-        this.MAX_GAP = parseInt(clientConfig.MAX_GAP, 10);
-        this.isSpatiallyContinuous = (clientConfig.SPATIALLY_CONTINUOUS === 'true');
+        this.MIN_SPACING = parseInt(clientConfig?.MIN_SPACING, 10);
+        this.MAX_GAP = parseInt(clientConfig?.MAX_GAP, 10);
+        this.isSpatiallyContinuous = (clientConfig?.SPATIALLY_CONTINUOUS === 'true');
         this.gapFillerCache = new Map();
         this.MAX_STRATEGY_CACHE = 1000;
     }

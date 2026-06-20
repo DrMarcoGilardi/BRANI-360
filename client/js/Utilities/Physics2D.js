@@ -1,0 +1,172 @@
+export class Physics2D {
+    constructor(container, nodes, edges) {
+        this.container = container;
+        this.nodes = nodes;
+        this.edges = edges;
+
+        this.physicsLoop = null;
+        this.isRunning = false;
+
+        // Physics Constants
+        this.repulsion = 40000;
+        this.springDist = 200;
+        this.springForce = 0.05;
+        this.gravity = 0.02;
+        this.damping = 0.8;
+    }
+
+    start() {
+        if (!this.isRunning) {
+            this.isRunning = true;
+            this._run();
+        }
+    }
+
+    stop() {
+        this.isRunning = false;
+        if (this.physicsLoop) {
+            cancelAnimationFrame(this.physicsLoop);
+            this.physicsLoop = null;
+        }
+    }
+
+    _normalizeVector(x, y) {
+        const len = Math.sqrt(x * x + y * y) || 1;
+        return { nx: x / len, ny: y / len };
+    }
+
+    _calculateLabelOffset(nx, ny, labelWidth = 150, labelHeight = 30, nodeRadius = 65) {
+        const w = labelWidth / 2;
+        const h = labelHeight / 2;
+
+        const absNx = Math.abs(nx);
+        const absNy = Math.abs(ny) || 0.0001;
+        const safeNx = absNx || 0.0001;
+
+        const t1 = (nodeRadius + h) / absNy;
+
+        if (t1 * absNx <= w) return t1;
+
+        const t2 = (nodeRadius + w) / safeNx;
+        if (t2 * absNy <= h) return t2;
+
+        const B = -2 * (absNx * w + absNy * h);
+        const C = (w * w) + (h * h) - (nodeRadius * nodeRadius);
+        return (-B + Math.sqrt((B * B) - (4 * C))) / 2;
+    }
+
+    _run() {
+        if (!this.isRunning) return;
+
+        const width = this.container.clientWidth || window.innerWidth;
+        const height = this.container.clientHeight || window.innerHeight;
+        const center = { x: width / 2, y: height / 2 };
+
+        // 1. Repulsion
+        for (let i = 0; i < this.nodes.length; i++) {
+            for (let j = i + 1; j < this.nodes.length; j++) {
+                const n1 = this.nodes[i];
+                const n2 = this.nodes[j];
+                const dx = n1.x - n2.x;
+                const dy = n1.y - n2.y;
+                let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+
+                if (dist < 400) {
+                    const force = this.repulsion / (dist * dist);
+                    const fx = (dx / dist) * force;
+                    const fy = (dy / dist) * force;
+                    if (!n1.isDragging) { n1.vx += fx; n1.vy += fy; }
+                    if (!n2.isDragging) { n2.vx -= fx; n2.vy -= fy; }
+                }
+            }
+        }
+
+        // 2. Spring Force
+        this.edges.forEach(edge => {
+            const dx = edge.target.x - edge.source.x;
+            const dy = edge.target.y - edge.source.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const force = (dist - this.springDist) * this.springForce;
+
+            const fx = (dx / dist) * force;
+            const fy = (dy / dist) * force;
+
+            if (!edge.source.isDragging) { edge.source.vx += fx; edge.source.vy += fy; }
+            if (!edge.target.isDragging) { edge.target.vx -= fx; edge.target.vy -= fy; }
+        });
+
+        let totalMovement = 0;
+
+        // 3. Apply velocities and compute dynamic label placements
+        this.nodes.forEach(node => {
+            if (!node.isDragging) {
+                node.vx += (center.x - node.x) * this.gravity;
+                node.vy += (center.y - node.y) * this.gravity;
+                node.vx *= this.damping;
+                node.vy *= this.damping;
+                node.x += node.vx;
+                node.y += node.vy;
+                totalMovement += Math.abs(node.vx) + Math.abs(node.vy);
+            }
+
+            // Label Positioning Vector Math
+            let rx = 0;
+            let ry = 20;
+
+            node.neighbors.forEach(neighbor => {
+                const dx = neighbor.x - node.x;
+                const dy = neighbor.y - node.y;
+                const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                rx -= (dx / dist) * 150;
+                ry -= (dy / dist) * 150;
+            });
+
+            this.nodes.forEach(otherNode => {
+                if (node === otherNode) return;
+                const dx = otherNode.x - node.x;
+                const dy = otherNode.y - node.y;
+                const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                if (dist < 250) {
+                    const force = (250 - dist);
+                    rx -= (dx / dist) * force;
+                    ry -= (dy / dist) * force;
+                }
+            });
+
+            const targetLen = Math.sqrt(rx * rx + ry * ry) || 1;
+            node.lx += ((rx / targetLen) - node.lx) * 0.15;
+            node.ly += ((ry / targetLen) - node.ly) * 0.15;
+
+            // 4. Update DOM
+            const { nx, ny } = this._normalizeVector(node.lx, node.ly);
+
+            node.el.style.left = `${node.x}px`;
+            node.el.style.top = `${node.y}px`;
+
+            if (!node.labelWidth && node.labelEl.offsetWidth) {
+                node.labelWidth = node.labelEl.offsetWidth;
+                node.labelHeight = node.labelEl.offsetHeight;
+            }
+
+            const t = this._calculateLabelOffset(nx, ny, node.labelWidth, node.labelHeight, 65);
+
+            node.labelEl.style.left = `${node.x}px`;
+            node.labelEl.style.top = `${node.y}px`;
+            node.labelEl.style.transform = `translate(calc(-50% + ${nx * t}px), calc(-50% + ${ny * t}px))`;
+        });
+
+        this.edges.forEach(edge => {
+            edge.el.setAttribute('x1', edge.source.x);
+            edge.el.setAttribute('y1', edge.source.y);
+            edge.el.setAttribute('x2', edge.target.x);
+            edge.el.setAttribute('y2', edge.target.y);
+        });
+
+        // Sleep Optimization
+        if (totalMovement > 0.5 || this.nodes.some(n => n.isDragging)) {
+            this.physicsLoop = requestAnimationFrame(() => this._run());
+        } else {
+            this.isRunning = false;
+        }
+    }
+}

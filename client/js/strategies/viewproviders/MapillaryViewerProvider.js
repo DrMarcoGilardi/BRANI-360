@@ -31,7 +31,7 @@ import { BaseViewerProvider } from './BaseViewerProvider.js';
 /**
  * MapillaryViewerProvider
  * EXAMPLE STRATEGY IMPLEMENTATION
- * Strategy implementing the 2D panorama interface utilizing MapillaryJS and MapLibre GL.
+ * Strategy implementing the map and 360° viewer interface utilizing MapillaryJS and MapLibre GL.
  * * ### Architecture
  * ```mermaid
  * classDiagram

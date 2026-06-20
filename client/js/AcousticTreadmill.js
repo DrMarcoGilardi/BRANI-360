@@ -48,17 +48,19 @@ export class AcousticTreadmill {
      * @constructor
      * @param {SpatialAudioPlayer} player - The active audio player.
      * @param {UIManager} ui - The UI HUD.
+     * @param {Object} clientConfig - Configuration options for the client.
      */
-    constructor(player, ui) {
+    constructor(player, ui, clientConfig = {}) {
         this.player = player;
         this.ui = ui;
+        this.clientConfig = (clientConfig?.SPATIALLY_CONTINUOUS === 'true');
         this.anchorTracker = {
             expectedIds: [],
             completedIds: new Set(),
             activeNodeId: null
         };
     }
-    
+
     /**
      * @method reset
      * @memberof AcousticTreadmill
@@ -73,7 +75,7 @@ export class AcousticTreadmill {
             expectedIds: expectedIds || [],
             completedIds: new Set()
         };
-        
+
         if (!currentIsAnchor) {
             this.ui.updatePipelineProgress(nodeId, 'syncing', 0, false, false, false, null, null);
         }
@@ -98,15 +100,15 @@ export class AcousticTreadmill {
 
             if (count >= total) {
                 this.ui.updatePipelineProgress(
-                    this.anchorTracker.activeNodeId, 
-                    'complete', 
+                    this.anchorTracker.activeNodeId,
+                    'complete',
                     1.0, false, false, false, null, null
                 );
             } else {
                 // UI Agnostic string for background loading
                 this.ui.updatePipelineProgress(
-                    this.anchorTracker.activeNodeId, 
-                    'syncing background', 
+                    this.anchorTracker.activeNodeId,
+                    'syncing background',
                     progress, false, false, false, null, null
                 );
             }
@@ -153,13 +155,13 @@ export class AcousticTreadmill {
                 mixTargets.forEach(a => {
                     const safeHops = (typeof a.hops === 'number' && !isNaN(a.hops)) ? a.hops : 1;
                     let calculatedWeight = (1 / (SMOOTHING_FACTOR + safeHops)) / totalInvHops;
-                    
+
                     if (isNaN(calculatedWeight) || !isFinite(calculatedWeight)) {
                         calculatedWeight = 0;
                     }
 
                     volumes.push({
-                        id: String(a.nodeId), 
+                        id: String(a.nodeId),
                         weight: calculatedWeight * 0.5 // Scale to 50%
                     });
                 });
@@ -173,7 +175,7 @@ export class AcousticTreadmill {
                 nodeId: (a.nodeId)?.toString(),
                 hops: a.hops
             })).filter(a => a.nodeId); // Filter out any broken entries
-            
+
             let totalInvHops = 0;
             const SMOOTHING_FACTOR = 1.0;
 
@@ -185,11 +187,11 @@ export class AcousticTreadmill {
             volumes = mixTargets.map(a => {
                 const safeHops = (typeof a.hops === 'number' && !isNaN(a.hops)) ? a.hops : 1;
                 let calculatedWeight = (1 / (SMOOTHING_FACTOR + safeHops)) / totalInvHops;
-                
+
                 if (isNaN(calculatedWeight) || !isFinite(calculatedWeight)) calculatedWeight = 0;
 
                 return {
-                    id: String(a.nodeId), 
+                    id: String(a.nodeId),
                     weight: calculatedWeight
                 };
             });
