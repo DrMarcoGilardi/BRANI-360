@@ -67,9 +67,10 @@ export class SpatialAudioPlayer {
             masterSpatialGain: spatialGain
         } = config.audioGains
 
-        this.masterBackgroundGain = backGain;
-        this.masterForegroundGain = foreGain;
-        this.masterSpatialGain = spatialGain;
+        this.masterBackgroundGain = parseFloat(backGain);
+        this.masterForegroundGain = parseFloat(foreGain);
+        this.masterSpatialGain = parseFloat(spatialGain);
+        console.log(this.masterSpatialGain);
 
         this.currentEpoch = 0;
         this.currentNodeId = null;
@@ -167,7 +168,7 @@ export class SpatialAudioPlayer {
             autoplay: true,
             loop: true,
             volume: 0,
-            positional: false 
+            positional: false
         });
 
         const scene = document.querySelector('a-scene');
@@ -185,7 +186,7 @@ export class SpatialAudioPlayer {
      */
     updatePersistentVolumes(mixRatios) {
         const applyVolumes = (sourceMap, masterGain) => {
-            const safeMasterGain = (typeof masterGain === 'number' && !isNaN(masterGain)) ? masterGain : 1.0;
+            const safeMasterGain = !isNaN(masterGain) ? masterGain : 1.0;
 
             for (const [nodeId, anchorData] of sourceMap.entries()) {
                 const mix = mixRatios.find(m => String(m.id) === String(nodeId));

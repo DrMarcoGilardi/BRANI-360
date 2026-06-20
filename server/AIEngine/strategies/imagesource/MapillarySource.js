@@ -68,6 +68,7 @@ export class MapillarySource extends ImageSourceProvider {
      * @throws {Error} If the image is not a 360 panorama or the fetch fails.
      */
     async getImage(id) {
+        const resolution = 2048;
         if (this.cacheManager) {
             const cachedPath = await this.cacheManager.getImage(id);
             if (cachedPath) {
@@ -77,7 +78,7 @@ export class MapillarySource extends ImageSourceProvider {
         }
 
         this.logger.log(`[MapillarySource] Downloading image ${id}...`);
-        const url = `https://graph.mapillary.com/${id}?fields=thumb_1024_url,is_pano&access_token=${this.token}`;
+        const url = `https://graph.mapillary.com/${id}?fields=thumb_${resolution}_url,is_pano&access_token=${this.token}`;
         const response = await axios.get(url);
         const metadata = response.data;
 
@@ -85,7 +86,7 @@ export class MapillarySource extends ImageSourceProvider {
             throw new Error(`[Mapillary] Image ${id} is not a 360 panorama. Analysis aborted.`);
         }
 
-        const imageUrl = metadata.thumb_1024_url || metadata.thumb_2048_url || metadata.thumb_original_url;
+        const imageUrl = metadata.thumb_2048_url;// || metadata.thumb_2048_url || metadata.thumb_original_url;
         const imgRes = await axios.get(imageUrl, { responseType: 'arraybuffer' });
         const buffer = Buffer.from(imgRes.data);
 

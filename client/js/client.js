@@ -91,7 +91,7 @@ async function bootstrap() {
             nodeSelectionStrategy: nName,
             semanticProvider: sName,
             vrLoaderProvider: vrName,
-            semanticLayers
+            semanticLayers,
         } = config.clientStrategies;
 
         ui.statusEl.innerHTML = '<span class="pulse"></span>HW: LOADING CLIENT STRATEGIES...';

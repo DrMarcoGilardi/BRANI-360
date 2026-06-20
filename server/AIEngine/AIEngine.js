@@ -143,6 +143,7 @@ export class AIEngine {
         for (const [key, value] of Object.entries(this.config)) {
             if (key.startsWith('CLIENT_PARAM_')) {
                 const cleanKey = key.replace('CLIENT_PARAM_', '');
+                this.logger.log(`[AI Engine] CLENAN KEY: ${cleanKey}, ${value}`);
                 strategyOptions[cleanKey] = value;
             }
         }
@@ -156,10 +157,10 @@ export class AIEngine {
                 semanticProvider: this.config.CLIENT_SEMANTIC_PROVIDER,
                 vrLoaderProvider: this.config.CLIENT_VR_LOADER_PROVIDER,
                 semanticLayers: semanticLayers,
-                options: strategyOptions
             },
+            options: strategyOptions,
             audioGains: {
-                tmasterBackgroundGain: this.config.BACKGROUND_GAIN,
+                masterBackgroundGain: this.config.BACKGROUND_GAIN,
                 masterForegroundGain: this.config.FOREGROUND_GAIN,
                 masterSpatialGain: this.config.SPATIAL_GAIN
             }
