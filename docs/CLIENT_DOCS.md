@@ -236,36 +236,17 @@ class MapillaryTopologyProvider{
 
 
 </dd>
+<dt><a href="#MarzipanoTopologyProvider">MarzipanoTopologyProvider</a></dt>
+<dd></dd>
 <dt><a href="#BaseViewerProvider">BaseViewerProvider</a></dt>
-<dd><p>Strategy Pattern Interface for Base Viewer Provider
-Abstract Strategy Pattern for 2D/360 Viewer SDKs (Mapillary, MapLibre, OpenMaps, Kartaview, etc.).
+<dd><p>BaseViewerProvider
+Abstract Strategy Pattern for 2D/360 Viewer SDKs (Google Maps, Mapillary, etc.).
 Standardizes event emissions and location tracking APIs.</p>
-<ul>
-<li><h3 id="architecture">Architecture</h3>
-</li>
-</ul>
-
-
-```mermaid
-classDiagram
-class BaseViewerProvider{
-<<Abstract>>
-+init() Promise~void~
-+on(event, callback)
-+trigger(event, data)
-+getCurrentNodeId() string
-+getLocation() string
-+isVisible() boolean
-+getNativeViewer() Object
-}
-```
-
-
 </dd>
 <dt><a href="#MapillaryViewerProvider">MapillaryViewerProvider</a></dt>
 <dd><p>MapillaryViewerProvider
 EXAMPLE STRATEGY IMPLEMENTATION
-Strategy implementing the 2D panorama interface utilizing MapillaryJS and MapLibre GL.</p>
+Strategy implementing the map and 360° viewer interface utilizing MapillaryJS and MapLibre GL.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -287,6 +268,8 @@ class MapillaryViewerProvider{
 
 
 </dd>
+<dt><a href="#MarzipanoViewerProvider">MarzipanoViewerProvider</a></dt>
+<dd></dd>
 <dt><a href="#BaseVRLoader">BaseVRLoader</a></dt>
 <dd><p>Strategy Pattern Interface for VR 360 Image Fetching.
 Standardizes the progressive loading of high-resolution panoramas for WebXR.</p>
@@ -328,6 +311,8 @@ class MapillaryVRLoader{
 
 
 </dd>
+<dt><a href="#MarzipanoVRLoader">MarzipanoVRLoader</a></dt>
+<dd></dd>
 <dt><a href="#TopologyRadar">TopologyRadar</a></dt>
 <dd><p>TopologyRadar (Map-Agnostic)
 Handles topological mapping and BFS spidering of ANY node-based graph.</p>
@@ -389,36 +374,8 @@ class UIManager{
 
 
 </dd>
-<dt><a href="#SceneController">SceneController</a></dt>
-<dd><p>SceneController manages the A-Frame Lifecycle and WebXR spatial audio syncing.
-Acts as the bridge between agnostic 2D logic and 3D WebXR representation.</p>
-<ul>
-<li><h3 id="architecture">Architecture</h3>
-</li>
-</ul>
-
-
-```mermaid
-classDiagram
-SceneController --> VRManager : Updates Visuals
-SceneController --> VRRPGAudioManager : Syncs Audio
-class SceneController{
-+setEpoch(epoch)
-+setupListeners()
-+ensureAudioContext()
-+sync2DRotation(pov)
-+syncVRHeadtracking(nativeViewer)
-+updateSkybox(nodeId)
-+updateVRNavigation(links, nativeViewer)
-+addSpatialSource(data, tunnelUrl)
-+setAmbientWash(url)
-+clearSpatialSources()
-+enterVR(nodeId, links, nativeViewer)
-}
-```
-
-
-</dd>
+<dt><a href="#Physics2D">Physics2D</a></dt>
+<dd></dd>
 <dt><a href="#VRManager">VRManager</a></dt>
 <dd><p>VRManager: Main coordinator for the VR experience.
 Orchestrates HD visual projection and Camera sync.</p>
@@ -442,7 +399,11 @@ class VRManager{
 </dd>
 <dt><a href="#VRRPGAudioManager">VRRPGAudioManager</a></dt>
 <dd><p>VRRPGAudioManager: Manages A-Frame sound entities.
-Places sounds in the 3D space.</p>
+Places &quot;organic&quot; and &quot;mechanical&quot; sounds physically in the 3D space.</p>
+</dd>
+<dt><a href="#VRSceneController">VRSceneController</a></dt>
+<dd><p>VRSceneController manages the A-Frame Lifecycle and WebXR spatial audio syncing.
+Acts as the bridge between agnostic 2D logic and 3D WebXR representation.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -451,10 +412,20 @@ Places sounds in the 3D space.</p>
 
 ```mermaid
 classDiagram
-class VRRPGAudioManager{
-+addSpatialSource(id, label, audioUrl, spatialData)
-+setAmbientWash(audioUrl)
+VRSceneController --> VRManager : Updates Visuals
+VRSceneController --> VRRPGAudioManager : Syncs Audio
+class VRSceneController{
++setEpoch(epoch)
++setupListeners()
++ensureAudioContext()
++sync2DRotation(pov)
++syncVRHeadtracking(nativeViewer)
++updateSkybox(nodeId)
++updateVRNavigation(links, nativeViewer)
++addSpatialSource(data, tunnelUrl)
++setAmbientWash(url)
 +clearSpatialSources()
++enterVR(nodeId, links, nativeViewer)
 }
 ```
 
@@ -465,6 +436,11 @@ class VRRPGAudioManager{
 ## Constants
 
 <dl>
+<dt><a href="#ZROK_UNIQUE_NAME">ZROK_UNIQUE_NAME</a> ⇒ <code>Promise.&lt;void&gt;</code></dt>
+<dd><p>Main application bootstrap (Dependency Injection Root).
+Fully Agnostic Injection handler. Fetches configuration from the server 
+and imports requested strategy patterns dynamically over the network.</p>
+</dd>
 <dt><a href="#SpatialUtils">SpatialUtils</a></dt>
 <dd><p>SpatialUtils
 Agnostic mathematical utilities for geographic and topological operations.
@@ -506,19 +482,20 @@ AcousticTreadmill manages the mathematical mixing of backgrounds and aggregate p
 **Kind**: global class  
 
 * [AcousticTreadmill](#AcousticTreadmill)
-    * [new AcousticTreadmill(player, ui)](#new_AcousticTreadmill_new)
+    * [new AcousticTreadmill(player, ui, clientConfig)](#new_AcousticTreadmill_new)
     * [.reset(nodeId, expectedIds, currentIsAnchor)](#AcousticTreadmill.reset)
     * [.updateAggregateProgress(anchorId, currentIsAnchor)](#AcousticTreadmill.updateAggregateProgress)
     * [.refreshMix(currentNodeId, currentIsAnchor, currentNearbyAnchors, radar)](#AcousticTreadmill.refreshMix)
 
 <a name="new_AcousticTreadmill_new"></a>
 
-### new AcousticTreadmill(player, ui)
+### new AcousticTreadmill(player, ui, clientConfig)
 
 | Param | Type | Description |
 | --- | --- | --- |
 | player | [<code>SpatialAudioPlayer</code>](#SpatialAudioPlayer) | The active audio player. |
 | ui | [<code>UIManager</code>](#UIManager) | The UI HUD. |
+| clientConfig | <code>Object</code> | Configuration options for the client. |
 
 <a name="AcousticTreadmill.reset"></a>
 
@@ -565,9 +542,14 @@ Calculates distance-based volume weights and pushes them to the audio player.
 NavigationManager (Provider-Agnostic)Orchestrates movement using injected Strategy Providers (Viewer, Topology, UI, etc.).Coordinates the fetch state and topology mapping when navigating between panoramas.* ### Architecture```mermaidclassDiagramNavigationManager --> BaseViewerProvider : Listens toNavigationManager --> TopologyRadar : Requests GraphNavigationManager --> NetworkService : Emits SyncNavigationManager --> SpatialAudioPlayer : Syncs AudioNavigationManager --> AcousticTreadmill : Drives MixNavigationManager --> BaseSemanticProvider : Queries Intentsclass NavigationManager{+currentNodeId string+navEpoch number+setupListeners()+moveToNode(nodeId, location, isAnchor, epoch, originNodeId) Promise~void~}```
 
 **Kind**: global class  
+
+* [NavigationManager](#NavigationManager)
+    * [new NavigationManager(viewer, radar, networkService, ui, player, treadmill, vrSceneController, semanticProvider)](#new_NavigationManager_new)
+    * [.moveToNode(nodeId, [location], [isAnchor], [epoch], [originNodeId])](#NavigationManager.moveToNode) ⇒ <code>Promise.&lt;void&gt;</code>
+
 <a name="new_NavigationManager_new"></a>
 
-### new NavigationManager(viewer, radar, networkService, ui, player, treadmill, sceneController, semanticProvider)
+### new NavigationManager(viewer, radar, networkService, ui, player, treadmill, vrSceneController, semanticProvider)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -577,8 +559,23 @@ NavigationManager (Provider-Agnostic)Orchestrates movement using injected Strat
 | ui | [<code>UIManager</code>](#UIManager) | HUD interface. |
 | player | [<code>SpatialAudioPlayer</code>](#SpatialAudioPlayer) | Web Audio lifecycle manager. |
 | treadmill | [<code>AcousticTreadmill</code>](#AcousticTreadmill) | Background audio mixer. |
-| sceneController | [<code>SceneController</code>](#SceneController) | 3D/VR Environment manager. |
+| vrSceneController | [<code>VRSceneController</code>](#VRSceneController) | 3D/VR Environment manager. |
 | semanticProvider | [<code>BaseSemanticProvider</code>](#BaseSemanticProvider) | Strategy defining active semantic media layers. |
+
+<a name="NavigationManager.moveToNode"></a>
+
+### NavigationManager.moveToNode(nodeId, [location], [isAnchor], [epoch], [originNodeId]) ⇒ <code>Promise.&lt;void&gt;</code>
+Evaluates a node hop. Follows a fast path (Cached API hit) or slow path (Radar Analysis).
+
+**Kind**: static method of [<code>NavigationManager</code>](#NavigationManager)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| nodeId | <code>string</code> |  | Target node ID. |
+| [location] | <code>Object</code> \| <code>null</code> | <code></code> | Optional Lat/Lng payload. |
+| [isAnchor] | <code>boolean</code> | <code>true</code> | Whether the origin assumes anchor status. |
+| [epoch] | <code>number</code> \| <code>null</code> | <code></code> | Navigational validity tick. |
+| [originNodeId] | <code>string</code> \| <code>null</code> | <code>null</code> | ID of the previous node. |
 
 <a name="NetworkService"></a>
 
@@ -590,7 +587,6 @@ NetworkServiceEncapsulates WebSocket orchestration and High-Speed Navigation Gu
 * [NetworkService](#NetworkService)
     * [new NetworkService(tunnelUrl)](#new_NetworkService_new)
     * [.setupListeners()](#NetworkService.setupListeners)
-    * [.moveToNode(nodeId, [location], [isAnchor], [epoch], [originNodeId])](#NetworkService.moveToNode) ⇒ <code>Promise.&lt;void&gt;</code>
     * [.init(ui, player, sceneController, treadmill, navManager)](#NetworkService.init)
     * [.incrementEpoch()](#NetworkService.incrementEpoch) ⇒ <code>number</code>
     * [.getEpoch()](#NetworkService.getEpoch) ⇒ <code>number</code>
@@ -617,21 +613,6 @@ NetworkServiceEncapsulates WebSocket orchestration and High-Speed Navigation Gu
 Binds generic, cross-provider event listeners bridging visual transitions to the internal Navigation state machine.
 
 **Kind**: static method of [<code>NetworkService</code>](#NetworkService)  
-<a name="NetworkService.moveToNode"></a>
-
-### NetworkService.moveToNode(nodeId, [location], [isAnchor], [epoch], [originNodeId]) ⇒ <code>Promise.&lt;void&gt;</code>
-Evaluates a node hop. Follows a fast path (Cached API hit) or slow path (Radar Analysis).
-
-**Kind**: static method of [<code>NetworkService</code>](#NetworkService)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| nodeId | <code>string</code> |  | Target node ID. |
-| [location] | <code>Object</code> \| <code>null</code> | <code></code> | Optional Lat/Lng payload. |
-| [isAnchor] | <code>boolean</code> | <code>true</code> | Whether the origin assumes anchor status. |
-| [epoch] | <code>number</code> \| <code>null</code> | <code></code> | Navigational validity tick. |
-| [originNodeId] | <code>string</code> \| <code>null</code> | <code>null</code> | ID of the previous node. |
-
 <a name="NetworkService.init"></a>
 
 ### NetworkService.init(ui, player, sceneController, treadmill, navManager)
@@ -643,7 +624,7 @@ Binds internal managers to incoming socket events.
 | --- | --- | --- |
 | ui | [<code>UIManager</code>](#UIManager) | The UI Manager. |
 | player | [<code>SpatialAudioPlayer</code>](#SpatialAudioPlayer) | The Audio Player. |
-| sceneController | [<code>SceneController</code>](#SceneController) | The VR Manager. |
+| sceneController | <code>SceneController</code> | The VR Manager. |
 | treadmill | [<code>AcousticTreadmill</code>](#AcousticTreadmill) | The Audio Mixing Engine. |
 | navManager | [<code>NavigationManager</code>](#NavigationManager) | The primary Nav Orchestrator. |
 
@@ -800,7 +781,7 @@ Ensures memory stability by extracting a clean slice from an ArrayBuffer wrapper
 <a name="SpatialAudioPlayer.registerPersistentAnchor"></a>
 
 ### SpatialAudioPlayer.registerPersistentAnchor(nodeId, bufferData, url) ⇒ <code>Promise.&lt;void&gt;</code>
-Mounts a persistent ambient track (Foreground or Background) into the 3D scene.
+Mounts a persistent ambient track (Foreground or Background) into the 3D scene. Foreground sounds are local to the current node, while background sounds are from neighboring nodes.
 
 **Kind**: static method of [<code>SpatialAudioPlayer</code>](#SpatialAudioPlayer)  
 
@@ -911,18 +892,8 @@ EXAMPLE STRATEGY IMPLEMENTATIONEnforces strict Min 3 / Max 6 spacing across top
 **Kind**: global class  
 
 * [AcousticHorizonStrategy](#AcousticHorizonStrategy)
-    * [new AcousticHorizonStrategy([minSpacing], [maxGap])](#new_AcousticHorizonStrategy_new)
     * [.reset()](#AcousticHorizonStrategy.reset)
     * [.isAnchor(nodeId, radar)](#AcousticHorizonStrategy.isAnchor) ⇒ <code>Promise.&lt;boolean&gt;</code>
-
-<a name="new_AcousticHorizonStrategy_new"></a>
-
-### new AcousticHorizonStrategy([minSpacing], [maxGap])
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [minSpacing] | <code>number</code> | <code>3</code> | Minimum allowed graph distance between anchors. |
-| [maxGap] | <code>number</code> | <code>6</code> | Maximum allowed empty hops before forcing a filler anchor. |
 
 <a name="AcousticHorizonStrategy.reset"></a>
 
@@ -1137,22 +1108,70 @@ Public interface to retrieve node data and navigation links. Deduplicates concur
 | --- | --- | --- |
 | nodeId | <code>string</code> | The target Image ID. |
 
+<a name="MarzipanoTopologyProvider"></a>
+
+## MarzipanoTopologyProvider
+**Kind**: global class  
+
+* [MarzipanoTopologyProvider](#MarzipanoTopologyProvider)
+    * [new MarzipanoTopologyProvider()](#new_MarzipanoTopologyProvider_new)
+    * [.MarzipanoTopologyProvider](#MarzipanoTopologyProvider.MarzipanoTopologyProvider)
+        * [new MarzipanoTopologyProvider(key)](#new_MarzipanoTopologyProvider.MarzipanoTopologyProvider_new)
+    * [.getNode(nodeId)](#MarzipanoTopologyProvider.getNode) ⇒ <code>Promise.&lt;Object&gt;</code>
+
+<a name="new_MarzipanoTopologyProvider_new"></a>
+
+### new MarzipanoTopologyProvider()
+Provides network topology parsing for Marzipano local tours, generating spatial routing and node relationships.* ### Architecture```mermaidclassDiagramBaseTopologyProvider <|-- MarzipanoTopologyProviderclass MarzipanoTopologyProvider{+data Object+getNode(nodeId) Promise~Object~}```
+
+<a name="MarzipanoTopologyProvider.MarzipanoTopologyProvider"></a>
+
+### MarzipanoTopologyProvider.MarzipanoTopologyProvider
+**Kind**: static class of [<code>MarzipanoTopologyProvider</code>](#MarzipanoTopologyProvider)  
+<a name="new_MarzipanoTopologyProvider.MarzipanoTopologyProvider_new"></a>
+
+#### new MarzipanoTopologyProvider(key)
+Initializes the Topology provider to read the shared APP_DATA.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>Object</code> | Configuration or initialization key. |
+
+<a name="MarzipanoTopologyProvider.getNode"></a>
+
+### MarzipanoTopologyProvider.getNode(nodeId) ⇒ <code>Promise.&lt;Object&gt;</code>
+Resolves detailed node connection data and hotspot headings for a given scene.
+
+**Kind**: static method of [<code>MarzipanoTopologyProvider</code>](#MarzipanoTopologyProvider)  
+**Returns**: <code>Promise.&lt;Object&gt;</code> - An object detailing lat, lng, and formatted spatial links.  
+**Throws**:
+
+- <code>Error</code> If the node ID does not exist in the loaded data.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| nodeId | <code>string</code> | Target Marzipano scene ID. |
+
 <a name="BaseViewerProvider"></a>
 
 ## BaseViewerProvider
-Strategy Pattern Interface for Base Viewer ProviderAbstract Strategy Pattern for 2D/360 Viewer SDKs (Mapillary, MapLibre, OpenMaps, Kartaview, etc.).Standardizes event emissions and location tracking APIs.* ### Architecture```mermaidclassDiagramclass BaseViewerProvider{<<Abstract>>+init() Promise~void~+on(event, callback)+trigger(event, data)+getCurrentNodeId() string+getLocation() string+isVisible() boolean+getNativeViewer() Object}```
+BaseViewerProviderAbstract Strategy Pattern for 2D/360 Viewer SDKs (Google Maps, Mapillary, etc.).Standardizes event emissions and location tracking APIs.
 
 **Kind**: global class  
 
 * [BaseViewerProvider](#BaseViewerProvider)
     * [new BaseViewerProvider(containerId)](#new_BaseViewerProvider_new)
-    * [.init()](#BaseViewerProvider.init) ⇒ <code>Promise.&lt;void&gt;</code>
-    * [.on(event, callback)](#BaseViewerProvider.on)
-    * [.trigger(event, data)](#BaseViewerProvider.trigger)
-    * [.getCurrentNodeId()](#BaseViewerProvider.getCurrentNodeId) ⇒ <code>string</code> \| <code>null</code>
-    * [.getLocation()](#BaseViewerProvider.getLocation) ⇒ <code>Object</code> \| <code>string</code>
-    * [.isVisible()](#BaseViewerProvider.isVisible) ⇒ <code>boolean</code>
-    * [.getNativeViewer()](#BaseViewerProvider.getNativeViewer) ⇒ <code>any</code>
+    * [.supportsCameraSync](#BaseViewerProvider+supportsCameraSync) ⇒ <code>boolean</code>
+    * [.init()](#BaseViewerProvider+init) ⇒ <code>Promise.&lt;void&gt;</code>
+    * [.on(event, callback)](#BaseViewerProvider+on)
+    * [.trigger(event, data)](#BaseViewerProvider+trigger)
+    * [.getCurrentNodeId()](#BaseViewerProvider+getCurrentNodeId) ⇒ <code>string</code> \| <code>null</code>
+    * [.getLocation()](#BaseViewerProvider+getLocation) ⇒ <code>Object</code> \| <code>string</code>
+    * [.isVisible()](#BaseViewerProvider+isVisible) ⇒ <code>boolean</code>
+    * [.getNativeViewer()](#BaseViewerProvider+getNativeViewer) ⇒ <code>any</code>
+    * [.syncCamera(pov)](#BaseViewerProvider+syncCamera)
 
 <a name="new_BaseViewerProvider_new"></a>
 
@@ -1162,88 +1181,81 @@ Strategy Pattern Interface for Base Viewer ProviderAbstract Strategy Pattern fo
 | --- | --- | --- |
 | containerId | <code>string</code> | The DOM ID for mounting the viewer. |
 
-<a name="BaseViewerProvider.init"></a>
+<a name="BaseViewerProvider+supportsCameraSync"></a>
 
-### BaseViewerProvider.init() ⇒ <code>Promise.&lt;void&gt;</code>
+### baseViewerProvider.supportsCameraSync ⇒ <code>boolean</code>
+CAPABILITY FLAG: Does this viewer support external camera syncing?Override this to return true if the viewer can be programmatically rotated(e.g., by UI compass clicks, Minimaps, or VR headsets).
+
+**Kind**: instance property of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+<a name="BaseViewerProvider+init"></a>
+
+### baseViewerProvider.init() ⇒ <code>Promise.&lt;void&gt;</code>
 Initializes the underlying map SDK.
 
-**Kind**: static method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
 **Throws**:
 
 - <code>Error</code> If not implemented by the specific provider.
 
-<a name="BaseViewerProvider.on"></a>
+<a name="BaseViewerProvider+on"></a>
 
-### BaseViewerProvider.on(event, callback)
+### baseViewerProvider.on(event, callback)
 Binds a callback to standardized viewer events (e.g., 'node_changed', 'pov_changed').
 
-**Kind**: static method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | event | <code>string</code> | The agnostic event name. |
 | callback | <code>function</code> | Execution callback. |
 
-<a name="BaseViewerProvider.trigger"></a>
+<a name="BaseViewerProvider+trigger"></a>
 
-### BaseViewerProvider.trigger(event, data)
+### baseViewerProvider.trigger(event, data)
 Safely executes attached callbacks.
 
-**Kind**: static method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | event | <code>string</code> | The agnostic event name. |
 | data | <code>any</code> | Event payload. |
 
-<a name="BaseViewerProvider.getCurrentNodeId"></a>
+<a name="BaseViewerProvider+getCurrentNodeId"></a>
 
-### BaseViewerProvider.getCurrentNodeId() ⇒ <code>string</code> \| <code>null</code>
-Returns the current node ID
+### baseViewerProvider.getCurrentNodeId() ⇒ <code>string</code> \| <code>null</code>
+**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+**Returns**: <code>string</code> \| <code>null</code> - Current agnostic node ID.  
+<a name="BaseViewerProvider+getLocation"></a>
 
-**Kind**: static method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
-**Returns**: <code>string</code> \| <code>null</code> - Current node ID.  
-**Throws**:
-
-- <code>Error</code> If not implemented by the specific provider.
-
-<a name="BaseViewerProvider.getLocation"></a>
-
-### BaseViewerProvider.getLocation() ⇒ <code>Object</code> \| <code>string</code>
-Returns latitude and longitude in a single string or object
-
-**Kind**: static method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+### baseViewerProvider.getLocation() ⇒ <code>Object</code> \| <code>string</code>
+**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
 **Returns**: <code>Object</code> \| <code>string</code> - Unified location coordinate string or object.  
-**Throws**:
+<a name="BaseViewerProvider+isVisible"></a>
 
-- <code>Error</code> If not implemented by the specific provider.
+### baseViewerProvider.isVisible() ⇒ <code>boolean</code>
+**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+**Returns**: <code>boolean</code> - Whether the street level view is actively visible.  
+<a name="BaseViewerProvider+getNativeViewer"></a>
 
-<a name="BaseViewerProvider.isVisible"></a>
-
-### BaseViewerProvider.isVisible() ⇒ <code>boolean</code>
-Flags whether the user entered the 360 view
-
-**Kind**: static method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
-**Returns**: <code>boolean</code> - Whether the pegman/street view is actively visible.  
-**Throws**:
-
-- <code>Error</code> If not implemented by the specific provider.
-
-<a name="BaseViewerProvider.getNativeViewer"></a>
-
-### BaseViewerProvider.getNativeViewer() ⇒ <code>any</code>
-Gets the underlying SDK map object
-
-**Kind**: static method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+### baseViewerProvider.getNativeViewer() ⇒ <code>any</code>
+**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
 **Returns**: <code>any</code> - A raw reference to the underlying SDK map object.  
-**Throws**:
+<a name="BaseViewerProvider+syncCamera"></a>
 
-- <code>Error</code> If not implemented by the specific provider.
+### baseViewerProvider.syncCamera(pov)
+Optional implementation for external camera syncing.Only called by the orchestrator if supportsCameraSync returns true.
+
+**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| pov | <code>Object</code> | Standardized { heading, pitch } object |
 
 <a name="MapillaryViewerProvider"></a>
 
 ## MapillaryViewerProvider
-MapillaryViewerProviderEXAMPLE STRATEGY IMPLEMENTATIONStrategy implementing the 2D panorama interface utilizing MapillaryJS and MapLibre GL.* ### Architecture```mermaidclassDiagramBaseViewerProvider <|-- MapillaryViewerProviderclass MapillaryViewerProvider{+init() Promise~void~+show360Viewer(imageId)+getCurrentNodeId() string+getLocation() string+isVisible() boolean+getNativeViewer() Object}```
+MapillaryViewerProviderEXAMPLE STRATEGY IMPLEMENTATIONStrategy implementing the map and 360° viewer interface utilizing MapillaryJS and MapLibre GL.* ### Architecture```mermaidclassDiagramBaseViewerProvider <|-- MapillaryViewerProviderclass MapillaryViewerProvider{+init() Promise~void~+show360Viewer(imageId)+getCurrentNodeId() string+getLocation() string+isVisible() boolean+getNativeViewer() Object}```
 
 **Kind**: global class  
 
@@ -1255,6 +1267,8 @@ MapillaryViewerProviderEXAMPLE STRATEGY IMPLEMENTATIONStrategy implementing th
     * [.getLocation()](#MapillaryViewerProvider.getLocation) ⇒ <code>string</code>
     * [.isVisible()](#MapillaryViewerProvider.isVisible) ⇒ <code>boolean</code>
     * [.getNativeViewer()](#MapillaryViewerProvider.getNativeViewer) ⇒ <code>Object</code> \| <code>null</code>
+    * [.supportsCameraSync()](#MapillaryViewerProvider.supportsCameraSync) ⇒ <code>boolean</code>
+    * [.syncCamera(pov)](#MapillaryViewerProvider.syncCamera)
 
 <a name="new_MapillaryViewerProvider_new"></a>
 
@@ -1310,6 +1324,127 @@ Exposes the underlying Mapillary JS Viewer instance.
 
 **Kind**: static method of [<code>MapillaryViewerProvider</code>](#MapillaryViewerProvider)  
 **Returns**: <code>Object</code> \| <code>null</code> - Native Mapillary viewer instance.  
+<a name="MapillaryViewerProvider.supportsCameraSync"></a>
+
+### MapillaryViewerProvider.supportsCameraSync() ⇒ <code>boolean</code>
+CAPABILITY FLAG: Mapillary natively supports external camera syncing.
+
+**Kind**: static method of [<code>MapillaryViewerProvider</code>](#MapillaryViewerProvider)  
+<a name="MapillaryViewerProvider.syncCamera"></a>
+
+### MapillaryViewerProvider.syncCamera(pov)
+Executes the camera sync using Mapillary's proprietary SDK methods.
+
+**Kind**: static method of [<code>MapillaryViewerProvider</code>](#MapillaryViewerProvider)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| pov | <code>Object</code> | Standardized { heading, pitch } object |
+
+<a name="MarzipanoViewerProvider"></a>
+
+## MarzipanoViewerProvider
+**Kind**: global class  
+
+* [MarzipanoViewerProvider](#MarzipanoViewerProvider)
+    * [new MarzipanoViewerProvider()](#new_MarzipanoViewerProvider_new)
+    * [.MarzipanoViewerProvider](#MarzipanoViewerProvider.MarzipanoViewerProvider)
+        * [new MarzipanoViewerProvider(containerId, path)](#new_MarzipanoViewerProvider.MarzipanoViewerProvider_new)
+    * [.init()](#MarzipanoViewerProvider.init) ⇒ <code>Promise.&lt;void&gt;</code>
+    * [.setupUI(scenes)](#MarzipanoViewerProvider.setupUI) ⇒ <code>void</code>
+    * [.switchScene(nodeId)](#MarzipanoViewerProvider.switchScene) ⇒ <code>void</code>
+    * [.getCurrentNodeId()](#MarzipanoViewerProvider.getCurrentNodeId) ⇒ <code>string</code> \| <code>null</code>
+    * [.getLocation()](#MarzipanoViewerProvider.getLocation) ⇒ <code>string</code>
+    * [.isVisible()](#MarzipanoViewerProvider.isVisible) ⇒ <code>boolean</code>
+    * [.getNativeViewer()](#MarzipanoViewerProvider.getNativeViewer) ⇒ <code>Object</code> \| <code>null</code>
+    * [.supportsCameraSync()](#MarzipanoViewerProvider.supportsCameraSync) ⇒ <code>boolean</code>
+
+<a name="new_MarzipanoViewerProvider_new"></a>
+
+### new MarzipanoViewerProvider()
+Provider managing the Marzipano 360 viewer, its dynamic force-directed graph UI overlay, and event orchestration.* ### Architecture```mermaidclassDiagramBaseViewerProvider <|-- MarzipanoViewerProviderMarzipanoViewerProvider --> Physics2D : Drives UI Graphclass MarzipanoViewerProvider{+tourPath string+isViewerVisible boolean+init() Promise~void~+setupUI(scenes) void+switchScene(nodeId) void+getCurrentNodeId() string+getLocation() string+isVisible() boolean+getNativeViewer() Object}```
+
+<a name="MarzipanoViewerProvider.MarzipanoViewerProvider"></a>
+
+### MarzipanoViewerProvider.MarzipanoViewerProvider
+**Kind**: static class of [<code>MarzipanoViewerProvider</code>](#MarzipanoViewerProvider)  
+<a name="new_MarzipanoViewerProvider.MarzipanoViewerProvider_new"></a>
+
+#### new MarzipanoViewerProvider(containerId, path)
+Initializes the provider and prepares the required HTML container.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| containerId | <code>string</code> | The ID of the DOM element to host the viewer and graph. |
+| path | <code>string</code> | The relative or absolute path to the local Marzipano tour folder. |
+
+<a name="MarzipanoViewerProvider.init"></a>
+
+### MarzipanoViewerProvider.init() ⇒ <code>Promise.&lt;void&gt;</code>
+Loads external scripts, reads local tour data, initializes the Marzipano Viewer, and triggers UI setup.
+
+**Kind**: static method of [<code>MarzipanoViewerProvider</code>](#MarzipanoViewerProvider)  
+**Throws**:
+
+- <code>Error</code> If Marzipano or the tour's APP_DATA fails to load.
+
+<a name="MarzipanoViewerProvider.setupUI"></a>
+
+### MarzipanoViewerProvider.setupUI(scenes) ⇒ <code>void</code>
+Constructs the dynamic topology graph interface and back button overlay, and launches the Physics2D engine.
+
+**Kind**: static method of [<code>MarzipanoViewerProvider</code>](#MarzipanoViewerProvider)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| scenes | <code>Array.&lt;Object&gt;</code> | Array of scene objects from the Marzipano APP_DATA. |
+
+<a name="MarzipanoViewerProvider.switchScene"></a>
+
+### MarzipanoViewerProvider.switchScene(nodeId) ⇒ <code>void</code>
+Triggers Marzipano to switch to a specific scene and manages delayed audio/sync triggers.
+
+**Kind**: static method of [<code>MarzipanoViewerProvider</code>](#MarzipanoViewerProvider)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| nodeId | <code>string</code> | The target Marzipano scene/node ID. |
+
+<a name="MarzipanoViewerProvider.getCurrentNodeId"></a>
+
+### MarzipanoViewerProvider.getCurrentNodeId() ⇒ <code>string</code> \| <code>null</code>
+Returns the currently active 360 node.
+
+**Kind**: static method of [<code>MarzipanoViewerProvider</code>](#MarzipanoViewerProvider)  
+**Returns**: <code>string</code> \| <code>null</code> - The current node ID.  
+<a name="MarzipanoViewerProvider.getLocation"></a>
+
+### MarzipanoViewerProvider.getLocation() ⇒ <code>string</code>
+Fallback location string since local Marzipano tours are non-geographic.
+
+**Kind**: static method of [<code>MarzipanoViewerProvider</code>](#MarzipanoViewerProvider)  
+**Returns**: <code>string</code> - Default local string.  
+<a name="MarzipanoViewerProvider.isVisible"></a>
+
+### MarzipanoViewerProvider.isVisible() ⇒ <code>boolean</code>
+Indicates whether the 360 viewer (as opposed to the graph map) is active.
+
+**Kind**: static method of [<code>MarzipanoViewerProvider</code>](#MarzipanoViewerProvider)  
+**Returns**: <code>boolean</code> - True if inside a 360 scene.  
+<a name="MarzipanoViewerProvider.getNativeViewer"></a>
+
+### MarzipanoViewerProvider.getNativeViewer() ⇒ <code>Object</code> \| <code>null</code>
+Returns the raw Marzipano viewer instance.
+
+**Kind**: static method of [<code>MarzipanoViewerProvider</code>](#MarzipanoViewerProvider)  
+**Returns**: <code>Object</code> \| <code>null</code> - Marzipano Viewer object.  
+<a name="MarzipanoViewerProvider.supportsCameraSync"></a>
+
+### MarzipanoViewerProvider.supportsCameraSync() ⇒ <code>boolean</code>
+Capability flag defining if external heading/pitch forcing is supported.
+
+**Kind**: static method of [<code>MarzipanoViewerProvider</code>](#MarzipanoViewerProvider)  
 <a name="BaseVRLoader"></a>
 
 ## BaseVRLoader
@@ -1399,7 +1534,7 @@ Fetches and draws the initial low-resolution base image (1024px) to the canvas.
 <a name="MapillaryVRLoader.stitchProgressively"></a>
 
 ### MapillaryVRLoader.stitchProgressively(nodeId, zoom, ctx, width, height, [onTileDrawn]) ⇒ <code>Promise.&lt;boolean&gt;</code>
-Progressively updates the canvas with a higher-resolution image (2048px).
+Updates the canvas with the maximum-resolution image.
 
 **Kind**: static method of [<code>MapillaryVRLoader</code>](#MapillaryVRLoader)  
 **Returns**: <code>Promise.&lt;boolean&gt;</code> - True if the resolution tier was successfully rendered.  
@@ -1412,6 +1547,66 @@ Progressively updates the canvas with a higher-resolution image (2048px).
 | width | <code>number</code> | Output width. |
 | height | <code>number</code> | Output height. |
 | [onTileDrawn] | <code>function</code> | Callback fired to simulate individual tile load progression. |
+
+<a name="MarzipanoVRLoader"></a>
+
+## MarzipanoVRLoader
+**Kind**: global class  
+
+* [MarzipanoVRLoader](#MarzipanoVRLoader)
+    * [new MarzipanoVRLoader()](#new_MarzipanoVRLoader_new)
+    * [.MarzipanoVRLoader](#MarzipanoVRLoader.MarzipanoVRLoader)
+        * [new MarzipanoVRLoader([key])](#new_MarzipanoVRLoader.MarzipanoVRLoader_new)
+    * [.getLowResBase(nodeId, canvas, ctx)](#MarzipanoVRLoader.getLowResBase) ⇒ <code>Promise.&lt;void&gt;</code>
+    * [.stitchProgressively(nodeId, zoom, ctx, onTileDrawn)](#MarzipanoVRLoader.stitchProgressively) ⇒ <code>Promise.&lt;boolean&gt;</code>
+
+<a name="new_MarzipanoVRLoader_new"></a>
+
+### new MarzipanoVRLoader()
+Manages texture loading and image processing specific to Marzipano environments for WebXR injection.* ### Architecture```mermaidclassDiagramBaseVRLoader <|-- MarzipanoVRLoaderclass MarzipanoVRLoader{+tourPath string+getLowResBase(nodeId, canvas, ctx) Promise~void~+stitchProgressively(nodeId, zoom, ctx, onTileDrawn) Promise~boolean~}```
+
+<a name="MarzipanoVRLoader.MarzipanoVRLoader"></a>
+
+### MarzipanoVRLoader.MarzipanoVRLoader
+**Kind**: static class of [<code>MarzipanoVRLoader</code>](#MarzipanoVRLoader)  
+<a name="new_MarzipanoVRLoader.MarzipanoVRLoader_new"></a>
+
+#### new MarzipanoVRLoader([key])
+Initializes the VR loader and extracts the root tour path from URL params.
+
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [key] | <code>Object</code> | <code>{}</code> | Options object. |
+
+<a name="MarzipanoVRLoader.getLowResBase"></a>
+
+### MarzipanoVRLoader.getLowResBase(nodeId, canvas, ctx) ⇒ <code>Promise.&lt;void&gt;</code>
+Fetches and paints a base equirectangular image onto a provided canvas context for XR environments.
+
+**Kind**: static method of [<code>MarzipanoVRLoader</code>](#MarzipanoVRLoader)  
+**Returns**: <code>Promise.&lt;void&gt;</code> - Resolves when image is painted or on error fallback.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| nodeId | <code>string</code> | Target image/scene ID. |
+| canvas | <code>HTMLCanvasElement</code> | Target canvas element. |
+| ctx | <code>CanvasRenderingContext2D</code> | Target 2D rendering context. |
+
+<a name="MarzipanoVRLoader.stitchProgressively"></a>
+
+### MarzipanoVRLoader.stitchProgressively(nodeId, zoom, ctx, onTileDrawn) ⇒ <code>Promise.&lt;boolean&gt;</code>
+Placeholder method fulfilling the BaseVRLoader contract for progressive texture enhancement.
+
+**Kind**: static method of [<code>MarzipanoVRLoader</code>](#MarzipanoVRLoader)  
+**Returns**: <code>Promise.&lt;boolean&gt;</code> - Resolves to true when process halts/completes.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| nodeId | <code>string</code> | Target node ID. |
+| zoom | <code>number</code> | Target zoom/LOD level. |
+| ctx | <code>CanvasRenderingContext2D</code> | Rendering context. |
+| onTileDrawn | <code>function</code> | Callback fired on individual tile paints. |
 
 <a name="TopologyRadar"></a>
 
@@ -1711,147 +1906,52 @@ Updates the visual style (borders, shadows, text color) of an existing toggle bu
 | label | <code>string</code> | The text label for the button. |
 | state | <code>boolean</code> | The current toggle state. |
 
-<a name="SceneController"></a>
+<a name="Physics2D"></a>
 
-## SceneController
-SceneController manages the A-Frame Lifecycle and WebXR spatial audio syncing.Acts as the bridge between agnostic 2D logic and 3D WebXR representation.* ### Architecture```mermaidclassDiagramSceneController --> VRManager : Updates VisualsSceneController --> VRRPGAudioManager : Syncs Audioclass SceneController{+setEpoch(epoch)+setupListeners()+ensureAudioContext()+sync2DRotation(pov)+syncVRHeadtracking(nativeViewer)+updateSkybox(nodeId)+updateVRNavigation(links, nativeViewer)+addSpatialSource(data, tunnelUrl)+setAmbientWash(url)+clearSpatialSources()+enterVR(nodeId, links, nativeViewer)}```
-
+## Physics2D
 **Kind**: global class  
 
-* [SceneController](#SceneController)
-    * [new SceneController(googleApiKey, ui, vrLoaderStrategy)](#new_SceneController_new)
-    * [.setEpoch(epoch)](#SceneController.setEpoch)
-    * [.setupListeners()](#SceneController.setupListeners)
-    * [.ensureAudioContext()](#SceneController.ensureAudioContext)
-    * [.sync2DRotation(pov)](#SceneController.sync2DRotation)
-    * [.syncVRHeadtracking(nativeViewer)](#SceneController.syncVRHeadtracking)
-    * [.updateSkybox(nodeId)](#SceneController.updateSkybox)
-    * [.updateVRNavigation(links, nativeViewer)](#SceneController.updateVRNavigation)
-    * [.addSpatialSource(data, tunnelUrl)](#SceneController.addSpatialSource)
-    * [.setAmbientWash(url)](#SceneController.setAmbientWash)
-    * [.clearSpatialSources()](#SceneController.clearSpatialSources)
-    * [.enterVR(nodeId, links, nativeViewer)](#SceneController.enterVR)
+* [Physics2D](#Physics2D)
+    * [new Physics2D()](#new_Physics2D_new)
+    * [.Physics2D](#Physics2D.Physics2D)
+        * [new Physics2D(container, nodes, edges, [nodeSize])](#new_Physics2D.Physics2D_new)
+    * [.start()](#Physics2D.start) ⇒ <code>void</code>
+    * [.stop()](#Physics2D.stop) ⇒ <code>void</code>
 
-<a name="new_SceneController_new"></a>
+<a name="new_Physics2D_new"></a>
 
-### new SceneController(googleApiKey, ui, vrLoaderStrategy)
+### new Physics2D()
+A standalone 2D physics engine using force-directed graph algorithms to dynamically layout and arrange nodes and their text labels.* ### Architecture```mermaidclassDiagramclass Physics2D{+container HTMLElement+nodes Array+edges Array+nodeSize number+isRunning boolean+start() void+stop() void-_normalizeVector(x, y) Object-_calculateLabelOffset(nx, ny, labelWidth, labelHeight, nodeRadius) number-_run() void}```
 
-| Param | Type | Description |
-| --- | --- | --- |
-| googleApiKey | <code>string</code> | The API key for fetching tiles. |
-| ui | [<code>UIManager</code>](#UIManager) | The interface manager. |
-| vrLoaderStrategy | [<code>BaseVRLoader</code>](#BaseVRLoader) | The injected 360-image loading strategy. |
+<a name="Physics2D.Physics2D"></a>
 
-<a name="SceneController.setEpoch"></a>
+### Physics2D.Physics2D
+**Kind**: static class of [<code>Physics2D</code>](#Physics2D)  
+<a name="new_Physics2D.Physics2D_new"></a>
 
-### SceneController.setEpoch(epoch)
-Sets the active navigation epoch to sync VR operations with the pipeline.
+#### new Physics2D(container, nodes, edges, [nodeSize])
+Initializes the 2D physics engine with node and edge data, and sets up adaptive constants based on node size.
 
-**Kind**: static method of [<code>SceneController</code>](#SceneController)  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| epoch | <code>number</code> | The current navigation tick. |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| container | <code>HTMLElement</code> |  | The DOM element bounding the physics simulation. |
+| nodes | <code>Array.&lt;Object&gt;</code> |  | The array of graph node objects to simulate. |
+| edges | <code>Array.&lt;Object&gt;</code> |  | The array of graph edge (link) objects. |
+| [nodeSize] | <code>number</code> | <code>100</code> | The pixel dimension of the nodes used to scale forces. |
 
-<a name="SceneController.setupListeners"></a>
+<a name="Physics2D.start"></a>
 
-### SceneController.setupListeners()
-Initializes A-Frame enter/exit VR event listeners.
+### Physics2D.start() ⇒ <code>void</code>
+Wakes up the physics engine and starts the requestAnimationFrame loop.
 
-**Kind**: static method of [<code>SceneController</code>](#SceneController)  
-<a name="SceneController.ensureAudioContext"></a>
+**Kind**: static method of [<code>Physics2D</code>](#Physics2D)  
+<a name="Physics2D.stop"></a>
 
-### SceneController.ensureAudioContext()
-Ensures the Three.js AudioContext is resumed after user interaction.
+### Physics2D.stop() ⇒ <code>void</code>
+Halts the physics simulation loop and clears pending animation frames.
 
-**Kind**: static method of [<code>SceneController</code>](#SceneController)  
-<a name="SceneController.sync2DRotation"></a>
-
-### SceneController.sync2DRotation(pov)
-Syncs the 2D viewer's Point-of-View into the 3D scene camera (when not in VR).
-
-**Kind**: static method of [<code>SceneController</code>](#SceneController)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| pov | <code>Object</code> | The heading and pitch object. |
-
-<a name="SceneController.syncVRHeadtracking"></a>
-
-### SceneController.syncVRHeadtracking(nativeViewer)
-Syncs WebXR head-tracking rotation back to the 2D native viewer (when in VR).
-
-**Kind**: static method of [<code>SceneController</code>](#SceneController)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| nativeViewer | <code>Object</code> | The underlying map SDK object. |
-
-<a name="SceneController.updateSkybox"></a>
-
-### SceneController.updateSkybox(nodeId)
-Triggers the progressive HD skybox update for the current node.
-
-**Kind**: static method of [<code>SceneController</code>](#SceneController)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| nodeId | <code>string</code> | The target node identifier. |
-
-<a name="SceneController.updateVRNavigation"></a>
-
-### SceneController.updateVRNavigation(links, nativeViewer)
-Spawns 3D navigation arrows in the WebXR scene based on topological links.
-
-**Kind**: static method of [<code>SceneController</code>](#SceneController)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| links | <code>Array.&lt;Object&gt;</code> | Array of connected neighbor nodes. |
-| nativeViewer | <code>Object</code> | The underlying map SDK object. |
-
-<a name="SceneController.addSpatialSource"></a>
-
-### SceneController.addSpatialSource(data, tunnelUrl)
-Pipes a localized sound object to the VR audio manager.
-
-**Kind**: static method of [<code>SceneController</code>](#SceneController)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>Object</code> | Spatial audio configuration data. |
-| tunnelUrl | <code>string</code> | The base URL of the remote backend. |
-
-<a name="SceneController.setAmbientWash"></a>
-
-### SceneController.setAmbientWash(url)
-Sets the persistent ambient wash for the VR scene.
-
-**Kind**: static method of [<code>SceneController</code>](#SceneController)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| url | <code>string</code> | Audio URL. |
-
-<a name="SceneController.clearSpatialSources"></a>
-
-### SceneController.clearSpatialSources()
-Wipes all existing spatial sources from the VR scene.
-
-**Kind**: static method of [<code>SceneController</code>](#SceneController)  
-<a name="SceneController.enterVR"></a>
-
-### SceneController.enterVR(nodeId, links, nativeViewer)
-Orchestrates the transition from 2D DOM into the WebXR immersive session.
-
-**Kind**: static method of [<code>SceneController</code>](#SceneController)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| nodeId | <code>string</code> | Target panorama identifier. |
-| links | <code>Array.&lt;Object&gt;</code> | Topological neighbors. |
-| nativeViewer | <code>Object</code> | The underlying map SDK object. |
-
+**Kind**: static method of [<code>Physics2D</code>](#Physics2D)  
 <a name="VRManager"></a>
 
 ## VRManager
@@ -1862,8 +1962,8 @@ VRManager: Main coordinator for the VR experience.Orchestrates HD visual projec
 * [VRManager](#VRManager)
     * [new VRManager(apiKey, uiManager, vrLoaderStrategy)](#new_VRManager_new)
     * [.updateSkybox(nodeId)](#VRManager.updateSkybox) ⇒ <code>Promise.&lt;void&gt;</code>
-    * [.createNavArrows(links, onNavigate)](#VRManager.createNavArrows)
-    * [.syncPOV(panorama)](#VRManager.syncPOV)
+    * [.createNavArrows(links)](#VRManager.createNavArrows)
+    * [.getPOV()](#VRManager.getPOV) ⇒ <code>Object</code> \| <code>null</code>
 
 <a name="new_VRManager_new"></a>
 
@@ -1888,7 +1988,7 @@ Triggers a progressive HD tile load for the A-Frame skybox using a persistent 4K
 
 <a name="VRManager.createNavArrows"></a>
 
-### VRManager.createNavArrows(links, onNavigate)
+### VRManager.createNavArrows(links)
 Generates raycastable 3D arrows for WebXR navigation.
 
 **Kind**: static method of [<code>VRManager</code>](#VRManager)  
@@ -1896,30 +1996,31 @@ Generates raycastable 3D arrows for WebXR navigation.
 | Param | Type | Description |
 | --- | --- | --- |
 | links | <code>Array.&lt;Object&gt;</code> | Array of topological links with headings. |
-| onNavigate | <code>function</code> | Callback triggered when an arrow is selected. |
 
-<a name="VRManager.syncPOV"></a>
+<a name="VRManager.getPOV"></a>
 
-### VRManager.syncPOV(panorama)
-Syncs VR head rotation back to the underlying 2D Native Viewer.
+### VRManager.getPOV() ⇒ <code>Object</code> \| <code>null</code>
+Extracts the current VR headset rotation as a standardized POV object.
 
 **Kind**: static method of [<code>VRManager</code>](#VRManager)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| panorama | <code>Object</code> | The native map viewer instance. |
-
+**Returns**: <code>Object</code> \| <code>null</code> - Standardized { heading, pitch } object.  
 <a name="VRRPGAudioManager"></a>
 
 ## VRRPGAudioManager
-VRRPGAudioManager: Manages A-Frame sound entities.Places sounds in the 3D space.* ### Architecture```mermaidclassDiagramclass VRRPGAudioManager{+addSpatialSource(id, label, audioUrl, spatialData)+setAmbientWash(audioUrl)+clearSpatialSources()}```
+VRRPGAudioManager: Manages A-Frame sound entities.Places "organic" and "mechanical" sounds physically in the 3D space.
 
 **Kind**: global class  
 
 * [VRRPGAudioManager](#VRRPGAudioManager)
+    * [new VRRPGAudioManager()](#new_VRRPGAudioManager_new)
     * [.addSpatialSource(id, label, audioUrl, spatialData)](#VRRPGAudioManager.addSpatialSource)
     * [.setAmbientWash(audioUrl)](#VRRPGAudioManager.setAmbientWash)
     * [.clearSpatialSources()](#VRRPGAudioManager.clearSpatialSources)
+
+<a name="new_VRRPGAudioManager_new"></a>
+
+### new VRRPGAudioManager()
+Initializes the VRRPGAudioManager.
 
 <a name="VRRPGAudioManager.addSpatialSource"></a>
 
@@ -1952,6 +2053,28 @@ Mounts a non-positional ambient wash to the VR scene.
 Destroys all currently mounted spatial sources.
 
 **Kind**: static method of [<code>VRRPGAudioManager</code>](#VRRPGAudioManager)  
+<a name="VRSceneController"></a>
+
+## VRSceneController
+VRSceneController manages the A-Frame Lifecycle and WebXR spatial audio syncing.Acts as the bridge between agnostic 2D logic and 3D WebXR representation.* ### Architecture```mermaidclassDiagramVRSceneController --> VRManager : Updates VisualsVRSceneController --> VRRPGAudioManager : Syncs Audioclass VRSceneController{+setEpoch(epoch)+setupListeners()+ensureAudioContext()+sync2DRotation(pov)+syncVRHeadtracking(nativeViewer)+updateSkybox(nodeId)+updateVRNavigation(links, nativeViewer)+addSpatialSource(data, tunnelUrl)+setAmbientWash(url)+clearSpatialSources()+enterVR(nodeId, links, nativeViewer)}```
+
+**Kind**: global class  
+<a name="new_VRSceneController_new"></a>
+
+### new VRSceneController(googleApiKey, ui, vrLoaderStrategy)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| googleApiKey | <code>string</code> | The API key for fetching tiles. |
+| ui | [<code>UIManager</code>](#UIManager) | The interface manager. |
+| vrLoaderStrategy | [<code>BaseVRLoader</code>](#BaseVRLoader) | The injected 360-image loading strategy. |
+
+<a name="ZROK_UNIQUE_NAME"></a>
+
+## ZROK\_UNIQUE\_NAME ⇒ <code>Promise.&lt;void&gt;</code>
+Main application bootstrap (Dependency Injection Root).Fully Agnostic Injection handler. Fetches configuration from the server and imports requested strategy patterns dynamically over the network.
+
+**Kind**: global constant  
 <a name="SpatialUtils"></a>
 
 ## SpatialUtils

@@ -4,6 +4,9 @@
   "version": "2.0.0",
   "description": "ABBA-360: Agnostic Browser-Based Research Sandbox Architecture for AI Sound-Generation in Networks of 360 Images",
   "main": "server.js",
+  "plugins": [
+    "jsdoc-babel"
+  ],
   "dependencies": {
     "@gradio/client": "^2.2.0",
     "axios": "^1.15.2",
@@ -13,13 +16,13 @@
     "express": "^4.22.1",
     "fs-extra": "^11.1.1",
     "pako": "^2.1.0",
-    "socket.io": "^4.8.3",
-    "sharp": "^0.35.2"
+    "sharp": "^0.35.2",
+    "socket.io": "^4.8.3"
   },
   "scripts": {
     "start": "node server.js",
-    "docs:client": "jsdoc2md --configure jsdoc.json \"../client/js/**/*.js\" > ../docs/CLIENT_DOCS.md",
-    "docs:server": "jsdoc2md --configure jsdoc.json \"./AIEngine/**/*.js\" \"./utils/**/*.js\" \"./*.js\" > ../docs/SERVER_DOCS.md",
+    "docs:client": "jsdoc2md --configure jsdoc.json \"./client/js/**/*.js\" > ./docs/CLIENT_DOCS.md",
+    "docs:server": "jsdoc2md --configure jsdoc.json \"./server/**/*.js\" \"./server/AIEngine/**/*.js\" \"./server/utils/**/*.js\" \"./*.js\" > ./docs/SERVER_DOCS.md",
     "docs": "npm run docs:client && npm run docs:server && node fix-mermaid.js"
   },
   "devDependencies": {

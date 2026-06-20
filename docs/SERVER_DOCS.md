@@ -134,24 +134,11 @@ class GeoapifyContextProvider{
 
 
 </dd>
+<dt><a href="#MarzipanoContextProvider">MarzipanoContextProvider</a></dt>
+<dd></dd>
 <dt><a href="#ImageSourceProvider">ImageSourceProvider</a></dt>
 <dd><p>ImageSourceProvider (Base Class)
 Interface for 360-degree image acquisition strategies.</p>
-<ul>
-<li><h3 id="architecture">Architecture</h3>
-</li>
-</ul>
-
-
-```mermaid
-classDiagram
-class ImageSourceProvider{
-<<Abstract>>
-+getImage(id) Promise~Buffer~
-}
-```
-
-
 </dd>
 <dt><a href="#MapillarySource">MapillarySource</a></dt>
 <dd><p>EXAMPLE STRATEGY IMPLEMENTATION
@@ -174,6 +161,8 @@ class MapillarySource{
 
 
 </dd>
+<dt><a href="#MarzipanoImageSource">MarzipanoImageSource</a></dt>
+<dd></dd>
 <dt><a href="#LMStudioVisionProvider">LMStudioVisionProvider</a></dt>
 <dd><p>EXAMPLE STRATEGY IMPLEMENTATION
 LMStudioVisionProvider
@@ -232,24 +221,6 @@ class VisionProvider{
 <<Abstract>>
 +analyse(buffer, context, options) Promise~Object~
 +validateResponse(data) Object
-}
-```
-
-
-</dd>
-<dt><a href="#Utils">Utils</a></dt>
-<dd><p>Server-side utility class for file handling and audio manipulation.</p>
-<ul>
-<li><h3 id="architecture">Architecture</h3>
-</li>
-</ul>
-
-
-```mermaid
-classDiagram
-class Utils{
-+loadDictionary(filePath, logger)$ Promise~Object~
-+transcode(wavBuffer, targetFormat, taskType, logger)$ Promise~Buffer~
 }
 ```
 
@@ -344,30 +315,6 @@ class LogManager{
 <dd><p>PipelineService (Framework Orchestrator)
 A pure, domain-agnostic task runner.
 It treats tasks as black boxes and moves data without editing it.</p>
-<ul>
-<li><h3 id="architecture">Architecture</h3>
-</li>
-</ul>
-
-
-```mermaid
-classDiagram
-PipelineService --> AIEngine : Fetches Intents
-PipelineService --> GPUResourceManager : Queues Generations
-PipelineService --> CacheManager : Reads/Writes Audio
-PipelineService --> LogManager : Logs Output
-class PipelineService{
-+setEpoch(socketId, epoch)
-+cleanupSocket(socketId)
-+checkBatchCompletion()
-+processMovement(socket, data) Promise~void~
-+queueTask(socket, task, navEpoch, signal)
-+processGPUQueue() Promise~void~
-+regenerateTask(socket, taskData, feedbackData) Promise~void~
-}
-```
-
-
 </dd>
 <dt><a href="#SocketController">SocketController</a></dt>
 <dd><p>SocketController acts as the primary research interface for WebSocket clients.
@@ -387,6 +334,24 @@ SocketController --> LogManager : Tracks Sessions
 class SocketController{
 +io Server
 +init()
+}
+```
+
+
+</dd>
+<dt><a href="#Utils">Utils</a></dt>
+<dd><p>Server-side utility class for file handling and audio manipulation.</p>
+<ul>
+<li><h3 id="architecture">Architecture</h3>
+</li>
+</ul>
+
+
+```mermaid
+classDiagram
+class Utils{
++loadDictionary(filePath, logger)$ Promise~Object~
++transcode(wavBuffer, targetFormat, taskType, logger)$ Promise~Buffer~
 }
 ```
 
@@ -453,14 +418,14 @@ Evaluates VLM data for a primary node to generate a queue of foreground Audio ta
 | nodeId | <code>string</code> | Target panorama ID. |
 | lat | <code>number</code> | Latitude. |
 | lng | <code>number</code> | Longitude. |
-| isAnchor | <code>boolean</code> | Whether the node is a topological anchor. |
+| isAnchor | <code>boolean</code> | Whether the node is a topological/acoustic anchor. |
 | locationContext | <code>string</code> | Geocoded contextual string. |
 | requestedLayers | <code>Array.&lt;string&gt;</code> | Target semantic layers (e.g., 'ambient', 'spatial'). |
 
 <a name="AIEngine.getTasksForHorizon"></a>
 
 ### AIEngine.getTasksForHorizon(nodeId, lat, lng, locationContext, requestedLayers) ⇒ <code>Promise.&lt;Array.&lt;Object&gt;&gt;</code>
-Evaluates VLM data for background/neighboring nodes to support the acoustic treadmill. Limits processing to persistent, background-safe layers.
+Evaluates VLM data for background/neighboring nodes to support the acoustic treadmill.
 
 **Kind**: static method of [<code>AIEngine</code>](#AIEngine)  
 **Returns**: <code>Promise.&lt;Array.&lt;Object&gt;&gt;</code> - Array of configured background tasks.  
@@ -700,10 +665,70 @@ Exposes required public keys to the frontend without leaking server secrets.
 
 **Kind**: static method of [<code>GeoapifyContextProvider</code>](#GeoapifyContextProvider)  
 **Returns**: <code>Object</code> - Public configuration object.  
+<a name="MarzipanoContextProvider"></a>
+
+## MarzipanoContextProvider
+**Kind**: global class  
+
+* [MarzipanoContextProvider](#MarzipanoContextProvider)
+    * [new MarzipanoContextProvider()](#new_MarzipanoContextProvider_new)
+    * [.MarzipanoContextProvider](#MarzipanoContextProvider.MarzipanoContextProvider)
+        * [new MarzipanoContextProvider(path, logger)](#new_MarzipanoContextProvider.MarzipanoContextProvider_new)
+    * [.resolve(lat, lng)](#MarzipanoContextProvider.resolve) ⇒ <code>Promise.&lt;string&gt;</code>
+    * [.getPublicConfig()](#MarzipanoContextProvider.getPublicConfig) ⇒ <code>Object</code>
+
+<a name="new_MarzipanoContextProvider_new"></a>
+
+### new MarzipanoContextProvider()
+Serves locational and contextual metadata logic for local Marzipano environments.* ### Architecture```mermaidclassDiagramContextProvider <|-- MarzipanoContextProviderclass MarzipanoContextProvider{+path string+logger Object+resolve(lat, lng) Promise~string~+getPublicConfig() Object}```
+
+<a name="MarzipanoContextProvider.MarzipanoContextProvider"></a>
+
+### MarzipanoContextProvider.MarzipanoContextProvider
+**Kind**: static class of [<code>MarzipanoContextProvider</code>](#MarzipanoContextProvider)  
+<a name="new_MarzipanoContextProvider.MarzipanoContextProvider_new"></a>
+
+#### new MarzipanoContextProvider(path, logger)
+Sets up the context provider with the server-side tour path and logger.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| path | <code>Object</code> | Provider options including TOUR_PATH. |
+| logger | <code>Object</code> | Logging instance. |
+
+<a name="MarzipanoContextProvider.resolve"></a>
+
+### MarzipanoContextProvider.resolve(lat, lng) ⇒ <code>Promise.&lt;string&gt;</code>
+Resolves raw latitude and longitude into a human-readable location context.
+
+**Kind**: static method of [<code>MarzipanoContextProvider</code>](#MarzipanoContextProvider)  
+**Returns**: <code>Promise.&lt;string&gt;</code> - Contextual string. For Marzipano this defaults to "Unknown Location".  
+**Throws**:
+
+- <code>Error</code> If internal provider routing fails.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| lat | <code>number</code> | Latitude. |
+| lng | <code>number</code> | Longitude. |
+
+<a name="MarzipanoContextProvider.getPublicConfig"></a>
+
+### MarzipanoContextProvider.getPublicConfig() ⇒ <code>Object</code>
+Exposes public configuration/credentials safely to the frontend client.
+
+**Kind**: static method of [<code>MarzipanoContextProvider</code>](#MarzipanoContextProvider)  
+**Returns**: <code>Object</code> - Public config dictionary (e.g., { key: "..." }).  
+**Throws**:
+
+- <code>Error</code> If config generation fails.
+
 <a name="ImageSourceProvider"></a>
 
 ## ImageSourceProvider
-ImageSourceProvider (Base Class)Interface for 360-degree image acquisition strategies.* ### Architecture```mermaidclassDiagramclass ImageSourceProvider{<<Abstract>>+getImage(id) Promise~Buffer~}```
+ImageSourceProvider (Base Class)Interface for 360-degree image acquisition strategies.
 
 **Kind**: global class  
 <a name="ImageSourceProvider.getImage"></a>
@@ -759,6 +784,53 @@ Fetches the image buffer for a given Mapillary Node ID, utilizing the cache if a
 | --- | --- | --- |
 | id | <code>string</code> | Mapillary Image ID. |
 
+<a name="MarzipanoImageSource"></a>
+
+## MarzipanoImageSource
+**Kind**: global class  
+
+* [MarzipanoImageSource](#MarzipanoImageSource)
+    * [new MarzipanoImageSource()](#new_MarzipanoImageSource_new)
+    * [.MarzipanoImageSource](#MarzipanoImageSource.MarzipanoImageSource)
+        * [new MarzipanoImageSource(options, [logger])](#new_MarzipanoImageSource.MarzipanoImageSource_new)
+    * [.getImage(id)](#MarzipanoImageSource.getImage) ⇒ <code>Promise.&lt;Buffer&gt;</code>
+
+<a name="new_MarzipanoImageSource_new"></a>
+
+### new MarzipanoImageSource()
+Provides server-side processing to stitch Marzipano tiles back into equirectangular formats for AI engine ingestion.* ### Architecture```mermaidclassDiagramImageSourceProvider <|-- MarzipanoImageSourceclass MarzipanoImageSource{+tourPath string+logger Object+getImage(id) Promise~Buffer~}```
+
+<a name="MarzipanoImageSource.MarzipanoImageSource"></a>
+
+### MarzipanoImageSource.MarzipanoImageSource
+**Kind**: static class of [<code>MarzipanoImageSource</code>](#MarzipanoImageSource)  
+<a name="new_MarzipanoImageSource.MarzipanoImageSource_new"></a>
+
+#### new MarzipanoImageSource(options, [logger])
+Initializes the server-side image source provider.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>Object</code> | Configuration options, including TOUR_PATH. |
+| [logger] | <code>Object</code> | Optional logger instance. |
+
+<a name="MarzipanoImageSource.getImage"></a>
+
+### MarzipanoImageSource.getImage(id) ⇒ <code>Promise.&lt;Buffer&gt;</code>
+Reads local tour data and dynamically stitches raw Marzipano tiles into a single output Buffer using sharp.
+
+**Kind**: static method of [<code>MarzipanoImageSource</code>](#MarzipanoImageSource)  
+**Returns**: <code>Promise.&lt;Buffer&gt;</code> - The stitched image data as a JPEG buffer.  
+**Throws**:
+
+- <code>Error</code> If the scene is not found or stitching operations fail.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>string</code> | The ID of the scene to stitch. |
+
 <a name="LMStudioVisionProvider"></a>
 
 ## LMStudioVisionProvider
@@ -768,7 +840,10 @@ EXAMPLE STRATEGY IMPLEMENTATIONLMStudioVisionProviderStrategy authority for pr
 
 * [LMStudioVisionProvider](#LMStudioVisionProvider)
     * [new LMStudioVisionProvider(config, logger)](#new_LMStudioVisionProvider_new)
+    * [.layerProcessors()](#LMStudioVisionProvider.layerProcessors) ⇒ <code>Object</code>
     * [.init()](#LMStudioVisionProvider.init) ⇒ <code>Promise.&lt;void&gt;</code>
+    * [.analyse(buffer, context, options)](#LMStudioVisionProvider.analyse) ⇒ <code>Promise.&lt;Object&gt;</code>
+    * [._processAmbientLayer(buffer, locationContext, layerName, config)](#LMStudioVisionProvider._processAmbientLayer) ⇒ <code>Promise.&lt;Array&gt;</code>
 
 <a name="new_LMStudioVisionProvider_new"></a>
 
@@ -779,12 +854,47 @@ EXAMPLE STRATEGY IMPLEMENTATIONLMStudioVisionProviderStrategy authority for pr
 | config | <code>Object</code> | Configuration object containing {LM_STUDIO_API, VLM_MODEL_ID, VLM_PROMPT_AMBIENT, VLM_PROMPT_SPATIAL} |
 | logger | [<code>LogManager</code>](#LogManager) | The system logger |
 
+<a name="LMStudioVisionProvider.layerProcessors"></a>
+
+### LMStudioVisionProvider.layerProcessors() ⇒ <code>Object</code>
+Maps requested layer names to their corresponding processing functions.
+
+**Kind**: static method of [<code>LMStudioVisionProvider</code>](#LMStudioVisionProvider)  
 <a name="LMStudioVisionProvider.init"></a>
 
 ### LMStudioVisionProvider.init() ⇒ <code>Promise.&lt;void&gt;</code>
 Initializes the Vision Provider and logs connection details.
 
 **Kind**: static method of [<code>LMStudioVisionProvider</code>](#LMStudioVisionProvider)  
+<a name="LMStudioVisionProvider.analyse"></a>
+
+### LMStudioVisionProvider.analyse(buffer, context, options) ⇒ <code>Promise.&lt;Object&gt;</code>
+Executes multimodal analysis to extract sonic layers from an image buffer.
+
+**Kind**: static method of [<code>LMStudioVisionProvider</code>](#LMStudioVisionProvider)  
+**Returns**: <code>Promise.&lt;Object&gt;</code> - An object containing an array of audio generation 'intents'.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| buffer | <code>Buffer</code> | Raw equirectangular image data. |
+| context | <code>string</code> | Geocoded location string. |
+| options | <code>Object</code> | Strategy configuration parameters containing requested layers and topology info. |
+
+<a name="LMStudioVisionProvider._processAmbientLayer"></a>
+
+### LMStudioVisionProvider.\_processAmbientLayer(buffer, locationContext, layerName, config) ⇒ <code>Promise.&lt;Array&gt;</code>
+Processes the ambient layer for audio generation.
+
+**Kind**: static method of [<code>LMStudioVisionProvider</code>](#LMStudioVisionProvider)  
+**Returns**: <code>Promise.&lt;Array&gt;</code> - An array of processed ambient audio intents.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| buffer | <code>Buffer</code> | Raw equirectangular image data. |
+| locationContext | <code>string</code> | Geocoded location string. |
+| layerName | <code>string</code> | Name of the layer being processed. |
+| config | <code>Object</code> | Configuration options for the processing function. |
+
 <a name="PythonVisionProvider"></a>
 
 ## PythonVisionProvider
@@ -871,45 +981,6 @@ Validation guard ensuring the provider adheres to the system pipeline schema.
 | --- | --- | --- |
 | data | <code>Object</code> | Data payload to validate. |
 
-<a name="Utils"></a>
-
-## Utils
-Server-side utility class for file handling and audio manipulation.* ### Architecture```mermaidclassDiagramclass Utils{+loadDictionary(filePath, logger)$ Promise~Object~+transcode(wavBuffer, targetFormat, taskType, logger)$ Promise~Buffer~}```
-
-**Kind**: global class  
-
-* [Utils](#Utils)
-    * [.loadDictionary(filePath, [logger])](#Utils.loadDictionary) ⇒ <code>Promise.&lt;Object&gt;</code>
-    * [.transcode(wavBuffer, targetFormat, taskType, [logger])](#Utils.transcode) ⇒ <code>Promise.&lt;Buffer&gt;</code>
-
-<a name="Utils.loadDictionary"></a>
-
-### Utils.loadDictionary(filePath, [logger]) ⇒ <code>Promise.&lt;Object&gt;</code>
-Loads a JSON research dictionary and maps it for fast backend lookup.
-
-**Kind**: static method of [<code>Utils</code>](#Utils)  
-**Returns**: <code>Promise.&lt;Object&gt;</code> - The mapped dictionary.  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| filePath | <code>string</code> |  | Absolute path to the JSON file. |
-| [logger] | <code>Object</code> | <code>console</code> | System logger for error reporting. |
-
-<a name="Utils.transcode"></a>
-
-### Utils.transcode(wavBuffer, targetFormat, taskType, [logger]) ⇒ <code>Promise.&lt;Buffer&gt;</code>
-Transcodes a raw WAV buffer into the target framework format (webm, mp3, ogg) using FFmpeg.Also handles stereo-to-mono downmixing based on semantic task type.
-
-**Kind**: static method of [<code>Utils</code>](#Utils)  
-**Returns**: <code>Promise.&lt;Buffer&gt;</code> - The transcoded audio buffer.  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| wavBuffer | <code>Buffer</code> |  | The source audio buffer. |
-| targetFormat | <code>string</code> |  | Target extension (e.g., 'webm'). |
-| taskType | <code>string</code> |  | Semantic task type (used to determine channel count). |
-| [logger] | <code>Object</code> | <code>console</code> | System logger. |
-
 <a name="CacheManager"></a>
 
 ## CacheManager
@@ -934,7 +1005,7 @@ CacheManagerImplements a hybrid storage strategy:- SQLite: Database of pointer
     * [.saveAudio(id, buffer)](#CacheManager.saveAudio) ⇒ <code>Promise.&lt;boolean&gt;</code>
     * [.getAudio(id)](#CacheManager.getAudio) ⇒ <code>Promise.&lt;(string\|null)&gt;</code>
     * [.getAudioPath(id)](#CacheManager.getAudioPath) ⇒ <code>Promise.&lt;(string\|null)&gt;</code>
-    * [.deleteAudio(id)](#CacheManager.deleteAudio) ⇒ <code>Promise.&lt;(string\|null)&gt;</code>
+    * [.deleteAudio(id)](#CacheManager.deleteAudio) ⇒ <code>Promise.&lt;boolean&gt;</code>
 
 <a name="new_CacheManager_new"></a>
 
@@ -1125,11 +1196,11 @@ Retrieves the physical path to serve via Express.
 
 <a name="CacheManager.deleteAudio"></a>
 
-### CacheManager.deleteAudio(id) ⇒ <code>Promise.&lt;(string\|null)&gt;</code>
-Retrieves the physical path to serve via Express.
+### CacheManager.deleteAudio(id) ⇒ <code>Promise.&lt;boolean&gt;</code>
+Deletes an audio file and its database reference.
 
 **Kind**: static method of [<code>CacheManager</code>](#CacheManager)  
-**Returns**: <code>Promise.&lt;(string\|null)&gt;</code> - The file path.  
+**Returns**: <code>Promise.&lt;boolean&gt;</code> - True if successful.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1291,7 +1362,7 @@ Internal write helper that strips ANSI colors before writing to disk.
 <a name="LogManager.log"></a>
 
 ### LogManager.log(message, [socketId])
-Central logging method that mirrors to console, system log, and active session log. Unified to handle both standard info and debug level outputs.
+Central logging method that mirrors to console, system log, and active session log.
 
 **Kind**: static method of [<code>LogManager</code>](#LogManager)  
 
@@ -1327,7 +1398,7 @@ Error logging method for critical failures.
 <a name="PipelineService"></a>
 
 ## PipelineService
-PipelineService (Framework Orchestrator)A pure, domain-agnostic task runner.It treats tasks as black boxes and moves data without editing it.* ### Architecture```mermaidclassDiagramPipelineService --> AIEngine : Fetches IntentsPipelineService --> GPUResourceManager : Queues GenerationsPipelineService --> CacheManager : Reads/Writes AudioPipelineService --> LogManager : Logs Outputclass PipelineService{+setEpoch(socketId, epoch)+cleanupSocket(socketId)+checkBatchCompletion()+processMovement(socket, data) Promise~void~+queueTask(socket, task, navEpoch, signal)+processGPUQueue() Promise~void~+regenerateTask(socket, taskData, feedbackData) Promise~void~}```
+PipelineService (Framework Orchestrator)A pure, domain-agnostic task runner.It treats tasks as black boxes and moves data without editing it.
 
 **Kind**: global class  
 
@@ -1454,6 +1525,45 @@ SocketController acts as the primary research interface for WebSocket clients.I
 Binds event listeners to incoming connections (spatial_sync, cancel_tasks, regenerate).
 
 **Kind**: static method of [<code>SocketController</code>](#SocketController)  
+<a name="Utils"></a>
+
+## Utils
+Server-side utility class for file handling and audio manipulation.* ### Architecture```mermaidclassDiagramclass Utils{+loadDictionary(filePath, logger)$ Promise~Object~+transcode(wavBuffer, targetFormat, taskType, logger)$ Promise~Buffer~}```
+
+**Kind**: global class  
+
+* [Utils](#Utils)
+    * [.loadDictionary(filePath, [logger])](#Utils.loadDictionary) ⇒ <code>Promise.&lt;Object&gt;</code>
+    * [.transcode(wavBuffer, targetFormat, taskType, [logger])](#Utils.transcode) ⇒ <code>Promise.&lt;Buffer&gt;</code>
+
+<a name="Utils.loadDictionary"></a>
+
+### Utils.loadDictionary(filePath, [logger]) ⇒ <code>Promise.&lt;Object&gt;</code>
+Loads a JSON research dictionary and maps it for fast backend lookup.
+
+**Kind**: static method of [<code>Utils</code>](#Utils)  
+**Returns**: <code>Promise.&lt;Object&gt;</code> - The mapped dictionary.  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| filePath | <code>string</code> |  | Absolute path to the JSON file. |
+| [logger] | <code>Object</code> | <code>console</code> | System logger for error reporting. |
+
+<a name="Utils.transcode"></a>
+
+### Utils.transcode(wavBuffer, targetFormat, taskType, [logger]) ⇒ <code>Promise.&lt;Buffer&gt;</code>
+Transcodes a raw WAV buffer into the target framework format (webm, mp3, ogg) using FFmpeg. Also handles stereo-to-mono downmixing based on semantic task type.
+
+**Kind**: static method of [<code>Utils</code>](#Utils)  
+**Returns**: <code>Promise.&lt;Buffer&gt;</code> - The transcoded audio buffer.  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| wavBuffer | <code>Buffer</code> |  | The source audio buffer. |
+| targetFormat | <code>string</code> |  | Target extension (e.g., 'webm'). |
+| taskType | <code>string</code> |  | Semantic task type (used to determine channel count). |
+| [logger] | <code>Object</code> | <code>console</code> | System logger. |
+
 <a name="startServer"></a>
 
 ## startServer() ⇒ <code>Promise.&lt;void&gt;</code>

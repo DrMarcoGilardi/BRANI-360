@@ -1,6 +1,7 @@
 cache/
 node_modules/
 server/.env
+Google/
 .exe
 .env
 zrok2.exe
