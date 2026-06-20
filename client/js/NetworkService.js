@@ -60,7 +60,7 @@ export class NetworkService {
         this.persistentFetchControllers = new Set();
 
         this.socket = io(this.tunnelUrl, {
-            transports: ['websocket'],
+            transports: ['polling','websocket'],
             autoConnect: true,
             reconnection: true,
             reconnectionAttempts: Infinity,
