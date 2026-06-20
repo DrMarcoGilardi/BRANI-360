@@ -53,7 +53,9 @@ export class AcousticTreadmill {
     constructor(player, ui, clientConfig = {}) {
         this.player = player;
         this.ui = ui;
-        this.clientConfig = (clientConfig?.SPATIALLY_CONTINUOUS === 'true');
+        this.clientConfig = clientConfig;
+        this.spatiallycontinuous = (clientConfig?.SPATIALLY_CONTINUOUS === 'true');
+        console.log(this.spatiallycontinuous)
         this.anchorTracker = {
             expectedIds: [],
             completedIds: new Set(),
@@ -125,6 +127,11 @@ export class AcousticTreadmill {
      * @param {TopologyRadar} radar - Radar topology reference.
      */
     refreshMix(currentNodeId, currentIsAnchor, currentNearbyAnchors, radar) {
+        if (!this.spatiallycontinuous) {
+            this.player.updatePersistentVolumes([{ id: String(currentNodeId), weight: 1.0 }]);
+            return;
+        }
+
         if (!currentNearbyAnchors || !Array.isArray(currentNearbyAnchors)) return;
 
         let mixTargets = [];

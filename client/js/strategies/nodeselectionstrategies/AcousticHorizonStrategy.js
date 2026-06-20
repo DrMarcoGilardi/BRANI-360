@@ -85,9 +85,9 @@ export class AcousticHorizonStrategy extends NodeSelectionStrategy {
      * @returns {Promise<boolean>} True if the node qualifies as an anchor.
      */
     async isAnchor(nodeId, radar) {
-        // if (!this.isSpatiallyContinuous) {
-        //     return true;
-        // }
+        if (!this.isSpatiallyContinuous) {
+            return true;
+        }
 
         const neighborhood = await radar._getNeighborhood(nodeId, this.MAX_GAP);
 

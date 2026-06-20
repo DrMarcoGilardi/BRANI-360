@@ -70,7 +70,6 @@ export class SpatialAudioPlayer {
         this.masterBackgroundGain = parseFloat(backGain);
         this.masterForegroundGain = parseFloat(foreGain);
         this.masterSpatialGain = parseFloat(spatialGain);
-        console.log(this.masterSpatialGain);
 
         this.currentEpoch = 0;
         this.currentNodeId = null;
@@ -192,7 +191,7 @@ export class SpatialAudioPlayer {
                 const mix = mixRatios.find(m => String(m.id) === String(nodeId));
                 let targetVolume = 0; // Default to 0
 
-                if (mix && typeof mix.weight === 'number' && isFinite(mix.weight)) {
+                if (mix && isFinite(mix.weight)) {
                     targetVolume = parseFloat(mix.weight * safeMasterGain);
                     if (isNaN(targetVolume) || !isFinite(targetVolume)) targetVolume = 0;
                 } else if (sourceMap === this.foregroundSources && !mix) {
