@@ -121,7 +121,7 @@ async function bootstrap() {
         const semanticProvider = new SemanticClass(semanticLayers);
 
         const topologyProvider = new TopologyClass(config.key);
-        const nodeSelectionStrategy = new SelectionClass();
+        const nodeSelectionStrategy = new SelectionClass(config.options);
         const radar = new TopologyRadar(topologyProvider, nodeSelectionStrategy);
 
         const vrLoaderProvider = new VRLoaderClass(config.key);

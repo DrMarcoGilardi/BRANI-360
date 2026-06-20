@@ -47,11 +47,11 @@ export class AcousticHorizonStrategy extends NodeSelectionStrategy {
      * @param {number} [maxGap=6] - Maximum allowed empty hops before forcing a filler anchor.
      * @param {boolean} [isSpatiallyContinuous=true] - Whether to consider spatial continuity in anchor selection.
      */
-    constructor(minSpacing = 3, maxGap = 6, isSpatiallyContinuous = true) {
+    constructor(clientConfig = {}) {
         super();
-        this.MIN_SPACING = minSpacing;
-        this.MAX_GAP = maxGap;
-        this.isSpatiallyContinuous = isSpatiallyContinuous;
+        this.MIN_SPACING = parseInt(clientConfig.MIN_SPACING, 10);
+        this.MAX_GAP = parseInt(clientConfig.MAX_GAP, 10);
+        this.isSpatiallyContinuous = clientConfig.SPATIALLY_CONTINUOUS === 'true';
         this.gapFillerCache = new Map();
         this.MAX_STRATEGY_CACHE = 1000;
     }
@@ -88,6 +88,10 @@ export class AcousticHorizonStrategy extends NodeSelectionStrategy {
      * @returns {Promise<boolean>} True if the node qualifies as an anchor.
      */
     async isAnchor(nodeId, radar) {
+        if (!this.isSpatiallyContinuous) {
+            return true;
+        }
+
         const neighborhood = await radar._getNeighborhood(nodeId, this.MAX_GAP);
 
         // 1. Isolated Component Logic (The Island Rule)

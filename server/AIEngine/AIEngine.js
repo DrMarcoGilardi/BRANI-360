@@ -141,8 +141,8 @@ export class AIEngine {
 
         const strategyOptions = {};
         for (const [key, value] of Object.entries(this.config)) {
-            if (key.startsWith('CLIENT_OPT_')) {
-                const cleanKey = key.replace('CLIENT_OPT_', '');
+            if (key.startsWith('CLIENT_PARAM_')) {
+                const cleanKey = key.replace('CLIENT_PARAM_', '');
                 strategyOptions[cleanKey] = value;
             }
         }
@@ -155,7 +155,8 @@ export class AIEngine {
                 nodeSelectionStrategy: this.config.CLIENT_NODE_SELECTION_STRATEGY,
                 semanticProvider: this.config.CLIENT_SEMANTIC_PROVIDER,
                 vrLoaderProvider: this.config.CLIENT_VR_LOADER_PROVIDER,
-                semanticLayers: semanticLayers
+                semanticLayers: semanticLayers,
+                options: strategyOptions
             },
             audioGains: {
                 tmasterBackgroundGain: this.config.BACKGROUND_GAIN,
