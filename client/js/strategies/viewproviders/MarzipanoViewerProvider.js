@@ -2,6 +2,7 @@ import { BaseViewerProvider } from './BaseViewerProvider.js';
 import { Physics2D } from '../../Utilities/Physics2D.js';
 
 export class MarzipanoViewerProvider extends BaseViewerProvider {
+
     constructor(containerId, path) {
         super(containerId);
         this.container = document.getElementById(containerId);
@@ -76,6 +77,9 @@ export class MarzipanoViewerProvider extends BaseViewerProvider {
     }
 
     setupUI(scenes) {
+        const numNodes = scenes.length || 1;
+        const nodeSize = Math.max(50, Math.min(120, 300 / Math.sqrt(numNodes)));
+
         // --- 1. Base UI Elements ---
         const backButton = document.createElement('button');
         backButton.innerText = '← Back to Map';
@@ -112,8 +116,9 @@ export class MarzipanoViewerProvider extends BaseViewerProvider {
 
             const nodeElement = document.createElement('div');
             nodeElement.title = scene.name || `Node ${scene.id}`;
+
             Object.assign(nodeElement.style, {
-                position: 'absolute', width: '100px', height: '100px', cursor: 'pointer',
+                position: 'absolute', width: `${nodeSize}px`, height: `${nodeSize}px`, cursor: 'pointer',
                 backgroundImage: `url('${previewUrl}')`,
                 backgroundSize: '100% 600%', backgroundPosition: 'center top',
                 border: '3px solid #00f0ff', borderRadius: '50%', boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
@@ -228,8 +233,8 @@ export class MarzipanoViewerProvider extends BaseViewerProvider {
         this.container.appendChild(overlay);
         this.container.appendChild(backButton);
 
-        // --- 5. Start Physics Engine ---
-        this.physicsEngine = new Physics2D(this.container, this.graphNodes, this.graphEdges);
+        // --- 5. Start Physics Engine with Dynamic Scale ---
+        this.physicsEngine = new Physics2D(this.container, this.graphNodes, this.graphEdges, nodeSize);
         this.physicsEngine.start();
     }
 

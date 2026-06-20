@@ -1,18 +1,25 @@
 export class Physics2D {
-    constructor(container, nodes, edges) {
+    // ADDED: nodeSize parameter to scale physics
+    constructor(container, nodes, edges, nodeSize = 100) {
         this.container = container;
         this.nodes = nodes;
         this.edges = edges;
+        this.nodeSize = nodeSize;
+        this.nodeRadius = nodeSize / 2;
 
         this.physicsLoop = null;
         this.isRunning = false;
 
-        // Physics Constants
-        this.repulsion = 40000;
-        this.springDist = 200;
+        // --- ADAPTIVE PHYSICS CONSTANTS ---
+        // Forces scale down as nodes get smaller to keep the graph tight but clean
+        this.repulsion = 40000 * (nodeSize / 100);
+        this.springDist = Math.max(150, nodeSize * 2);
         this.springForce = 0.05;
         this.gravity = 0.02;
         this.damping = 0.8;
+
+        this.repulsionThreshold = Math.max(300, nodeSize * 3);
+        this.labelAvoidanceThreshold = Math.max(200, nodeSize * 2);
     }
 
     start() {
@@ -71,7 +78,7 @@ export class Physics2D {
                 const dy = n1.y - n2.y;
                 let dist = Math.sqrt(dx * dx + dy * dy) || 1;
 
-                if (dist < 400) {
+                if (dist < this.repulsionThreshold) {
                     const force = this.repulsion / (dist * dist);
                     const fx = (dx / dist) * force;
                     const fy = (dy / dist) * force;
@@ -117,8 +124,8 @@ export class Physics2D {
                 const dx = neighbor.x - node.x;
                 const dy = neighbor.y - node.y;
                 const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                rx -= (dx / dist) * 150;
-                ry -= (dy / dist) * 150;
+                rx -= (dx / dist) * this.nodeSize;
+                ry -= (dy / dist) * this.nodeSize;
             });
 
             this.nodes.forEach(otherNode => {
@@ -126,8 +133,9 @@ export class Physics2D {
                 const dx = otherNode.x - node.x;
                 const dy = otherNode.y - node.y;
                 const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                if (dist < 250) {
-                    const force = (250 - dist);
+
+                if (dist < this.labelAvoidanceThreshold) {
+                    const force = (this.labelAvoidanceThreshold - dist);
                     rx -= (dx / dist) * force;
                     ry -= (dy / dist) * force;
                 }
@@ -137,7 +145,7 @@ export class Physics2D {
             node.lx += ((rx / targetLen) - node.lx) * 0.15;
             node.ly += ((ry / targetLen) - node.ly) * 0.15;
 
-            // 4. Update DOM
+            // 4. Update DOM Elements
             const { nx, ny } = this._normalizeVector(node.lx, node.ly);
 
             node.el.style.left = `${node.x}px`;
@@ -148,7 +156,8 @@ export class Physics2D {
                 node.labelHeight = node.labelEl.offsetHeight;
             }
 
-            const t = this._calculateLabelOffset(nx, ny, node.labelWidth, node.labelHeight, 65);
+            // Provide the dynamic nodeRadius to the Minkowski Sum collision calculation (+15px gap)
+            const t = this._calculateLabelOffset(nx, ny, node.labelWidth, node.labelHeight, this.nodeRadius + 15);
 
             node.labelEl.style.left = `${node.x}px`;
             node.labelEl.style.top = `${node.y}px`;
