@@ -1,5 +1,33 @@
+/**
+ * @class Physics2D
+ * @description A standalone 2D physics engine using force-directed graph algorithms to dynamically layout and arrange nodes and their text labels.
+ * * ### Architecture
+ * ```mermaid
+ * classDiagram
+ * class Physics2D{
+ * +container HTMLElement
+ * +nodes Array
+ * +edges Array
+ * +nodeSize number
+ * +isRunning boolean
+ * +start() void
+ * +stop() void
+ * -_normalizeVector(x, y) Object
+ * -_calculateLabelOffset(nx, ny, labelWidth, labelHeight, nodeRadius) number
+ * -_run() void
+ * }
+ * ```
+ */
 export class Physics2D {
-    // ADDED: nodeSize parameter to scale physics
+    /**
+     * @constructor
+     * @memberof Physics2D
+     * @description Initializes the 2D physics engine with node and edge data, and sets up adaptive constants based on node size.
+     * @param {HTMLElement} container - The DOM element bounding the physics simulation.
+     * @param {Array<Object>} nodes - The array of graph node objects to simulate.
+     * @param {Array<Object>} edges - The array of graph edge (link) objects.
+     * @param {number} [nodeSize=100] - The pixel dimension of the nodes used to scale forces.
+     */
     constructor(container, nodes, edges, nodeSize = 100) {
         this.container = container;
         this.nodes = nodes;
@@ -10,8 +38,6 @@ export class Physics2D {
         this.physicsLoop = null;
         this.isRunning = false;
 
-        // --- ADAPTIVE PHYSICS CONSTANTS ---
-        // Forces scale down as nodes get smaller to keep the graph tight but clean
         this.repulsion = 40000 * (nodeSize / 100);
         this.springDist = Math.max(150, nodeSize * 2);
         this.springForce = 0.05;
@@ -22,6 +48,12 @@ export class Physics2D {
         this.labelAvoidanceThreshold = Math.max(200, nodeSize * 2);
     }
 
+    /**
+     * @method start
+     * @memberof Physics2D
+     * @description Wakes up the physics engine and starts the requestAnimationFrame loop.
+     * @returns {void}
+     */
     start() {
         if (!this.isRunning) {
             this.isRunning = true;
@@ -29,6 +61,12 @@ export class Physics2D {
         }
     }
 
+    /**
+     * @method stop
+     * @memberof Physics2D
+     * @description Halts the physics simulation loop and clears pending animation frames.
+     * @returns {void}
+     */
     stop() {
         this.isRunning = false;
         if (this.physicsLoop) {
@@ -37,11 +75,32 @@ export class Physics2D {
         }
     }
 
+    /**
+     * @method _normalizeVector
+     * @memberof Physics2D
+     * @description Normalizes a 2D vector to a length of 1.
+     * @param {number} x - The x component.
+     * @param {number} y - The y component.
+     * @returns {Object} An object containing the normalized nx and ny components.
+     * @private
+     */
     _normalizeVector(x, y) {
         const len = Math.sqrt(x * x + y * y) || 1;
         return { nx: x / len, ny: y / len };
     }
 
+    /**
+     * @method _calculateLabelOffset
+     * @memberof Physics2D
+     * @description Calculates the exact displacement distance needed to prevent a rectangular label from overlapping a circular node using Minkowski Sum collision math.
+     * @param {number} nx - Normalized X direction vector.
+     * @param {number} ny - Normalized Y direction vector.
+     * @param {number} [labelWidth=150] - Pixel width of the text label.
+     * @param {number} [labelHeight=30] - Pixel height of the text label.
+     * @param {number} [nodeRadius=65] - Target radius collision boundary.
+     * @returns {number} The distance (t) to push the label center along the vector.
+     * @private
+     */
     _calculateLabelOffset(nx, ny, labelWidth = 150, labelHeight = 30, nodeRadius = 65) {
         const w = labelWidth / 2;
         const h = labelHeight / 2;
@@ -62,6 +121,13 @@ export class Physics2D {
         return (-B + Math.sqrt((B * B) - (4 * C))) / 2;
     }
 
+    /**
+     * @method _run
+     * @memberof Physics2D
+     * @description The core internal physics loop applying repulsion, spring forces, gravity, and label avoidance algorithms. Recursively calls requestAnimationFrame.
+     * @returns {void}
+     * @private
+     */
     _run() {
         if (!this.isRunning) return;
 

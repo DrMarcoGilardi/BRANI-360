@@ -1,8 +1,35 @@
 import { BaseViewerProvider } from './BaseViewerProvider.js';
 import { Physics2D } from '../../Utilities/Physics2D.js';
 
+/**
+ * @class MarzipanoViewerProvider
+ * @description Provider managing the Marzipano 360 viewer, its dynamic force-directed graph UI overlay, and event orchestration.
+ * * ### Architecture
+ * ```mermaid
+ * classDiagram
+ * BaseViewerProvider <|-- MarzipanoViewerProvider
+ * MarzipanoViewerProvider --> Physics2D : Drives UI Graph
+ * class MarzipanoViewerProvider{
+ * +tourPath string
+ * +isViewerVisible boolean
+ * +init() Promise~void~
+ * +setupUI(scenes) void
+ * +switchScene(nodeId) void
+ * +getCurrentNodeId() string
+ * +getLocation() string
+ * +isVisible() boolean
+ * +getNativeViewer() Object
+ * }
+ * ```
+ */
 export class MarzipanoViewerProvider extends BaseViewerProvider {
-
+    /**
+     * @constructor
+     * @memberof MarzipanoViewerProvider
+     * @description Initializes the provider and prepares the required HTML container.
+     * @param {string} containerId - The ID of the DOM element to host the viewer and graph.
+     * @param {string} path - The relative or absolute path to the local Marzipano tour folder.
+     */
     constructor(containerId, path) {
         super(containerId);
         this.container = document.getElementById(containerId);
@@ -24,6 +51,14 @@ export class MarzipanoViewerProvider extends BaseViewerProvider {
         this.physicsEngine = null;
     }
 
+    /**
+     * @async
+     * @method init
+     * @memberof MarzipanoViewerProvider
+     * @description Loads external scripts, reads local tour data, initializes the Marzipano Viewer, and triggers UI setup.
+     * @throws {Error} If Marzipano or the tour's APP_DATA fails to load.
+     * @returns {Promise<void>}
+     */
     async init() {
         await this._loadScript('https://www.marzipano.net/build/marzipano.js');
         await this._loadScript(`${this.tourPath}/data.js`);
@@ -76,6 +111,13 @@ export class MarzipanoViewerProvider extends BaseViewerProvider {
         }
     }
 
+    /**
+     * @method setupUI
+     * @memberof MarzipanoViewerProvider
+     * @description Constructs the dynamic topology graph interface and back button overlay, and launches the Physics2D engine.
+     * @param {Array<Object>} scenes - Array of scene objects from the Marzipano APP_DATA.
+     * @returns {void}
+     */
     setupUI(scenes) {
         const numNodes = scenes.length || 1;
         const nodeSize = Math.max(50, Math.min(120, 300 / Math.sqrt(numNodes)));
@@ -238,6 +280,13 @@ export class MarzipanoViewerProvider extends BaseViewerProvider {
         this.physicsEngine.start();
     }
 
+    /**
+     * @method switchScene
+     * @memberof MarzipanoViewerProvider
+     * @description Triggers Marzipano to switch to a specific scene and manages delayed audio/sync triggers.
+     * @param {string} nodeId - The target Marzipano scene/node ID.
+     * @returns {void}
+     */
     switchScene(nodeId) {
         if (!this.scenes[nodeId]) return;
 
@@ -267,6 +316,14 @@ export class MarzipanoViewerProvider extends BaseViewerProvider {
         }, 600);
     }
 
+    /**
+     * @method _loadScript
+     * @memberof MarzipanoViewerProvider
+     * @description Helper to dynamically load external JavaScript files into the document.
+     * @param {string} src - URL or path of the script.
+     * @returns {Promise<Event>} Promise resolving when the script finishes loading.
+     * @private
+     */
     _loadScript(src) {
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
@@ -277,9 +334,43 @@ export class MarzipanoViewerProvider extends BaseViewerProvider {
         });
     }
 
+    /**
+     * @method getCurrentNodeId
+     * @memberof MarzipanoViewerProvider
+     * @description Returns the currently active 360 node.
+     * @returns {string|null} The current node ID.
+     */
     getCurrentNodeId() { return this.currentNodeId; }
+
+    /**
+     * @method getLocation
+     * @memberof MarzipanoViewerProvider
+     * @description Fallback location string since local Marzipano tours are non-geographic.
+     * @returns {string} Default local string.
+     */
     getLocation() { return "Local Marzipano Tour"; }
+
+    /**
+     * @method isVisible
+     * @memberof MarzipanoViewerProvider
+     * @description Indicates whether the 360 viewer (as opposed to the graph map) is active.
+     * @returns {boolean} True if inside a 360 scene.
+     */
     isVisible() { return this.isViewerVisible; }
+
+    /**
+     * @method getNativeViewer
+     * @memberof MarzipanoViewerProvider
+     * @description Returns the raw Marzipano viewer instance.
+     * @returns {Object|null} Marzipano Viewer object.
+     */
     getNativeViewer() { return this.viewer; }
+
+    /**
+     * @method supportsCameraSync
+     * @memberof MarzipanoViewerProvider
+     * @description Capability flag defining if external heading/pitch forcing is supported.
+     * @returns {boolean}
+     */
     get supportsCameraSync() { return false; }
 }

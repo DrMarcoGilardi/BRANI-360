@@ -1,10 +1,31 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import sharp from 'sharp'; // You will need to add this to your server/package.json
+import sharp from 'sharp';
 import { ImageSourceProvider } from './ImageSourceProvider.js';
 
+/**
+ * @class MarzipanoImageSource
+ * @description Provides server-side processing to stitch Marzipano tiles back into equirectangular formats for AI engine ingestion.
+ * * ### Architecture
+ * ```mermaid
+ * classDiagram
+ * ImageSourceProvider <|-- MarzipanoImageSource
+ * class MarzipanoImageSource{
+ * +tourPath string
+ * +logger Object
+ * +getImage(id) Promise~Buffer~
+ * }
+ * ```
+ */
 export class MarzipanoImageSource extends ImageSourceProvider {
+    /**
+     * @constructor
+     * @memberof MarzipanoImageSource
+     * @description Initializes the server-side image source provider.
+     * @param {Object} options - Configuration options, including TOUR_PATH.
+     * @param {Object} [logger] - Optional logger instance.
+     */
     constructor(options, logger) {
         super();
         this.logger = logger || console;
@@ -13,7 +34,13 @@ export class MarzipanoImageSource extends ImageSourceProvider {
     }
 
     /**
-     * Stitches the Marzipano tiles into a single Buffer for the Vision Engine.
+     * @async
+     * @method getImage
+     * @memberof MarzipanoImageSource
+     * @description Reads local tour data and dynamically stitches raw Marzipano tiles into a single output Buffer using sharp.
+     * @param {string} id - The ID of the scene to stitch.
+     * @returns {Promise<Buffer>} The stitched image data as a JPEG buffer.
+     * @throws {Error} If the scene is not found or stitching operations fail.
      */
     async getImage(id) {
         const maxResolution = 1024; // Define the maximum resolution for the output image

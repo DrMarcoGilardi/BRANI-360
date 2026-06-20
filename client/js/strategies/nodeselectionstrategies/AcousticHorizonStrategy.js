@@ -43,9 +43,6 @@ import { NodeSelectionStrategy } from "./NodeSelectionStrategy.js";
 export class AcousticHorizonStrategy extends NodeSelectionStrategy {
     /**
      * @constructor
-     * @param {number} [minSpacing=3] - Minimum allowed graph distance between anchors.
-     * @param {number} [maxGap=6] - Maximum allowed empty hops before forcing a filler anchor.
-     * @param {boolean} [isSpatiallyContinuous=true] - Whether to consider spatial continuity in anchor selection.
      */
     constructor(clientConfig = {}) {
         super();
