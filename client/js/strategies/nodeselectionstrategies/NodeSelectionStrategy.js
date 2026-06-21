@@ -33,7 +33,7 @@
  * * ### Architecture
  * ```mermaid
  * classDiagram
- * class NodeSelectionStrategy{
+ * class BaseNodeSelectionStrategy{
  * <<Abstract>>
  * +isAnchor(nodeId, radar) Promise~boolean~
  * +reset()
@@ -42,11 +42,11 @@
  * 
  * @class
  */
-export class NodeSelectionStrategy {
+export class BaseNodeSelectionStrategy {
     /**
      * @async
      * @method isAnchor
-     * @memberof NodeSelectionStrategy
+     * @memberof BaseNodeSelectionStrategy
      * @description Evaluates whether a specific node should act as an acoustic anchor.
      * @param {string} nodeId - The unique identifier for the node.
      * @param {TopologyRadar} radar - The active TopologyRadar instance for neighborhood context.
@@ -57,7 +57,7 @@ export class NodeSelectionStrategy {
 
     /**
      * @method reset
-     * @memberof NodeSelectionStrategy
+     * @memberof BaseNodeSelectionStrategy
      * @description Optional state cleanup triggered when the engine resets.
      */
     reset() { /* Optional state cleanup */ }

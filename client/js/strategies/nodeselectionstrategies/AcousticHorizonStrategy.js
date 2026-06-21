@@ -26,7 +26,7 @@
  * -------------------------------------------------------------------------
  */
 
-import { NodeSelectionStrategy } from "./NodeSelectionStrategy.js";
+import { BaseNodeSelectionStrategy } from "./BaseNodeSelectionStrategy.js";
 
 /**
  * EXAMPLE STRATEGY IMPLEMENTATION  
@@ -35,7 +35,7 @@ import { NodeSelectionStrategy } from "./NodeSelectionStrategy.js";
  * * ### Architecture
  * ```mermaid
  * classDiagram
- * NodeSelectionStrategy <|-- AcousticHorizonStrategy
+ * BaseNodeSelectionStrategy <|-- AcousticHorizonStrategy
  * class AcousticHorizonStrategy{
  * +reset()
  * +isAnchor(nodeId, radar) Promise~boolean~
@@ -44,7 +44,7 @@ import { NodeSelectionStrategy } from "./NodeSelectionStrategy.js";
  * 
  * @class 
  */
-export class AcousticHorizonStrategy extends NodeSelectionStrategy {
+export class AcousticHorizonStrategy extends BaseNodeSelectionStrategy {
     /**
      * @constructor
      */
