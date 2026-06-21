@@ -30,7 +30,7 @@ import { spawn } from 'child_process';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
-import { VisionProvider } from '../../VisionProvider.js';
+import { BaseVisionProvider } from '../../BaseVisionProvider.js';
 
 /**
  * EXAMPLE STRATEGY IMPLEMENTATION  
@@ -39,7 +39,7 @@ import { VisionProvider } from '../../VisionProvider.js';
  * * ### Architecture
  * ```mermaid
  * classDiagram
- * VisionProvider <|-- PythonVisionProvider
+ * BaseVisionProvider <|-- PythonVisionProvider
  * class PythonVisionProvider{
  * +init() Promise~void~
  * +analyse(buffer, contextString, options) Promise~Object~
@@ -48,7 +48,7 @@ import { VisionProvider } from '../../VisionProvider.js';
  * 
  * @class
  */
-export class PythonVisionProvider extends VisionProvider {
+export class PythonVisionProvider extends BaseVisionProvider {
     /**
      * @constructor
      * @param {Object} config - System configuration containing PYTHON_EXEC and PYTHON_VISION_SCRIPT paths.

@@ -30,7 +30,7 @@ import { spawn } from 'child_process';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
-import { AudioProvider } from '../../AudioProvider.js';
+import { BaseAudioProvider } from '../../BaseAudioProvider.js';
 
 /**
  * EXAMPLE STRATEGY IMPLEMENTATION  
@@ -39,7 +39,7 @@ import { AudioProvider } from '../../AudioProvider.js';
  * * ### Architecture
  * ```mermaid
  * classDiagram
- * AudioProvider <|-- PythonAudioProvider
+ * BaseAudioProvider <|-- PythonAudioProvider
  * class PythonAudioProvider{
  * +init() Promise~void~
  * +generate(task, contextHooks) Promise~Object~
@@ -47,7 +47,7 @@ import { AudioProvider } from '../../AudioProvider.js';
  * ```
  * @class 
  */
-export class PythonAudioProvider extends AudioProvider {
+export class PythonAudioProvider extends BaseAudioProvider {
     /**
      * @constructor
      * @param {Object} config - System configuration containing PYTHON_EXEC and PYTHON_AUDIO_SCRIPT.

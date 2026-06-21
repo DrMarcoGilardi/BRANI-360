@@ -26,7 +26,7 @@
  * -------------------------------------------------------------------------
  */
 
-import { VisionProvider } from './VisionProvider.js';
+import { BaseVisionProvider } from './BaseVisionProvider.js';
 import axios from 'axios';
 
 /**
@@ -36,7 +36,7 @@ import axios from 'axios';
  * * ### Architecture
  * ```mermaid
  * classDiagram
- * VisionProvider <|-- LMStudioVisionProvider
+ * BaseVisionProvider <|-- LMStudioVisionProvider
  * class LMStudioVisionProvider{
  * +init() Promise~void~
  * +analyse(buffer, context, options) Promise~Object~
@@ -45,7 +45,7 @@ import axios from 'axios';
  * 
  * @class
  */
-export class LMStudioVisionProvider extends VisionProvider {
+export class LMStudioVisionProvider extends BaseVisionProvider {
     /**
      * @constructor
      * @param {Object} config - Configuration object containing {LM_STUDIO_API, VLM_MODEL_ID, VLM_PROMPT_AMBIENT, VLM_PROMPT_SPATIAL}

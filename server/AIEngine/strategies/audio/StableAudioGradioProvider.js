@@ -32,7 +32,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { AudioProvider } from './AudioProvider.js';
+import { BaseAudioProvider } from './BaseAudioProvider.js';
 import { Utils } from '../../../utilities/Utils.js';
 
 const execAsync = promisify(exec);
@@ -48,7 +48,7 @@ const __dirname = path.dirname(__filename);
  * * ### Architecture
  * ```mermaid
  * classDiagram
- * AudioProvider <|-- StableAudioGradioProvider
+ * BaseAudioProvider <|-- StableAudioGradioProvider
  * class StableAudioGradioProvider{
  * +init() Promise~void~
  * +generate(task, executionContext) Promise~Object~
@@ -57,7 +57,7 @@ const __dirname = path.dirname(__filename);
  * 
  * @class
  */
-export class StableAudioGradioProvider extends AudioProvider {
+export class StableAudioGradioProvider extends BaseAudioProvider {
     /**
      * @constructor
      * @param {Object} config - System configuration containing STABLE_AUDIO_API URL.

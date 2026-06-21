@@ -34,7 +34,7 @@
  * * ### Architecture
  * ```mermaid
  * classDiagram
- * class VisionProvider{
+ * class BaseVisionProvider{
  * <<Abstract>>
  * +analyse(buffer, context, options) Promise~Object~
  * +validateResponse(data) Object
@@ -43,11 +43,11 @@
  * 
  * @class
  */
-export class VisionProvider {
+export class BaseVisionProvider {
     /**
      * @async
      * @method analyse
-     * @memberof VisionProvider
+     * @memberof BaseVisionProvider
      * @description Executes multimodal analysis to extract sonic layers from visuals.
      * @param {Buffer} buffer - Raw image data.
      * @param {string} context - Geocoded location string.
@@ -61,7 +61,7 @@ export class VisionProvider {
 
     /**
      * @method validateResponse
-     * @memberof VisionProvider
+     * @memberof BaseVisionProvider
      * @description Validation guard ensuring the provider adheres to the system pipeline schema.
      * @param {Object} data - Data payload to validate.
      * @returns {Object} Validated payload.

@@ -26,7 +26,7 @@
  * -------------------------------------------------------------------------
  */
 
-import { ContextProvider } from './ContextProvider.js'
+import { BaseContextProvider } from './BaseContextProvider.js'
 
 /**
  * EXAMPLE STRATEGY IMPLEMENTATION  
@@ -35,7 +35,7 @@ import { ContextProvider } from './ContextProvider.js'
  * * ### Architecture
  * ```mermaid
  * classDiagram
- * ContextProvider <|-- GeoapifyContextProvider
+ * BaseContextProvider <|-- GeoapifyContextProvider
  * class GeoapifyContextProvider{
  * +resolve(lat, lng) Promise~string~
  * +getPublicConfig() Object
@@ -44,7 +44,7 @@ import { ContextProvider } from './ContextProvider.js'
  * 
  * @class
  */
-export class GeoapifyContextProvider extends ContextProvider {
+export class GeoapifyContextProvider extends BaseContextProvider {
     /**
      * @constructor
      * @param {Object} key - Server configuration object containing API tokens.

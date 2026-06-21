@@ -26,7 +26,7 @@
  * -------------------------------------------------------------------------
  */
 
-import { ContextProvider } from './ContextProvider.js'
+import { BaseContextProvider } from './BaseContextProvider.js'
 
 /**
  * EXAMPLE STRATEGY IMPLEMENTATION  
@@ -35,7 +35,7 @@ import { ContextProvider } from './ContextProvider.js'
  * * ### Architecture
  * ```mermaid
  * classDiagram
- * ContextProvider <|-- MarzipanoContextProvider
+ * BaseContextProvider <|-- MarzipanoContextProvider
  * class MarzipanoContextProvider{
  * +path string
  * +logger Object
@@ -46,7 +46,7 @@ import { ContextProvider } from './ContextProvider.js'
  * 
  * @class
  */
-export class MarzipanoContextProvider extends ContextProvider {
+export class MarzipanoContextProvider extends BaseContextProvider {
     /**
      * @constructor
      * @memberof MarzipanoContextProvider

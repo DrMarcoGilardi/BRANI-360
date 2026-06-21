@@ -26,7 +26,7 @@
  * -------------------------------------------------------------------------
  */
 
-import { ImageSourceProvider } from './ImageSourceProvider.js'
+import { BaseImageSourceProvider } from './BaseImageSourceProvider.js'
 import axios from 'axios';
 import fs from 'fs';
 
@@ -38,7 +38,7 @@ import fs from 'fs';
  * * ### Architecture
  * ```mermaid
  * classDiagram
- * ImageSourceProvider <|-- MapillarySource
+ * BaseImageSourceProvider <|-- MapillarySource
  * class MapillarySource{
  * +getImage(id) Promise~Buffer~
  * }
@@ -46,7 +46,7 @@ import fs from 'fs';
  * 
  * @class
  */
-export class MapillarySource extends ImageSourceProvider {
+export class MapillarySource extends BaseImageSourceProvider {
     /**
      * @constructor
      * @param {Object} options - Configuration containing the MAPILLARY_TOKEN.

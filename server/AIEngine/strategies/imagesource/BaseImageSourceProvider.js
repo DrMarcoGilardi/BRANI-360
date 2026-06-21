@@ -25,35 +25,40 @@
  * Please contact Marco.Gilardi@uws.ac.uk for commercial licensing details.
  * -------------------------------------------------------------------------
  */
+import axios from 'axios';
+import fs from 'fs/promises';
+import path from 'path';
 
 /**
  * Base Class Interface.  
- * Interface for audio synthesis providers.
+ * Interface for 360-degree image acquisition strategies.
  * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
- * class AudioProvider{
+ * class BaseImageSourceProvider{
  * <<Abstract>>
- * +generate(task, context) Promise~Object~
+ * +getImage(id) Promise~Buffer~
  * }
  * ```
  * 
- * @class
+ * @class 
  */
-export class AudioProvider {
+export class BaseImageSourceProvider {
     /**
      * @async
-     * @method generate
-     * @memberof AudioProvider
-     * @description Executes the audio generation pipeline for a given semantic task.
-     * @param {Object} task - The complete task metadata (prompt, type, steps).
-     * @param {Object} context - Execution hooks including { signal, socket, progressCallback }.
-     * @returns {Promise<{buffer: Buffer, duration: string}>} The generated audio data.
+     * @method getImage
+     * @memberof BaseImageSourceProvider
+     * @description Fetches an equirectangular image buffer for a specific node ID.
+     * @param {string} id - The agnostic node identifier.
+     * @returns {Promise<Buffer>} The binary image data.
      * @throws {Error} If not implemented by the specific provider.
      */
-    async generate(task, context) {
-        throw new Error("[AUDIO PROVIDER CONTRACT VIOLATION]: Method 'generate(task, context)' must be implemented.");
-    }
+    async getImage(id) { throw new Error("[IMAGE SOURCE PROVIDER CONTRACT VIOLATION]: Method 'getImage()' must be implemented."); }
 }
+
+
+
+
+
 

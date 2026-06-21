@@ -28,7 +28,7 @@
 
 import { UIManager } from './UIManager.js';
 import { SpatialAudioPlayer } from './SpatialAudioPlayer.js';
-import { VRSceneController } from './VR/VRSceneController.js';
+import { VRSceneController } from './vr/VRSceneController.js';
 import { AcousticTreadmill } from './AcousticTreadmill.js';
 import { NetworkService } from './NetworkService.js';
 import { NavigationManager } from './NavigationManager.js';

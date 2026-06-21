@@ -30,7 +30,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
-import { ImageSourceProvider } from './ImageSourceProvider.js';
+import { BaseImageSourceProvider } from './BaseImageSourceProvider.js';
 
 /**
  * Provides server-side processing to stitch Marzipano tiles back into equirectangular formats for AI engine ingestion.
@@ -38,7 +38,7 @@ import { ImageSourceProvider } from './ImageSourceProvider.js';
  * * ### Architecture
  * ```mermaid
  * classDiagram
- * ImageSourceProvider <|-- MarzipanoImageSource
+ * BaseImageSourceProvider <|-- MarzipanoImageSource
  * class MarzipanoImageSource{
  * +getImage(id) Promise~Buffer~
  * }
@@ -46,7 +46,7 @@ import { ImageSourceProvider } from './ImageSourceProvider.js';
  * 
  * @class
  */
-export class MarzipanoImageSource extends ImageSourceProvider {
+export class MarzipanoImageSource extends BaseImageSourceProvider {
     /**
      * @constructor
      * @memberof MarzipanoImageSource

@@ -33,7 +33,7 @@
  * * ### Architecture
  * ```mermaid
  * classDiagram
- * class ContextProvider{
+ * class BaseContextProvider{
  * <<Abstract>>
  * +resolve(lat, lng) Promise~string~
  * +getPublicConfig() Object
@@ -42,11 +42,11 @@
  * 
  * @calss
  */
-export class ContextProvider {
+export class BaseContextProvider {
     /**
      * @async
      * @method resolve
-     * @memberof ContextProvider
+     * @memberof BaseContextProvider
      * @description Resolves raw latitude and longitude into a human-readable location context.
      * @param {number} lat - Latitude.
      * @param {number} lng - Longitude.
@@ -59,7 +59,7 @@ export class ContextProvider {
 
     /**
      * @method getPublicConfig
-     * @memberof ContextProvider
+     * @memberof BaseContextProvider
      * @description Exposes public configuration/credentials safely to the frontend client.
      * @returns {Object} Public config dictionary (e.g., { apiKey: "..." }).
      * @throws {Error} If not implemented by the specific provider.
