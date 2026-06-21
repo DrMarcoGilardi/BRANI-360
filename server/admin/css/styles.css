@@ -32,6 +32,7 @@ body {
     margin-bottom: 15px;
     border-radius: 6px;
     position: relative;
+    transition: all 0.2s ease;
 }
 
 .row {
@@ -63,8 +64,9 @@ textarea.section-input {
     border: none;
     outline: none;
     font-family: inherit;
-    resize: vertical;
-    min-height: 80px;
+    resize: none;
+    overflow: hidden;
+    min-height: 40px;
     margin-top: 10px;
 }
 
@@ -81,8 +83,9 @@ textarea.comment-input {
     padding: 8px;
     border-radius: 4px;
     font-family: inherit;
-    resize: vertical;
-    min-height: 40px;
+    resize: none;
+    overflow: hidden;
+    min-height: 35px;
 }
 
 input {
@@ -100,9 +103,20 @@ input.key-input {
     color: #9cdcfe;
 }
 
-input.val-input {
+textarea.val-input {
     flex: 0.7;
+    background: #333;
     color: #ce9178;
+    border: 1px solid #555;
+    padding: 9.5px;
+    line-height: 1.2;
+    box-sizing: border-box;
+    border-radius: 4px;
+    font-family: inherit;
+    resize: none;
+    overflow: hidden;
+    min-height: 10px;
+    word-wrap: break-word;
 }
 
 button {
@@ -120,13 +134,26 @@ button:hover {
     filter: brightness(1.2);
 }
 
+.btn-icon {
+    padding: 8px 12px;
+    font-size: 1.1em;
+    line-height: 1;
+}
+
 .btn-danger {
     background: #c53a3a;
-    padding: 10px 12px;
 }
 
 .btn-danger:hover {
     background: #e04444;
+}
+
+.btn-secondary {
+    background: #555555;
+}
+
+.btn-secondary:hover {
+    background: #777777;
 }
 
 .modal-overlay {
@@ -147,7 +174,7 @@ button:hover {
     border: 1px solid #3c3c3c;
     padding: 25px;
     border-radius: 8px;
-    width: 450px;
+    width: 600px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
 }
 
