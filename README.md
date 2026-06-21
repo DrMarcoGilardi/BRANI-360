@@ -76,7 +76,7 @@ abba360_v0/
 │   ├── server.js               # Bootstrapper
 │   ├── PipelineService.js      # Core Orchestrator
 │   ├── .env                    # <-- IMPLEMENT CONFIG
-│   ├── admin/
+│   ├── admin/                  # Administrator .env editor dashboard
 │   |   ├── css/
 │   |       └── style.css
 │   |   ├── js/
