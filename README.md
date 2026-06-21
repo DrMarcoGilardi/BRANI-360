@@ -44,7 +44,9 @@ The framework acts as a central registry that translates visual intents into 3D 
 ```text
 abba360_v0/
 ├── client/                     # Frontend Environment
-│   ├── index.html              
+│   ├── index.html
+|   ├── css/
+|   |   └── styles.css
 │   └── js/
 │       ├── client.js           # Bootstrapper & Dependency Injection
 │       ├── NavigationManager.js# Core Orchestrator
@@ -53,7 +55,17 @@ abba360_v0/
 │       ├── UIManager.js
 │       ├── TopologyRadar.js
 │       ├── AcousticTreadmill.js
-│       ├── VR/                 # WebXR & A-Frame lifecycle
+│       ├── vr/                 # WebXR & A-Frame lifecycle
+|       |   ├── assets/
+|       |   |   └── svg/        # Icons for VR interface
+|       |   ├── InteractiveMap.js
+|       |   ├── VRManager.js
+|       |   ├── VRRPGAudioManager.js
+|       |   ├── VRSceneController.js
+│       |   └── WristUI.js
+│       ├── utilities/
+│       |   ├── SpatialUtils.js
+│       |   └── Physics2D.js
 │       └── strategies/         # <-- IMPLEMENT CLIENT STRATEGIES HERE
 │           ├── nodeselectionstrategies/
 │           ├── semanticproviders/
@@ -63,18 +75,25 @@ abba360_v0/
 ├── server/                     # Backend Environment
 │   ├── server.js               # Bootstrapper
 │   ├── PipelineService.js      # Core Orchestrator
-│   ├── SocketController.js     # WebSocket server
-│   ├── CacheManager.js
-│   ├── GPUResourceManager.js
-│   ├── .env                    # <-- IMPLEMENT ACTIVE STRATEGIES CONFIG
-│   └── AIEngine/
-│       ├── AIEngine.js         # Strategy Delegator
-│       ├── pythonscripts/      # Python code go here
-│       └── strategies/         # <-- IMPLEMENT SERVER STRATEGIES HERE
-│           ├── audio/
-│           ├── context/
-│           ├── imagesource/
-│           └── vision/
+│   ├── .env                    # <-- IMPLEMENT CONFIG
+│   ├── AIEngine/
+│   |   ├── AIEngine.js         # Strategy Delegator
+│   |   ├── pythonscripts/      # Python code go here
+│   |   └── strategies/         # <-- IMPLEMENT SERVER STRATEGIES HERE
+│   |       ├── audio/
+│   |       |   └── BaseAudioProvider.js       # Base class for audio generation providers
+│   |       ├── context/
+│   |       |   └── BaseContextProvider.js     # Base class for audio reverse geolocation providers
+│   |       ├── imagesource/
+│   |       |   └── BaseImageSourceProvider.js # Base class for 360 image retrieval for analysis
+│   |       └── vision/
+│   |           └── BaseVisionProvider.js      # Base class for vision analysis provider
+│   └── utilities
+│       ├── CacheManager.js
+│       ├── GPUResourceManager.js
+│       ├── LogManager.js
+│       ├── SocketController.js # WebSocket server
+│       └── Utils.js
 └── docs/                       # Auto-generated Documentation
 ```
 
