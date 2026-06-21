@@ -29,7 +29,7 @@
 import { BaseVRLoader } from './BaseVRLoader.js';
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION 
+ * EXAMPLE STRATEGY IMPLEMENTATION  
  * Manages texture loading and image processing specific to Marzipano environments for WebXR injection.
  * 
  * * ### Architecture

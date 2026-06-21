@@ -29,7 +29,7 @@
 import { SpatialUtils } from './Utilities/SpatialUtils.js';
 
 /**
- * Manages the A-Frame/Three.js audio lifecycle for the 3D viewer. 
+ * Manages the A-Frame/Three.js audio lifecycle for the 3D viewer.  
  * Explicitly manages 3D positional instances, local foreground washes, and neighbor background mixes.
  * 
  * * ### Architecture

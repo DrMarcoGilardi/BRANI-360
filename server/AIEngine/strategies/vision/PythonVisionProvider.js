@@ -33,7 +33,7 @@ import os from 'os';
 import { VisionProvider } from '../../VisionProvider.js';
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION 
+ * EXAMPLE STRATEGY IMPLEMENTATION  
  * Interacts with external Python scripts (e.g., custom models or OpenCV pipelines) to generate sonic intents from visual buffers.
  * 
  * * ### Architecture

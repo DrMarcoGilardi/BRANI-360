@@ -29,7 +29,7 @@
 import { ContextProvider } from './ContextProvider.js'
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION 
+ * EXAMPLE STRATEGY IMPLEMENTATION  
  * Resolves geographical coordinates into location context strings using the Geoapify Reverse Geocoding API.
  * 
  * * ### Architecture

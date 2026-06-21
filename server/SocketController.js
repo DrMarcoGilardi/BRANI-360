@@ -27,7 +27,7 @@
  */
 
 /**
- * Acts as the primary research interface for WebSocket clients. 
+ * Acts as the primary research interface for WebSocket clients.  
  * It coordinates real-time data flow between the frontend, the GPU queue, and the pluggable AI strategies. 
  * 
  * * ### Architecture

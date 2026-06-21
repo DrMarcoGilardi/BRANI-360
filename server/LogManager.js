@@ -34,7 +34,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * Handles session-based file logging. 
+ * Handles session-based file logging.  
  * It creates a new log file for the system boot and individual files for each socket connection.
  * 
  * * ### Architecture

@@ -42,7 +42,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION 
+ * EXAMPLE STRATEGY IMPLEMENTATION  
  * Handles generation and transcodes of audio via Gradio API connections to a Stable Audio Open instance.
  * 
  * * ### Architecture

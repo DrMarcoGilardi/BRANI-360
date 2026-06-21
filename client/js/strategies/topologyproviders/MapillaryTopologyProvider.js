@@ -30,8 +30,8 @@ import { BaseTopologyProvider } from "./BaseTopologyProvider.js";
 import { SpatialUtils } from "../../Utilities/SpatialUtils.js";
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION 
- * Resolves node geometry and constructs topological links using Mapillary sequences. 
+ * EXAMPLE STRATEGY IMPLEMENTATION  
+ * Resolves node geometry and constructs topological links using Mapillary sequences.  
  * Optimized with Memory-Capped LRU Caching and rate-limit throttling.
  * 
  * * ### Architecture

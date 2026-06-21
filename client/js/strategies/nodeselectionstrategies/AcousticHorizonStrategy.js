@@ -29,7 +29,7 @@
 import { NodeSelectionStrategy } from "./NodeSelectionStrategy.js";
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION 
+ * EXAMPLE STRATEGY IMPLEMENTATION  
  * Enforces strict Min 3 / Max 6 spacing across topological graphs.
  * 
  * * ### Architecture

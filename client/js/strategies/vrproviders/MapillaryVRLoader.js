@@ -29,7 +29,7 @@
 import { BaseVRLoader } from './BaseVRLoader.js';
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION 
+ * EXAMPLE STRATEGY IMPLEMENTATION  
  * Strategy implementation for loading panoramic images from Mapillary's Graph API into the VR buffer.
  * 
  * * ### Architecture

@@ -27,7 +27,7 @@
  */
 
 /**
- * Domain-agnostic task runner. 
+ * Domain-agnostic task runner.  
  * It treats tasks as black boxes and moves data without editing it.
  * 
  * * ### Architecture

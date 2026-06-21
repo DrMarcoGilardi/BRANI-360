@@ -29,7 +29,7 @@
 import { SpatialUtils } from '../Utilities/SpatialUtils.js';
 
 /**
- * Manages A-Frame sound entities. 
+ * Manages A-Frame sound entities.  
  * Places sounds in the 3D space.
  * 
  * * ### Architecture

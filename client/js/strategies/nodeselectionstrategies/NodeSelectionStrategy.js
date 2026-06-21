@@ -27,7 +27,8 @@
  */
 
 /**
- * Strategy Pattern Interface for Node Selection. Determines the logical importance of a node within the topological graph.
+ * Strategy Pattern Interface for Node Selection.  
+ * Determines the logical importance of a node within the topological graph.
  * 
  * * ### Architecture
  * ```mermaid

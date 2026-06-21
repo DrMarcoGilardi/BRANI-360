@@ -27,7 +27,7 @@
 */
 
 /**
- * Manages a wrist-mounted 3D UI panel for WebXR. 
+ * Manages a wrist-mounted 3D UI panel for WebXR.  
  * Registers the 'wrist-ui' A-Frame component, rendering an interactive raycastable menu for exiting VR and toggling floating maps.
  *
  * ### Architecture

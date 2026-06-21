@@ -30,7 +30,7 @@ import fs from 'fs/promises';
 import path from 'path';
 
 /**
- * Base Class Interface. 
+ * Base Class Interface.  
  * Interface for 360-degree image acquisition strategies.
  * 
  * * ### Architecture

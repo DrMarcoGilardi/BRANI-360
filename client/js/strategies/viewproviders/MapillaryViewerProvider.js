@@ -29,7 +29,7 @@
 import { BaseViewerProvider } from './BaseViewerProvider.js';
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION 
+ * EXAMPLE STRATEGY IMPLEMENTATION  
  * Strategy implementing the map and 360° viewer interface utilizing MapillaryJS and MapLibre GL.
  * 
  * * ### Architecture

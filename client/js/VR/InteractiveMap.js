@@ -27,7 +27,7 @@
  */
 
 /**
- * Bridges 3D WebXR raycast events to a 2D HTML5 Canvas. 
+ * Bridges 3D WebXR raycast events to a 2D HTML5 Canvas.  
  * Registers the 'interactive-map' A-Frame component to allow users to interact with UI elements like the topology radar from within VR.
  *
  * ### Architecture

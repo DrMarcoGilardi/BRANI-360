@@ -29,7 +29,7 @@
 import { ContextProvider } from './ContextProvider.js'
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION
+ * EXAMPLE STRATEGY IMPLEMENTATION  
  * Serves locational and contextual metadata logic for local Marzipano environments.
  * 
  * * ### Architecture

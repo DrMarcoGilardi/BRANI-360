@@ -27,8 +27,8 @@
  */
 
 /**
- * Handles all 2D overlays, HUD elements, and the Radar graph visualization. 
- * Completely Provider Agnostic. 
+ * Handles all 2D overlays, HUD elements, and the Radar graph visualization.  
+ * Completely Provider Agnostic.  
  * Styles are driven by topological context.
  * 
  * * ### Architecture

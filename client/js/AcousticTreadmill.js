@@ -27,7 +27,7 @@
  */
 
 /**
- * Manages the mathematical mixing of backgrounds and aggregate progress tracking. 
+ * Manages the mathematical mixing of backgrounds and aggregate progress tracking.  
  * Agnostically adjusts volume levels of adjacent nodes to simulate distance.
  * 
  * * ### Architecture

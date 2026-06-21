@@ -107,8 +107,7 @@ class SpatialAudioPlayer{
 
 </dd>
 <dt><a href="#AcousticHorizonStrategy">AcousticHorizonStrategy</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
-Enforces strict Min 3 / Max 6 spacing across topological graphs.</p>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Enforces strict Min 3 / Max 6 spacing across topological graphs.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -1014,7 +1013,7 @@ Initializes a periodic garbage collection loop to remove stale background sounds
 <a name="AcousticHorizonStrategy"></a>
 
 ## AcousticHorizonStrategy
-EXAMPLE STRATEGY IMPLEMENTATION Enforces strict Min 3 / Max 6 spacing across topological graphs.* ### Architecture```mermaidclassDiagramNodeSelectionStrategy <|-- AcousticHorizonStrategyclass AcousticHorizonStrategy{+reset()+isAnchor(nodeId, radar) Promise~boolean~}```
+EXAMPLE STRATEGY IMPLEMENTATION  Enforces strict Min 3 / Max 6 spacing across topological graphs.* ### Architecture```mermaidclassDiagramNodeSelectionStrategy <|-- AcousticHorizonStrategyclass AcousticHorizonStrategy{+reset()+isAnchor(nodeId, radar) Promise~boolean~}```
 
 **Kind**: global class  
 

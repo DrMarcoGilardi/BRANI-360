@@ -27,7 +27,7 @@
  */
 
 /**
- * Agnostic mathematical utilities for geographic and topological operations. 
+ * Agnostic mathematical utilities for geographic and topological operations.  
  * Explicitly decoupled from proprietary libraries.
  * 
  * * ### Architecture

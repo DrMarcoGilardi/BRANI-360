@@ -27,7 +27,7 @@
  */
 
 /**
- * Orchestrates movement using injected Strategy Providers (Viewer, Topology, UI, etc.) agnostically. 
+ * Orchestrates movement using injected Strategy Providers (Viewer, Topology, UI, etc.) agnostically.  
  * Coordinates the fetch state and topology mapping when navigating between panoramas.
  * 
  * * ### Architecture

@@ -33,7 +33,7 @@ import os from 'os';
 import { AudioProvider } from '../../AudioProvider.js';
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION 
+ * EXAMPLE STRATEGY IMPLEMENTATION  
  * Delegate strategy for producing audio by invoking an external Python generation script (e.g., custom PyTorch inferencing).
  * 
  * * ### Architecture

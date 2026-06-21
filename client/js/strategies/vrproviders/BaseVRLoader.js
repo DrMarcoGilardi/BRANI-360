@@ -27,7 +27,7 @@
  */
 
 /**
- * Strategy Pattern Interface for VR 360 Image Fetching. 
+ * Strategy Pattern Interface for VR 360 Image Fetching.  
  * Standardizes the progressive loading of high-resolution panoramas for WebXR.
  * 
  * * ### Architecture

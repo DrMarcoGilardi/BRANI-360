@@ -27,7 +27,7 @@
  */
 
 /**
- * Abstract Strategy Pattern for 2D/360 Viewer SDKs (Google Maps, Mapillary, etc.). 
+ * Abstract Strategy Pattern for 2D/360 Viewer SDKs (Google Maps, Mapillary, etc.).  
  * Standardizes event emissions and location tracking APIs.
  * 
  * * ### Architecture

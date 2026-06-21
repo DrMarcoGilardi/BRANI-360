@@ -35,7 +35,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * Handles logic, prompt construction, and provider selection. 
+ * Handles logic, prompt construction, and provider selection.  
  * Standardized: Encapsulates all strategy instantiation and dictionary.
  * 
  * * ### Architecture

@@ -27,8 +27,8 @@
  */
 
 /**
- * Base class interface. 
- * Interface for multimodal analysis providers. 
+ * Base class interface.  
+ * Interface for multimodal analysis providers.  
  * CONTRACT: Implementing classes must return an object containing an 'intents' array.
  *  
  * * ### Architecture

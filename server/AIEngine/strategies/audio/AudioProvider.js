@@ -27,7 +27,8 @@
  */
 
 /**
- * Base Class Interface. Interface for audio synthesis providers.
+ * Base Class Interface.  
+ * Interface for audio synthesis providers.
  * 
  * * ### Architecture
  * ```mermaid

@@ -1,6 +1,6 @@
 import { BaseTopologyProvider } from './BaseTopologyProvider.js';
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION 
+ * EXAMPLE STRATEGY IMPLEMENTATION  
  * Provides network topology parsing for Marzipano local tours, generating spatial routing and node relationships.
  * 
  * * ### Architecture

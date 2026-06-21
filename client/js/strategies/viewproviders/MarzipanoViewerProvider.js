@@ -29,7 +29,7 @@ import { BaseViewerProvider } from './BaseViewerProvider.js';
 import { Physics2D } from '../../Utilities/Physics2D.js';
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION 
+ * EXAMPLE STRATEGY IMPLEMENTATION  
  * Provider managing the Marzipano 360 viewer, its dynamic force-directed graph UI overlay, and event orchestration.
  * 
  * * ### Architecture

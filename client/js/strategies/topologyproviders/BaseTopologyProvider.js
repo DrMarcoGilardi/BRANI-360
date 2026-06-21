@@ -27,7 +27,7 @@
  */
 
 /**
- * Strategy Pattern Interface for Node Topology sources. 
+ * Strategy Pattern Interface for Node Topology sources.  
  * Agnostic interface for fetching graph connectivity from a mapping provider.
  * 
  * * ### Architecture

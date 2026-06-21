@@ -27,7 +27,7 @@
  */
 
 /**
- * Main coordinator for the VR experience. 
+ * Main coordinator for the VR experience.  
  * Orchestrates HD visual projection and Camera sync.
  * 
  * * ### Architecture
