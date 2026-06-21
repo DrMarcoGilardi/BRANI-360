@@ -33,8 +33,8 @@ import os from 'os';
 import { VisionProvider } from '../../VisionProvider.js';
 
 /**
- * @Class PythonVisionProvider
- * @description EXAMPLE STRATEGY IMPLEMENTATION Interacts with external Python scripts (e.g., custom models or OpenCV pipelines) to generate sonic intents from visual buffers.
+ * EXAMPLE STRATEGY IMPLEMENTATION 
+ * Interacts with external Python scripts (e.g., custom models or OpenCV pipelines) to generate sonic intents from visual buffers.
  * 
  * * ### Architecture
  * ```mermaid
@@ -45,6 +45,7 @@ import { VisionProvider } from '../../VisionProvider.js';
  * +analyse(buffer, contextString, options) Promise~Object~
  * }
  * ```
+ * 
  * @class
  */
 export class PythonVisionProvider extends VisionProvider {

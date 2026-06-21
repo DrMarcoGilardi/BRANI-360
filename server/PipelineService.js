@@ -27,8 +27,8 @@
  */
 
 /**
- * @class PipelineService
- * @description Framework orchestrator. A pure, domain-agnostic task runner. It treats tasks as black boxes and moves data without editing it.
+ * Domain-agnostic task runner. 
+ * It treats tasks as black boxes and moves data without editing it.
  * 
  * * ### Architecture
  * ```mermaid
@@ -46,7 +46,9 @@
  * +processGPUQueue() Promise~void~
  * +regenerateTask(socket, taskData, feedbackData) Promise~void~
  * }
- * `` 
+ * ```
+ * 
+ * @class
  */
 export class PipelineService {
     /**

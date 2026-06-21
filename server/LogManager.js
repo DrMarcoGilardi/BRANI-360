@@ -34,8 +34,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * @class LogManager 
- * @description Handles session-based file logging. It creates a new log file for the system boot and individual files for each socket connection.
+ * Handles session-based file logging. 
+ * It creates a new log file for the system boot and individual files for each socket connection.
  * 
  * * ### Architecture
  * ```mermaid
@@ -50,6 +50,8 @@ const __dirname = path.dirname(__filename);
  * +error(message, socketId)
  * }
  * ```
+ * 
+ * @class
  */
 export class LogManager {
     /**

@@ -2,8 +2,7 @@
 
 <dl>
 <dt><a href="#AIEngine">AIEngine</a></dt>
-<dd><p>AIEngine
-Handles logic, prompt construction, and provider selection.
+<dd><p>Handles logic, prompt construction, and provider selection. 
 Standardized: Encapsulates all strategy instantiation and dictionary.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
@@ -32,8 +31,7 @@ class AIEngine{
 
 </dd>
 <dt><a href="#AudioProvider">AudioProvider</a></dt>
-<dd><p>AudioProvider (Base Class Interface)
-Interface for audio synthesis providers.</p>
+<dd><p>Base Class Interface. Interface for audio synthesis providers.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -51,8 +49,7 @@ class AudioProvider{
 
 </dd>
 <dt><a href="#PythonAudioProvider">PythonAudioProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION
-PythonAudioProvider
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
 Delegate strategy for producing audio by invoking an external Python generation script (e.g., custom PyTorch inferencing).</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
@@ -72,8 +69,7 @@ class PythonAudioProvider{
 
 </dd>
 <dt><a href="#StableAudioGradioProvider">StableAudioGradioProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION
-StableAudioGradioProvider
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
 Handles generation and transcodes of audio via Gradio API connections to a Stable Audio Open instance.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
@@ -93,9 +89,8 @@ class StableAudioGradioProvider{
 
 </dd>
 <dt><a href="#ContextProvider">ContextProvider</a></dt>
-<dd><p>ContextProvider
-Interface for location resolution and client-side configuration delivery.
-Enforces provider-agnosticism on the backend.</p>
+<dd><p>Base Class Interface. 
+Interface for location resolution and client-side configuration delivery. Enforces provider-agnosticism on the backend.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -114,8 +109,7 @@ class ContextProvider{
 
 </dd>
 <dt><a href="#GeoapifyContextProvider">GeoapifyContextProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION
-GeoapifyContextProvider
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
 Resolves geographical coordinates into location context strings using the Geoapify Reverse Geocoding API.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
@@ -135,15 +129,49 @@ class GeoapifyContextProvider{
 
 </dd>
 <dt><a href="#MarzipanoContextProvider">MarzipanoContextProvider</a></dt>
-<dd></dd>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION
+Serves locational and contextual metadata logic for local Marzipano environments.</p>
+<ul>
+<li><h3 id="architecture">Architecture</h3>
+</li>
+</ul>
+
+
+```mermaid
+classDiagram
+ContextProvider <|-- MarzipanoContextProvider
+class MarzipanoContextProvider{
++path string
++logger Object
++resolve(lat, lng) Promise~string~
++getPublicConfig() Object
+}
+```
+
+
+</dd>
 <dt><a href="#ImageSourceProvider">ImageSourceProvider</a></dt>
-<dd><p>ImageSourceProvider (Base Class)
+<dd><p>Base Class Interface. 
 Interface for 360-degree image acquisition strategies.</p>
+<ul>
+<li><h3 id="architecture">Architecture</h3>
+</li>
+</ul>
+
+
+```mermaid
+classDiagram
+class ImageSourceProvider{
+<<Abstract>>
++getImage(id) Promise~Buffer~
+}
+```
+
+
 </dd>
 <dt><a href="#MapillarySource">MapillarySource</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION
-MapillarySource
-Provider strategy for fetching raw equirectangular image buffers from the Mapillary API.
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
+Provider strategy for fetching raw equirectangular image buffers from the Mapillary API. 
 Enforces strict filtering to reject non-360 panoramic images.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
@@ -162,10 +190,25 @@ class MapillarySource{
 
 </dd>
 <dt><a href="#MarzipanoImageSource">MarzipanoImageSource</a></dt>
-<dd></dd>
+<dd><p>Provides server-side processing to stitch Marzipano tiles back into equirectangular formats for AI engine ingestion.</p>
+<ul>
+<li><h3 id="architecture">Architecture</h3>
+</li>
+</ul>
+
+
+```mermaid
+classDiagram
+ImageSourceProvider <|-- MarzipanoImageSource
+class MarzipanoImageSource{
++getImage(id) Promise~Buffer~
+}
+```
+
+
+</dd>
 <dt><a href="#LMStudioVisionProvider">LMStudioVisionProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION
-LMStudioVisionProvider
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
 Strategy authority for prompt engineering and intent mapping using a local LM Studio Vision-Language Model.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
@@ -185,8 +228,7 @@ class LMStudioVisionProvider{
 
 </dd>
 <dt><a href="#PythonVisionProvider">PythonVisionProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION
-PythonVisionProvider
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
 Interacts with external Python scripts (e.g., custom models or OpenCV pipelines) to generate sonic intents from visual buffers.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
@@ -206,8 +248,8 @@ class PythonVisionProvider{
 
 </dd>
 <dt><a href="#VisionProvider">VisionProvider</a></dt>
-<dd><p>VisionProvider (Base Class Interface)
-Interface for multimodal analysis providers.
+<dd><p>Base class interface. 
+Interface for multimodal analysis providers. 
 CONTRACT: Implementing classes must return an object containing an &#39;intents&#39; array.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
@@ -227,8 +269,7 @@ class VisionProvider{
 
 </dd>
 <dt><a href="#CacheManager">CacheManager</a></dt>
-<dd><p>CacheManager
-Implements a hybrid storage strategy:</p>
+<dd><p>Implements a hybrid storage strategy:</p>
 <ul>
 <li>SQLite: Database of pointers and lightweight metadata.</li>
 <li>Filesystem: Standalone storage for JSON (VLM Ouputs) and Audio outputs.</li>
@@ -261,8 +302,7 @@ class CacheManager{
 
 </dd>
 <dt><a href="#GPUResourceManager">GPUResourceManager</a></dt>
-<dd><p>GPUResourceManager
-Handles queuing and concurrency for hardware-intensive tasks.</p>
+<dd><p>Handles queuing and concurrency for hardware-intensive tasks.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -288,7 +328,7 @@ class GPUResourceManager{
 
 </dd>
 <dt><a href="#LogManager">LogManager</a></dt>
-<dd><p>LogManager handles session-based file logging.
+<dd><p>Handles session-based file logging. 
 It creates a new log file for the system boot and individual files for each socket connection.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
@@ -312,14 +352,36 @@ class LogManager{
 
 </dd>
 <dt><a href="#PipelineService">PipelineService</a></dt>
-<dd><p>PipelineService (Framework Orchestrator)
-A pure, domain-agnostic task runner.
+<dd><p>Domain-agnostic task runner. 
 It treats tasks as black boxes and moves data without editing it.</p>
+<ul>
+<li><h3 id="architecture">Architecture</h3>
+</li>
+</ul>
+
+
+```mermaid
+classDiagram
+PipelineService --> AIEngine : process / getTasks
+PipelineService --> GPUResourceManager : queueBackgroundTask
+PipelineService --> CacheManager : Checks DB / Saves Audio
+PipelineService --> LogManager : Records sessions / errors
+class PipelineService{
++setEpoch(socketId, epoch)
++cleanupSocket(socketId)
++checkBatchCompletion()
++processMovement(socket, data) Promise~void~
++queueTask(socket, task, navEpoch, signal)
++processGPUQueue() Promise~void~
++regenerateTask(socket, taskData, feedbackData) Promise~void~
+}
+```
+
+
 </dd>
 <dt><a href="#SocketController">SocketController</a></dt>
-<dd><p>SocketController acts as the primary research interface for WebSocket clients.
-It coordinates real-time data flow between the frontend, the GPU queue, 
-and the pluggable AI strategies.</p>
+<dd><p>Acts as the primary research interface for WebSocket clients. 
+It coordinates real-time data flow between the frontend, the GPU queue, and the pluggable AI strategies. </p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -359,18 +421,89 @@ class Utils{
 </dd>
 </dl>
 
+## Members
+
+<dl>
+<dt><a href="#envItems">envItems</a> : <code>Array.&lt;Object&gt;</code></dt>
+<dd><p>Stores the ordered sequence of document blocks (sections and variables) fetched from the server.</p>
+</dd>
+<dt><a href="#currentMoveIndex">currentMoveIndex</a> : <code>number</code></dt>
+<dd><p>Tracks the array index of the variable currently selected to move sections via the move modal. A value of -1 indicates no variable is currently queued to move.</p>
+</dd>
+</dl>
+
 ## Functions
 
 <dl>
+<dt><a href="#loadEnv">loadEnv()</a> ⇒ <code>Promise.&lt;void&gt;</code></dt>
+<dd><p>Fetches the array of environment blocks from the backend API via localhost.</p>
+</dd>
+<dt><a href="#escapeHTML">escapeHTML(str)</a> ⇒ <code>string</code></dt>
+<dd><p>Sanitizes raw strings for safe injection into HTML attributes to prevent layout breakage and XSS.</p>
+</dd>
+<dt><a href="#getSectionTitle">getSectionTitle(content)</a> ⇒ <code>string</code></dt>
+<dd><p>Parses a raw section header block and extracts a clean, readable title for dropdown menus.</p>
+</dd>
+<dt><a href="#autoExpand">autoExpand(field)</a> ⇒ <code>void</code></dt>
+<dd><p>Dynamically resizes a textarea height to fit its content exactly, removing internal scrollbars.</p>
+</dd>
+<dt><a href="#syncStateFromDOM">syncStateFromDOM()</a> ⇒ <code>void</code></dt>
+<dd><p>Scrapes all current input values from the screen and updates the internal <code>envItems</code> array state. Prevents unsaved text edits from disappearing when the UI is forced to re-render.</p>
+</dd>
+<dt><a href="#render">render()</a> ⇒ <code>void</code></dt>
+<dd><p>Flushes the container and iterates over the <code>envItems</code> array to draw the UI. Respects the &#39;collapsed&#39; state of sections to hide/show their child variables.</p>
+</dd>
+<dt><a href="#toggleCollapse">toggleCollapse(index)</a> ⇒ <code>void</code></dt>
+<dd><p>Flips the visibility state for the variables nested under a specific section header.</p>
+</dd>
+<dt><a href="#moveBlock">moveBlock(index, dir)</a> ⇒ <code>void</code></dt>
+<dd><p>Mathematically moves a single variable OR an entire section block (header + children) up or down the array.</p>
+</dd>
+<dt><a href="#openAddModal">openAddModal()</a> ⇒ <code>void</code></dt>
+<dd><p>Syncs the DOM state, populates the target section dropdown, and opens the &#39;Add Variable&#39; modal.</p>
+</dd>
+<dt><a href="#closeAddModal">closeAddModal()</a> ⇒ <code>void</code></dt>
+<dd><p>Hides the &#39;Add Variable&#39; modal overlay without saving changes.</p>
+</dd>
+<dt><a href="#confirmAddVariable">confirmAddVariable()</a> ⇒ <code>void</code></dt>
+<dd><p>Validates modal input, formats comments safely, calculates insertion index, and appends the new variable.</p>
+</dd>
+<dt><a href="#openMoveModal">openMoveModal(index)</a> ⇒ <code>void</code></dt>
+<dd><p>Syncs the DOM state, prepares the target section dropdown, and opens the Move overlay.</p>
+</dd>
+<dt><a href="#closeMoveModal">closeMoveModal()</a> ⇒ <code>void</code></dt>
+<dd><p>Hides the move modal overlay and resets the active move index.</p>
+</dd>
+<dt><a href="#confirmMoveVariable">confirmMoveVariable()</a> ⇒ <code>void</code></dt>
+<dd><p>Calculates array offsets to extract the selected variable and inject it at the bottom of the target section.</p>
+</dd>
+<dt><a href="#addNewSection">addNewSection()</a> ⇒ <code>void</code></dt>
+<dd><p>Syncs the DOM state, then appends a new Section Header template to the bottom of the state flow.</p>
+</dd>
+<dt><a href="#removeItem">removeItem(index)</a> ⇒ <code>void</code></dt>
+<dd><p>Syncs the DOM state, destroys a specific block, and re-renders the UI. Warns if removing a parent section.</p>
+</dd>
+<dt><a href="#saveChanges">saveChanges()</a> ⇒ <code>Promise.&lt;void&gt;</code></dt>
+<dd><p>Syncs the DOM state, then executes a POST request to the backend to write the updated <code>.env</code> array to disk.</p>
+</dd>
 <dt><a href="#startServer">startServer()</a> ⇒ <code>Promise.&lt;void&gt;</code></dt>
 <dd><p>Standardized Agnostic Bootloader for the Express/WebSocket backend. Assembles the infrastructure (Cache, GPU, Logging) and bootstraps the AI Engine.</p>
+</dd>
+<dt><a href="#requireLocalhost">requireLocalhost(req, res, next)</a></dt>
+<dd><p>Express middleware to restrict route access strictly to the local machine. Blocks external IP addresses from accessing the admin dashboard.</p>
+</dd>
+<dt><a href="#getEnvData">getEnvData()</a> ⇒ <code>Array.&lt;Object&gt;</code></dt>
+<dd><p>Parses the .env file into an ordered array of blocks. Separates standalone section headers from variable-specific comments.</p>
+</dd>
+<dt><a href="#updateEnvFile">updateEnvFile(items)</a></dt>
+<dd><p>Reconstructs and writes the .env file sequentially from an array of blocks, maintaining exact order and updating the live <code>process.env</code>.</p>
 </dd>
 </dl>
 
 <a name="AIEngine"></a>
 
 ## AIEngine
-AIEngineHandles logic, prompt construction, and provider selection.Standardized: Encapsulates all strategy instantiation and dictionary.* ### Architecture```mermaidclassDiagramAIEngine --> ImageSourceProvider : UsesAIEngine --> ContextProvider : UsesAIEngine --> VisionProvider : UsesAIEngine --> AudioProvider : UsesAIEngine --> CacheManager : Usesclass AIEngine{+init() Promise~void~+getPublicConfig() Object+getTasksForMovement(nodeId, lat, lng, isAnchor, locationContext, requestedLayers) Promise~Array~+getTasksForHorizon(nodeId, lat, lng, locationContext, requestedLayers) Promise~Array~+createRegenTask(taskData, feedbackData, epoch) Promise~Object~+process(nodeId, lat, lng, options) Promise~Object~+generateAudio(task, signal, socket, progressCallback) Promise~Object~}```
+Handles logic, prompt construction, and provider selection. Standardized: Encapsulates all strategy instantiation and dictionary.* ### Architecture```mermaidclassDiagramAIEngine --> ImageSourceProvider : UsesAIEngine --> ContextProvider : UsesAIEngine --> VisionProvider : UsesAIEngine --> AudioProvider : UsesAIEngine --> CacheManager : Usesclass AIEngine{+init() Promise~void~+getPublicConfig() Object+getTasksForMovement(nodeId, lat, lng, isAnchor, locationContext, requestedLayers) Promise~Array~+getTasksForHorizon(nodeId, lat, lng, locationContext, requestedLayers) Promise~Array~+createRegenTask(taskData, feedbackData, epoch) Promise~Object~+process(nodeId, lat, lng, options) Promise~Object~+generateAudio(task, signal, socket, progressCallback) Promise~Object~}```
 
 **Kind**: global class  
 
@@ -485,7 +618,7 @@ Executes the audio diffusion strategy and performs post-processing transcodes.
 <a name="AudioProvider"></a>
 
 ## AudioProvider
-AudioProvider (Base Class Interface)Interface for audio synthesis providers.* ### Architecture```mermaidclassDiagramclass AudioProvider{<<Abstract>>+generate(task, context) Promise~Object~}```
+Base Class Interface. Interface for audio synthesis providers.* ### Architecture```mermaidclassDiagramclass AudioProvider{<<Abstract>>+generate(task, context) Promise~Object~}```
 
 **Kind**: global class  
 <a name="AudioProvider.generate"></a>
@@ -508,7 +641,7 @@ Executes the audio generation pipeline for a given semantic task.
 <a name="PythonAudioProvider"></a>
 
 ## PythonAudioProvider
-EXAMPLE STRATEGY IMPLEMENTATIONPythonAudioProviderDelegate strategy for producing audio by invoking an external Python generation script (e.g., custom PyTorch inferencing).* ### Architecture```mermaidclassDiagramAudioProvider <|-- PythonAudioProviderclass PythonAudioProvider{+init() Promise~void~+generate(task, contextHooks) Promise~Object~}```
+EXAMPLE STRATEGY IMPLEMENTATION Delegate strategy for producing audio by invoking an external Python generation script (e.g., custom PyTorch inferencing).* ### Architecture```mermaidclassDiagramAudioProvider <|-- PythonAudioProviderclass PythonAudioProvider{+init() Promise~void~+generate(task, contextHooks) Promise~Object~}```
 
 **Kind**: global class  
 
@@ -548,7 +681,7 @@ Offloads the audio task to a Python subprocess, handling the retrieval of the ge
 <a name="StableAudioGradioProvider"></a>
 
 ## StableAudioGradioProvider
-EXAMPLE STRATEGY IMPLEMENTATIONStableAudioGradioProviderHandles generation and transcodes of audio via Gradio API connections to a Stable Audio Open instance.* ### Architecture```mermaidclassDiagramAudioProvider <|-- StableAudioGradioProviderclass StableAudioGradioProvider{+init() Promise~void~+generate(task, executionContext) Promise~Object~}```
+EXAMPLE STRATEGY IMPLEMENTATION Handles generation and transcodes of audio via Gradio API connections to a Stable Audio Open instance.* ### Architecture```mermaidclassDiagramAudioProvider <|-- StableAudioGradioProviderclass StableAudioGradioProvider{+init() Promise~void~+generate(task, executionContext) Promise~Object~}```
 
 **Kind**: global class  
 
@@ -588,9 +721,10 @@ Executes the generation cycle via Gradio API, handling prompt formulation, audio
 <a name="ContextProvider"></a>
 
 ## ContextProvider
-ContextProviderInterface for location resolution and client-side configuration delivery.Enforces provider-agnosticism on the backend.* ### Architecture```mermaidclassDiagramclass ContextProvider{<<Abstract>>+resolve(lat, lng) Promise~string~+getPublicConfig() Object}```
+Base Class Interface. Interface for location resolution and client-side configuration delivery. Enforces provider-agnosticism on the backend.* ### Architecture```mermaidclassDiagramclass ContextProvider{<<Abstract>>+resolve(lat, lng) Promise~string~+getPublicConfig() Object}```
 
 **Kind**: global class  
+**Calss**:   
 
 * [ContextProvider](#ContextProvider)
     * [.resolve(lat, lng)](#ContextProvider.resolve) ⇒ <code>Promise.&lt;string&gt;</code>
@@ -627,7 +761,7 @@ Exposes public configuration/credentials safely to the frontend client.
 <a name="GeoapifyContextProvider"></a>
 
 ## GeoapifyContextProvider
-EXAMPLE STRATEGY IMPLEMENTATIONGeoapifyContextProviderResolves geographical coordinates into location context strings using the Geoapify Reverse Geocoding API.* ### Architecture```mermaidclassDiagramContextProvider <|-- GeoapifyContextProviderclass GeoapifyContextProvider{+resolve(lat, lng) Promise~string~+getPublicConfig() Object}```
+EXAMPLE STRATEGY IMPLEMENTATION Resolves geographical coordinates into location context strings using the Geoapify Reverse Geocoding API.* ### Architecture```mermaidclassDiagramContextProvider <|-- GeoapifyContextProviderclass GeoapifyContextProvider{+resolve(lat, lng) Promise~string~+getPublicConfig() Object}```
 
 **Kind**: global class  
 
@@ -665,70 +799,10 @@ Exposes required public keys to the frontend without leaking server secrets.
 
 **Kind**: static method of [<code>GeoapifyContextProvider</code>](#GeoapifyContextProvider)  
 **Returns**: <code>Object</code> - Public configuration object.  
-<a name="MarzipanoContextProvider"></a>
-
-## MarzipanoContextProvider
-**Kind**: global class  
-
-* [MarzipanoContextProvider](#MarzipanoContextProvider)
-    * [new MarzipanoContextProvider()](#new_MarzipanoContextProvider_new)
-    * [.MarzipanoContextProvider](#MarzipanoContextProvider.MarzipanoContextProvider)
-        * [new MarzipanoContextProvider(path, logger)](#new_MarzipanoContextProvider.MarzipanoContextProvider_new)
-    * [.resolve(lat, lng)](#MarzipanoContextProvider.resolve) ⇒ <code>Promise.&lt;string&gt;</code>
-    * [.getPublicConfig()](#MarzipanoContextProvider.getPublicConfig) ⇒ <code>Object</code>
-
-<a name="new_MarzipanoContextProvider_new"></a>
-
-### new MarzipanoContextProvider()
-Serves locational and contextual metadata logic for local Marzipano environments.* ### Architecture```mermaidclassDiagramContextProvider <|-- MarzipanoContextProviderclass MarzipanoContextProvider{+path string+logger Object+resolve(lat, lng) Promise~string~+getPublicConfig() Object}```
-
-<a name="MarzipanoContextProvider.MarzipanoContextProvider"></a>
-
-### MarzipanoContextProvider.MarzipanoContextProvider
-**Kind**: static class of [<code>MarzipanoContextProvider</code>](#MarzipanoContextProvider)  
-<a name="new_MarzipanoContextProvider.MarzipanoContextProvider_new"></a>
-
-#### new MarzipanoContextProvider(path, logger)
-Sets up the context provider with the server-side tour path and logger.
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| path | <code>Object</code> | Provider options including TOUR_PATH. |
-| logger | <code>Object</code> | Logging instance. |
-
-<a name="MarzipanoContextProvider.resolve"></a>
-
-### MarzipanoContextProvider.resolve(lat, lng) ⇒ <code>Promise.&lt;string&gt;</code>
-Resolves raw latitude and longitude into a human-readable location context.
-
-**Kind**: static method of [<code>MarzipanoContextProvider</code>](#MarzipanoContextProvider)  
-**Returns**: <code>Promise.&lt;string&gt;</code> - Contextual string. For Marzipano this defaults to "Unknown Location".  
-**Throws**:
-
-- <code>Error</code> If internal provider routing fails.
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| lat | <code>number</code> | Latitude. |
-| lng | <code>number</code> | Longitude. |
-
-<a name="MarzipanoContextProvider.getPublicConfig"></a>
-
-### MarzipanoContextProvider.getPublicConfig() ⇒ <code>Object</code>
-Exposes public configuration/credentials safely to the frontend client.
-
-**Kind**: static method of [<code>MarzipanoContextProvider</code>](#MarzipanoContextProvider)  
-**Returns**: <code>Object</code> - Public config dictionary (e.g., { key: "..." }).  
-**Throws**:
-
-- <code>Error</code> If config generation fails.
-
 <a name="ImageSourceProvider"></a>
 
 ## ImageSourceProvider
-ImageSourceProvider (Base Class)Interface for 360-degree image acquisition strategies.
+Base Class Interface. Interface for 360-degree image acquisition strategies.* ### Architecture```mermaidclassDiagramclass ImageSourceProvider{<<Abstract>>+getImage(id) Promise~Buffer~}```
 
 **Kind**: global class  
 <a name="ImageSourceProvider.getImage"></a>
@@ -750,7 +824,7 @@ Fetches an equirectangular image buffer for a specific node ID.
 <a name="MapillarySource"></a>
 
 ## MapillarySource
-EXAMPLE STRATEGY IMPLEMENTATIONMapillarySourceProvider strategy for fetching raw equirectangular image buffers from the Mapillary API.Enforces strict filtering to reject non-360 panoramic images.* ### Architecture```mermaidclassDiagramImageSourceProvider <|-- MapillarySourceclass MapillarySource{+getImage(id) Promise~Buffer~}```
+EXAMPLE STRATEGY IMPLEMENTATION Provider strategy for fetching raw equirectangular image buffers from the Mapillary API. Enforces strict filtering to reject non-360 panoramic images.* ### Architecture```mermaidclassDiagramImageSourceProvider <|-- MapillarySourceclass MapillarySource{+getImage(id) Promise~Buffer~}```
 
 **Kind**: global class  
 
@@ -784,57 +858,10 @@ Fetches the image buffer for a given Mapillary Node ID, utilizing the cache if a
 | --- | --- | --- |
 | id | <code>string</code> | Mapillary Image ID. |
 
-<a name="MarzipanoImageSource"></a>
-
-## MarzipanoImageSource
-**Kind**: global class  
-
-* [MarzipanoImageSource](#MarzipanoImageSource)
-    * [new MarzipanoImageSource()](#new_MarzipanoImageSource_new)
-    * [.MarzipanoImageSource](#MarzipanoImageSource.MarzipanoImageSource)
-        * [new MarzipanoImageSource(options, [logger])](#new_MarzipanoImageSource.MarzipanoImageSource_new)
-    * [.getImage(id)](#MarzipanoImageSource.getImage) ⇒ <code>Promise.&lt;Buffer&gt;</code>
-
-<a name="new_MarzipanoImageSource_new"></a>
-
-### new MarzipanoImageSource()
-Provides server-side processing to stitch Marzipano tiles back into equirectangular formats for AI engine ingestion.* ### Architecture```mermaidclassDiagramImageSourceProvider <|-- MarzipanoImageSourceclass MarzipanoImageSource{+tourPath string+logger Object+getImage(id) Promise~Buffer~}```
-
-<a name="MarzipanoImageSource.MarzipanoImageSource"></a>
-
-### MarzipanoImageSource.MarzipanoImageSource
-**Kind**: static class of [<code>MarzipanoImageSource</code>](#MarzipanoImageSource)  
-<a name="new_MarzipanoImageSource.MarzipanoImageSource_new"></a>
-
-#### new MarzipanoImageSource(options, [logger])
-Initializes the server-side image source provider.
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>Object</code> | Configuration options, including TOUR_PATH. |
-| [logger] | <code>Object</code> | Optional logger instance. |
-
-<a name="MarzipanoImageSource.getImage"></a>
-
-### MarzipanoImageSource.getImage(id) ⇒ <code>Promise.&lt;Buffer&gt;</code>
-Reads local tour data and dynamically stitches raw Marzipano tiles into a single output Buffer using sharp.
-
-**Kind**: static method of [<code>MarzipanoImageSource</code>](#MarzipanoImageSource)  
-**Returns**: <code>Promise.&lt;Buffer&gt;</code> - The stitched image data as a JPEG buffer.  
-**Throws**:
-
-- <code>Error</code> If the scene is not found or stitching operations fail.
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| id | <code>string</code> | The ID of the scene to stitch. |
-
 <a name="LMStudioVisionProvider"></a>
 
 ## LMStudioVisionProvider
-EXAMPLE STRATEGY IMPLEMENTATIONLMStudioVisionProviderStrategy authority for prompt engineering and intent mapping using a local LM Studio Vision-Language Model.* ### Architecture```mermaidclassDiagramVisionProvider <|-- LMStudioVisionProviderclass LMStudioVisionProvider{+init() Promise~void~+analyse(buffer, context, options) Promise~Object~}```
+EXAMPLE STRATEGY IMPLEMENTATION Strategy authority for prompt engineering and intent mapping using a local LM Studio Vision-Language Model.* ### Architecture```mermaidclassDiagramVisionProvider <|-- LMStudioVisionProviderclass LMStudioVisionProvider{+init() Promise~void~+analyse(buffer, context, options) Promise~Object~}```
 
 **Kind**: global class  
 
@@ -898,7 +925,7 @@ Processes the ambient layer for audio generation.
 <a name="PythonVisionProvider"></a>
 
 ## PythonVisionProvider
-EXAMPLE STRATEGY IMPLEMENTATIONPythonVisionProviderInteracts with external Python scripts (e.g., custom models or OpenCV pipelines) to generate sonic intents from visual buffers.* ### Architecture```mermaidclassDiagramVisionProvider <|-- PythonVisionProviderclass PythonVisionProvider{+init() Promise~void~+analyse(buffer, contextString, options) Promise~Object~}```
+EXAMPLE STRATEGY IMPLEMENTATION Interacts with external Python scripts (e.g., custom models or OpenCV pipelines) to generate sonic intents from visual buffers.* ### Architecture```mermaidclassDiagramVisionProvider <|-- PythonVisionProviderclass PythonVisionProvider{+init() Promise~void~+analyse(buffer, contextString, options) Promise~Object~}```
 
 **Kind**: global class  
 
@@ -939,7 +966,7 @@ Writes the image buffer to disk, spawns a Python child process for analysis, and
 <a name="VisionProvider"></a>
 
 ## VisionProvider
-VisionProvider (Base Class Interface)Interface for multimodal analysis providers.CONTRACT: Implementing classes must return an object containing an 'intents' array.* ### Architecture```mermaidclassDiagramclass VisionProvider{<<Abstract>>+analyse(buffer, context, options) Promise~Object~+validateResponse(data) Object}```
+Base class interface. Interface for multimodal analysis providers. CONTRACT: Implementing classes must return an object containing an 'intents' array. * ### Architecture```mermaidclassDiagramclass VisionProvider{<<Abstract>>+analyse(buffer, context, options) Promise~Object~+validateResponse(data) Object}```
 
 **Kind**: global class  
 
@@ -984,7 +1011,7 @@ Validation guard ensuring the provider adheres to the system pipeline schema.
 <a name="CacheManager"></a>
 
 ## CacheManager
-CacheManagerImplements a hybrid storage strategy:- SQLite: Database of pointers and lightweight metadata.- Filesystem: Standalone storage for JSON (VLM Ouputs) and Audio outputs.* ### Architecture```mermaidclassDiagramclass CacheManager{+dbPath string+init()+get(key, type) Promise~any~+set(key, value, type) Promise~boolean~+delete(key) Promise~boolean~+getNode(nodeId) Promise~Object~+saveNode(nodeId, data) Promise~boolean~+getImage(imageId) Promise~string~+saveImage(imageId, buffer) Promise~string~+getVLMData(nodeId) Promise~Object~+saveVLMData(nodeId, data) Promise~boolean~+getAudio(id) Promise~string~+saveAudio(id, buffer) Promise~boolean~}```
+Implements a hybrid storage strategy: - SQLite: Database of pointers and lightweight metadata. - Filesystem: Standalone storage for JSON (VLM Ouputs) and Audio outputs.* ### Architecture```mermaidclassDiagramclass CacheManager{+dbPath string+init()+get(key, type) Promise~any~+set(key, value, type) Promise~boolean~+delete(key) Promise~boolean~+getNode(nodeId) Promise~Object~+saveNode(nodeId, data) Promise~boolean~+getImage(imageId) Promise~string~+saveImage(imageId, buffer) Promise~string~+getVLMData(nodeId) Promise~Object~+saveVLMData(nodeId, data) Promise~boolean~+getAudio(id) Promise~string~+saveAudio(id, buffer) Promise~boolean~}```
 
 **Kind**: global class  
 
@@ -1209,7 +1236,7 @@ Deletes an audio file and its database reference.
 <a name="GPUResourceManager"></a>
 
 ## GPUResourceManager
-GPUResourceManagerHandles queuing and concurrency for hardware-intensive tasks.* ### Architecture```mermaidclassDiagramclass GPUResourceManager{+maxWorkers number+activeWorkers number+isBusy() boolean+isTaskActive(id) boolean+acquireLock() Promise~void~+releaseLock()+queueBackgroundTask(task)+getNextBackgroundTask() Object+clearTasksForSocket(socketId)+completeTask(id, success)}```
+Handles queuing and concurrency for hardware-intensive tasks.* ### Architecture```mermaidclassDiagramclass GPUResourceManager{+maxWorkers number+activeWorkers number+isBusy() boolean+isTaskActive(id) boolean+acquireLock() Promise~void~+releaseLock()+queueBackgroundTask(task)+getNextBackgroundTask() Object+clearTasksForSocket(socketId)+completeTask(id, success)}```
 
 **Kind**: global class  
 
@@ -1305,7 +1332,7 @@ Marks an active task as completed and tracks it in the recent completions set.
 <a name="LogManager"></a>
 
 ## LogManager
-LogManager handles session-based file logging.It creates a new log file for the system boot and individual files for each socket connection.* ### Architecture```mermaidclassDiagramclass LogManager{+init()+startSession(socketId) string+endSession(socketId)+write(stream, message)+log(message, socketId)+warn(message, socketId)+error(message, socketId)}```
+Handles session-based file logging. It creates a new log file for the system boot and individual files for each socket connection.* ### Architecture```mermaidclassDiagramclass LogManager{+init()+startSession(socketId) string+endSession(socketId)+write(stream, message)+log(message, socketId)+warn(message, socketId)+error(message, socketId)}```
 
 **Kind**: global class  
 
@@ -1398,7 +1425,7 @@ Error logging method for critical failures.
 <a name="PipelineService"></a>
 
 ## PipelineService
-PipelineService (Framework Orchestrator)A pure, domain-agnostic task runner.It treats tasks as black boxes and moves data without editing it.
+Domain-agnostic task runner. It treats tasks as black boxes and moves data without editing it.* ### Architecture```mermaidclassDiagramPipelineService --> AIEngine : process / getTasksPipelineService --> GPUResourceManager : queueBackgroundTaskPipelineService --> CacheManager : Checks DB / Saves AudioPipelineService --> LogManager : Records sessions / errorsclass PipelineService{+setEpoch(socketId, epoch)+cleanupSocket(socketId)+checkBatchCompletion()+processMovement(socket, data) Promise~void~+queueTask(socket, task, navEpoch, signal)+processGPUQueue() Promise~void~+regenerateTask(socket, taskData, feedbackData) Promise~void~}```
 
 **Kind**: global class  
 
@@ -1500,7 +1527,7 @@ Stateless entry for audio regeneration (human-in-the-loop). Creates a new forced
 <a name="SocketController"></a>
 
 ## SocketController
-SocketController acts as the primary research interface for WebSocket clients.It coordinates real-time data flow between the frontend, the GPU queue, and the pluggable AI strategies.* ### Architecture```mermaidclassDiagramSocketController --> PipelineService : Routes EventsSocketController --> GPUResourceManager : Triggers CancelsSocketController --> LogManager : Tracks Sessionsclass SocketController{+io Server+init()}```
+Acts as the primary research interface for WebSocket clients. It coordinates real-time data flow between the frontend, the GPU queue, and the pluggable AI strategies. * ### Architecture```mermaidclassDiagramSocketController --> PipelineService : Routes EventsSocketController --> GPUResourceManager : Triggers CancelsSocketController --> LogManager : Tracks Sessionsclass SocketController{+io Server+init()}```
 
 **Kind**: global class  
 
@@ -1528,7 +1555,7 @@ Binds event listeners to incoming connections (spatial_sync, cancel_tasks, regen
 <a name="Utils"></a>
 
 ## Utils
-Server-side utility class for file handling and audio manipulation.* ### Architecture```mermaidclassDiagramclass Utils{+loadDictionary(filePath, logger)$ Promise~Object~+transcode(wavBuffer, targetFormat, taskType, logger)$ Promise~Buffer~}```
+Server-side utility class for file handling and audio manipulation.* ### Architecture```mermaidclassDiagramclass Utils{+loadDictionary(filePath, logger)$ Promise~Object~+transcode(wavBuffer, targetFormat, taskType, logger)$ Promise~Buffer~}```
 
 **Kind**: global class  
 
@@ -1564,9 +1591,192 @@ Transcodes a raw WAV buffer into the target framework format (webm, mp3, ogg) us
 | taskType | <code>string</code> |  | Semantic task type (used to determine channel count). |
 | [logger] | <code>Object</code> | <code>console</code> | System logger. |
 
+<a name="envItems"></a>
+
+## envItems : <code>Array.&lt;Object&gt;</code>
+Stores the ordered sequence of document blocks (sections and variables) fetched from the server.
+
+**Kind**: global variable  
+<a name="currentMoveIndex"></a>
+
+## currentMoveIndex : <code>number</code>
+Tracks the array index of the variable currently selected to move sections via the move modal. A value of -1 indicates no variable is currently queued to move.
+
+**Kind**: global variable  
+<a name="loadEnv"></a>
+
+## loadEnv() ⇒ <code>Promise.&lt;void&gt;</code>
+Fetches the array of environment blocks from the backend API via localhost.
+
+**Kind**: global function  
+<a name="escapeHTML"></a>
+
+## escapeHTML(str) ⇒ <code>string</code>
+Sanitizes raw strings for safe injection into HTML attributes to prevent layout breakage and XSS.
+
+**Kind**: global function  
+**Returns**: <code>string</code> - The escaped HTML string.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| str | <code>string</code> | The raw string to sanitize. |
+
+<a name="getSectionTitle"></a>
+
+## getSectionTitle(content) ⇒ <code>string</code>
+Parses a raw section header block and extracts a clean, readable title for dropdown menus.
+
+**Kind**: global function  
+**Returns**: <code>string</code> - A cleaned string representing the title.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| content | <code>string</code> | The raw, multi-line string of the section header. |
+
+<a name="autoExpand"></a>
+
+## autoExpand(field) ⇒ <code>void</code>
+Dynamically resizes a textarea height to fit its content exactly, removing internal scrollbars.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| field | <code>HTMLElement</code> | The textarea element triggering the input event. |
+
+<a name="syncStateFromDOM"></a>
+
+## syncStateFromDOM() ⇒ <code>void</code>
+Scrapes all current input values from the screen and updates the internal `envItems` array state. Prevents unsaved text edits from disappearing when the UI is forced to re-render.
+
+**Kind**: global function  
+<a name="render"></a>
+
+## render() ⇒ <code>void</code>
+Flushes the container and iterates over the `envItems` array to draw the UI. Respects the 'collapsed' state of sections to hide/show their child variables.
+
+**Kind**: global function  
+<a name="toggleCollapse"></a>
+
+## toggleCollapse(index) ⇒ <code>void</code>
+Flips the visibility state for the variables nested under a specific section header.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| index | <code>number</code> | The array index of the section header to toggle. |
+
+<a name="moveBlock"></a>
+
+## moveBlock(index, dir) ⇒ <code>void</code>
+Mathematically moves a single variable OR an entire section block (header + children) up or down the array.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| index | <code>number</code> | The starting array index of the item. |
+| dir | <code>number</code> | The direction of movement (-1 for Up, 1 for Down). |
+
+<a name="openAddModal"></a>
+
+## openAddModal() ⇒ <code>void</code>
+Syncs the DOM state, populates the target section dropdown, and opens the 'Add Variable' modal.
+
+**Kind**: global function  
+<a name="closeAddModal"></a>
+
+## closeAddModal() ⇒ <code>void</code>
+Hides the 'Add Variable' modal overlay without saving changes.
+
+**Kind**: global function  
+<a name="confirmAddVariable"></a>
+
+## confirmAddVariable() ⇒ <code>void</code>
+Validates modal input, formats comments safely, calculates insertion index, and appends the new variable.
+
+**Kind**: global function  
+<a name="openMoveModal"></a>
+
+## openMoveModal(index) ⇒ <code>void</code>
+Syncs the DOM state, prepares the target section dropdown, and opens the Move overlay.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| index | <code>number</code> | The array index of the variable being moved. |
+
+<a name="closeMoveModal"></a>
+
+## closeMoveModal() ⇒ <code>void</code>
+Hides the move modal overlay and resets the active move index.
+
+**Kind**: global function  
+<a name="confirmMoveVariable"></a>
+
+## confirmMoveVariable() ⇒ <code>void</code>
+Calculates array offsets to extract the selected variable and inject it at the bottom of the target section.
+
+**Kind**: global function  
+<a name="addNewSection"></a>
+
+## addNewSection() ⇒ <code>void</code>
+Syncs the DOM state, then appends a new Section Header template to the bottom of the state flow.
+
+**Kind**: global function  
+<a name="removeItem"></a>
+
+## removeItem(index) ⇒ <code>void</code>
+Syncs the DOM state, destroys a specific block, and re-renders the UI. Warns if removing a parent section.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| index | <code>number</code> | The array index of the item to remove. |
+
+<a name="saveChanges"></a>
+
+## saveChanges() ⇒ <code>Promise.&lt;void&gt;</code>
+Syncs the DOM state, then executes a POST request to the backend to write the updated `.env` array to disk.
+
+**Kind**: global function  
 <a name="startServer"></a>
 
 ## startServer() ⇒ <code>Promise.&lt;void&gt;</code>
 Standardized Agnostic Bootloader for the Express/WebSocket backend. Assembles the infrastructure (Cache, GPU, Logging) and bootstraps the AI Engine.
 
 **Kind**: global function  
+<a name="requireLocalhost"></a>
+
+## requireLocalhost(req, res, next)
+Express middleware to restrict route access strictly to the local machine. Blocks external IP addresses from accessing the admin dashboard.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| req | <code>express.Request</code> | The Express request object. |
+| res | <code>express.Response</code> | The Express response object. |
+| next | <code>express.NextFunction</code> | The next middleware function. |
+
+<a name="getEnvData"></a>
+
+## getEnvData() ⇒ <code>Array.&lt;Object&gt;</code>
+Parses the .env file into an ordered array of blocks. Separates standalone section headers from variable-specific comments.
+
+**Kind**: global function  
+**Returns**: <code>Array.&lt;Object&gt;</code> - An array of objects representing the document flow. [{ type: 'section', content: '...' }, { type: 'variable', key: '...', value: '...', comment: '...' }]  
+<a name="updateEnvFile"></a>
+
+## updateEnvFile(items)
+Reconstructs and writes the .env file sequentially from an array of blocks, maintaining exact order and updating the live `process.env`.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| items | <code>Array.&lt;Object&gt;</code> | The ordered array of section and variable blocks from the UI. |
+

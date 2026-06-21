@@ -27,8 +27,8 @@
  */
 
 /**
- * @clas BaseViewerProvider
- * @description Abstract Strategy Pattern for 2D/360 Viewer SDKs (Google Maps, Mapillary, etc.). Standardizes event emissions and location tracking APIs.
+ * Abstract Strategy Pattern for 2D/360 Viewer SDKs (Google Maps, Mapillary, etc.). 
+ * Standardizes event emissions and location tracking APIs.
  * 
  * * ### Architecture
  * ```mermaid
@@ -46,9 +46,12 @@
  * +syncCamera(pov)
  * }
  * ```
+ * 
+ * @class
  */
 export class BaseViewerProvider {
     /**
+     * @constructor
      * @param {string} containerId - The DOM ID for mounting the viewer.
      */
     constructor(containerId) {

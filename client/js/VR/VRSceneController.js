@@ -32,8 +32,7 @@ import { WristUI } from './WristUI.js';
 import { InteractiveMap } from './InteractiveMap.js';
 
 /**
- * @class VRSceneController 
- * @description Manages the A-Frame Lifecycle and WebXR spatial audio syncing.
+ * Manages the A-Frame Lifecycle and WebXR spatial audio syncing.
  * Acts as the bridge between agnostic 2D logic and 3D WebXR representation.
  * 
  * * ### Architecture
@@ -55,6 +54,8 @@ import { InteractiveMap } from './InteractiveMap.js';
  * +enterVR(nodeId, links, nativeViewer)
  * }
  * ```
+ * 
+ * @class
  */
 export class VRSceneController {
     /**

@@ -27,8 +27,8 @@
  */
 
 /**
- * @class NavigationManager
- * @description Orchestrates movement using injected Strategy Providers (Viewer, Topology, UI, etc.) agnostically. Coordinates the fetch state and topology mapping when navigating between panoramas.
+ * Orchestrates movement using injected Strategy Providers (Viewer, Topology, UI, etc.) agnostically. 
+ * Coordinates the fetch state and topology mapping when navigating between panoramas.
  * 
  * * ### Architecture
  * ```mermaid
@@ -46,6 +46,7 @@
  * +moveToNode(nodeId, location, isAnchor, epoch, originNodeId) Promise~void~
  * }
  * ```
+ * 
  * @class
  */
 export class NavigationManager {

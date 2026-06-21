@@ -33,19 +33,18 @@ import sharp from 'sharp';
 import { ImageSourceProvider } from './ImageSourceProvider.js';
 
 /**
- * @class MarzipanoImageSource
- * @description Provides server-side processing to stitch Marzipano tiles back into equirectangular formats for AI engine ingestion.
+ * Provides server-side processing to stitch Marzipano tiles back into equirectangular formats for AI engine ingestion.
  * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
  * ImageSourceProvider <|-- MarzipanoImageSource
  * class MarzipanoImageSource{
- * +tourPath string
- * +logger Object
  * +getImage(id) Promise~Buffer~
  * }
  * ```
+ * 
+ * @class
  */
 export class MarzipanoImageSource extends ImageSourceProvider {
     /**

@@ -27,8 +27,8 @@
  */
 
 /**
- * @class SpatialUtils
- * @description Agnostic mathematical utilities for geographic and topological operations. Explicitly decoupled from proprietary libraries.
+ * Agnostic mathematical utilities for geographic and topological operations. 
+ * Explicitly decoupled from proprietary libraries.
  * 
  * * ### Architecture
  * ```mermaid
@@ -41,6 +41,8 @@
  * +sphericalToCartesian(h, p, dist) Object
  * }
  * ```
+ * 
+ * @class
  */
 export const SpatialUtils = {
     /**

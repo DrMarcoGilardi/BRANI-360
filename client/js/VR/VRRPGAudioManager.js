@@ -29,9 +29,9 @@
 import { SpatialUtils } from '../Utilities/SpatialUtils.js';
 
 /**
- * @class VRRPGAudioManager
- * @description Manages A-Frame sound entities. Places "organic" and "mechanical" sounds physically in the 3D space.
- *
+ * Manages A-Frame sound entities. 
+ * Places sounds in the 3D space.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -43,11 +43,12 @@ import { SpatialUtils } from '../Utilities/SpatialUtils.js';
  * +clearSpatialSources() void
  * }
  * ``` 
+ * 
+ * @class
  */
 export class VRRPGAudioManager {
     /**
      * @constructor
-     * @description Initializes the VRRPGAudioManager.
      */
     constructor() {
         this.treadmill = document.getElementById('audio-treadmill');

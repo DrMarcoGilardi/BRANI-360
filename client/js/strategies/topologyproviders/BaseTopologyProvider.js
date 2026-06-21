@@ -27,8 +27,8 @@
  */
 
 /**
- * @class BaseTopologyProvider
- * @description Strategy Pattern Interface for Node Topology sources. Agnostic interface for fetching graph connectivity from a mapping provider.
+ * Strategy Pattern Interface for Node Topology sources. 
+ * Agnostic interface for fetching graph connectivity from a mapping provider.
  * 
  * * ### Architecture
  * ```mermaid
@@ -38,6 +38,8 @@
  * +getNode(nodeId) Promise~Object~
  * }
  * ```
+ * 
+ * @class
  */
 
 export class BaseTopologyProvider {

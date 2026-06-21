@@ -106,22 +106,25 @@ function render() {
     const container = document.getElementById('env-container');
     let htmlBuffer = '';
     let isCollapsed = false;
-
+    const deleteButton = `<svg xmlns="http://w3.org" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="bin-icon">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                    </svg>`;
     envItems.forEach((item, index) => {
         if (item.type === 'section') {
             isCollapsed = !!item.collapsed;
-            const toggleIcon = isCollapsed ? '➕ Expand' : '➖ Collapse';
+            const toggleIcon = isCollapsed ? '➕' : '➖';
 
             htmlBuffer += `
                 <div class="env-item section-item" id="item-${index}">
                     <div class="row" style="margin-top: 0;">
-                        <span class="badge">DOCUMENT SECTION HEADER</span>
+                        <textarea class="section-input auto-expand" id="content-${index}" oninput="autoExpand(this)">${escapeHTML(item.content)}</textarea>
                         <button class="btn-secondary btn-icon" onclick="moveBlock(${index}, -1)" title="Move Section Up">▲</button>
                         <button class="btn-secondary btn-icon" onclick="moveBlock(${index}, 1)" title="Move Section Down">▼</button>
                         <button class="btn-secondary" onclick="toggleCollapse(${index})" title="Toggle Visibility">${toggleIcon}</button>
-                        <button class="btn-danger btn-icon" onclick="removeItem(${index})" title="Delete Section">✖</button>
+                        <button class="btn-danger btn-icon" onclick="removeItem(${index})" title="Delete Section">${deleteButton}</button>
                     </div>
-                    <textarea class="section-input auto-expand" id="content-${index}" oninput="autoExpand(this)">${escapeHTML(item.content)}</textarea>
                 </div>`;
         } else if (item.type === 'variable') {
             const displayStyle = isCollapsed ? 'display: none;' : '';
@@ -136,7 +139,7 @@ function render() {
                         <button class="btn-secondary btn-icon" onclick="moveBlock(${index}, 1)" title="Move Down">▼</button>
                         <button class="btn-secondary btn-icon" onclick="openMoveModal(${index})" title="Move to Section">↹</button>
                         
-                        <button class="btn-danger btn-icon" onclick="removeItem(${index})" title="Delete Variable">✖</button>
+                        <button class="btn-danger btn-icon" onclick="removeItem(${index})" title="Delete Variable">${deleteButton}</button>
                     </div>
                 </div>`;
         }

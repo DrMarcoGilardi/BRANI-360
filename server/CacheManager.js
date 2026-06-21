@@ -35,8 +35,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * @class CacheManager
- * @description Implements a hybrid storage strategy: - SQLite: Database of pointers and lightweight metadata. - Filesystem: Standalone storage for JSON (VLM Ouputs) and Audio outputs.
+ * Implements a hybrid storage strategy:
+ *  - SQLite: Database of pointers and lightweight metadata.
+ *  - Filesystem: Standalone storage for JSON (VLM Ouputs) and Audio outputs.
  * 
  * * ### Architecture
  * ```mermaid
@@ -57,6 +58,8 @@ const __dirname = path.dirname(__filename);
  * +saveAudio(id, buffer) Promise~boolean~
  * }
  * ```
+ * 
+ * @class
  */
 export class CacheManager {
     /**

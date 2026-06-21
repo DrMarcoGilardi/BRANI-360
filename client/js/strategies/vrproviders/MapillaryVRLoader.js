@@ -27,10 +27,10 @@
  */
 
 import { BaseVRLoader } from './BaseVRLoader.js';
+
 /**
- * 
- * @class MapillaryVRLoader
- * @description EXAMPLE STRATEGY IMPLEMENTATION Strategy implementation for loading panoramic images from Mapillary's Graph API into the VR buffer.
+ * EXAMPLE STRATEGY IMPLEMENTATION 
+ * Strategy implementation for loading panoramic images from Mapillary's Graph API into the VR buffer.
  * 
  * * ### Architecture
  * ```mermaid

@@ -29,8 +29,8 @@
 import { SpatialUtils } from './Utilities/SpatialUtils.js';
 
 /**
- * @class SpatialAudioPlayer
- * @description Manages the A-Frame/Three.js audio lifecycle for the 3D viewer. Explicitly manages 3D positional instances, local foreground washes, and neighbor background mixes.
+ * Manages the A-Frame/Three.js audio lifecycle for the 3D viewer. 
+ * Explicitly manages 3D positional instances, local foreground washes, and neighbor background mixes.
  * 
  * * ### Architecture
  * ```mermaid
@@ -48,6 +48,8 @@ import { SpatialUtils } from './Utilities/SpatialUtils.js';
  * +startGarbageCollector(treadmill)
  * }
  * ```
+ * 
+ * @class
  */
 export class SpatialAudioPlayer {
     /**

@@ -27,9 +27,8 @@
  */
 
 /**
- * @class TopologyRadar
- * @description Handles map-agnostic topological mapping and BFS spidering of ANY node-based graph.
- *
+ * Handles map-agnostic topological mapping and BFS spidering of ANY node-based graph.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -43,6 +42,8 @@
  * +buildVisualGraph(startNodeId, activeAnchorIds) Promise~Object~
  * }
  * ```
+ * 
+ * @class
  */
 
 export class TopologyRadar {

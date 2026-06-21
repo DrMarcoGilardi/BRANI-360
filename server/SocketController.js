@@ -27,8 +27,8 @@
  */
 
 /**
- * @class SocketController 
- * @description Acts as the primary research interface for WebSocket clients. It coordinates real-time data flow between the frontend, the GPU queue, and the pluggable AI strategies.
+ * Acts as the primary research interface for WebSocket clients. 
+ * It coordinates real-time data flow between the frontend, the GPU queue, and the pluggable AI strategies. 
  * 
  * * ### Architecture
  * ```mermaid
@@ -41,9 +41,12 @@
  * +init()
  * }
  * ```
+ * 
+ * @class
  */
 export class SocketController {
     /**
+     * @constructor
      * @param {Server} io - Socket.io Server instance.
      * @param {PipelineService} pipelineService - The active generation pipeline.
      * @param {GPUResourceManager} gpuManager - The queue manager.

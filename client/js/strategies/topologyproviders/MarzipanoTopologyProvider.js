@@ -1,8 +1,7 @@
 import { BaseTopologyProvider } from './BaseTopologyProvider.js';
 /**
- * 
- * @class MarzipanoTopologyProvider
- * @description  EXAMPLE STRATEGY IMPLEMENTATION Provides network topology parsing for Marzipano local tours, generating spatial routing and node relationships.
+ * EXAMPLE STRATEGY IMPLEMENTATION 
+ * Provides network topology parsing for Marzipano local tours, generating spatial routing and node relationships.
  * 
  * * ### Architecture
  * ```mermaid
@@ -13,10 +12,12 @@ import { BaseTopologyProvider } from './BaseTopologyProvider.js';
  * +getNode(nodeId) Promise~Object~
  * }
  * ```
+ * 
+ * @class
  */
 export class MarzipanoTopologyProvider extends BaseTopologyProvider {
     /**
-     * @constructor
+     * @constructor 
      * @memberof MarzipanoTopologyProvider
      * @description Initializes the Topology provider to read the shared APP_DATA.
      * @param {Object} key - Configuration or initialization key.

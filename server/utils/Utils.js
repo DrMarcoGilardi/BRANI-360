@@ -35,8 +35,7 @@ import { tmpdir } from 'os';
 const execAsync = promisify(exec);
 
 /**
- * @class Utils
- * @description Server-side utility class for file handling and audio manipulation.
+ * Server-side utility class for file handling and audio manipulation.
  * 
  * * ### Architecture
  * ```mermaid
@@ -46,6 +45,8 @@ const execAsync = promisify(exec);
  * +transcode(wavBuffer, targetFormat, taskType, logger)$ Promise~Buffer~
  * }
  * ```
+ * 
+ * @class 
  */
 export class Utils {
     /**

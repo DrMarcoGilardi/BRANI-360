@@ -96,6 +96,8 @@ async function startServer() {
     const pipelineService = new PipelineService(aiEngine, gpuManager, cacheManager, logger);
     new SocketController(io, pipelineService, gpuManager, logger);
 
+    logger.log('[Server] For the .env admin dashboard open http://localhost:3000/admin');
+
     // --- ADMIN ROUTES (Secured via Localhost) ---
     /**
      * @api {get} /admin

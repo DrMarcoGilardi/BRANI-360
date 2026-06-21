@@ -28,8 +28,9 @@
 import { BaseSemanticProvider } from "./BaseSemanticProvider.js";
 
 /**
- * @class DefaultSemanticProvider
- * @description EXAMPLE STRATEGY IMPLEMENTATION Default Semantic Strategy. Implements the standard base layers: ambient, spatial, and horizon.
+ * EXAMPLE STRATEGY IMPLEMENTATION 
+ * Default Semantic Strategy. 
+ * Implements the standard base layers: ambient, spatial, and horizon.
  * 
  * * ### Architecture
  * ```mermaid
@@ -44,11 +45,12 @@ import { BaseSemanticProvider } from "./BaseSemanticProvider.js";
  * +requiresBackgroundProcessing() boolean
  * }
  * ```
+ * 
  * @class
  */
 export class DefaultSemanticProvider extends BaseSemanticProvider {
     /**
-     * @constructor Initializes the provider with an array of active semantic layers.
+     * @constructor 
      * @param {Array<string>} [initialLayers=['ambient', 'spatial', 'horizon']] - The default layers to evaluate during navigation.
      */
     constructor(initialLayers = ['ambient', 'spatial', 'horizon']) {

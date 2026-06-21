@@ -33,8 +33,8 @@ import os from 'os';
 import { AudioProvider } from '../../AudioProvider.js';
 
 /**
- * @class PythonAudioProvider
- * @description EXAMPLE STRATEGY IMPLEMENTATION Delegate strategy for producing audio by invoking an external Python generation script (e.g., custom PyTorch inferencing).
+ * EXAMPLE STRATEGY IMPLEMENTATION 
+ * Delegate strategy for producing audio by invoking an external Python generation script (e.g., custom PyTorch inferencing).
  * 
  * * ### Architecture
  * ```mermaid
@@ -45,7 +45,7 @@ import { AudioProvider } from '../../AudioProvider.js';
  * +generate(task, contextHooks) Promise~Object~
  * }
  * ```
- * @class
+ * @class 
  */
 export class PythonAudioProvider extends AudioProvider {
     /**

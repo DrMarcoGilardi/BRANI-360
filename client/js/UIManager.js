@@ -27,8 +27,9 @@
  */
 
 /**
- * @class UIManager
- * @description Handles all 2D overlays, HUD elements, and the Radar graph visualization. Completely Map/Provider Agnostic. Styles are driven by topological context.
+ * Handles all 2D overlays, HUD elements, and the Radar graph visualization. 
+ * Completely Provider Agnostic. 
+ * Styles are driven by topological context.
  * 
  * * ### Architecture
  * ```mermaid
@@ -56,10 +57,12 @@
  * +showXrButton()
  * }
  * ```
+ * 
+ * @class
  */
 export class UIManager {
     /** 
-     * @constructor 
+     * @constructor
      */
     constructor() {
         this.statusEl = document.getElementById('status');

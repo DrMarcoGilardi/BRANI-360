@@ -35,8 +35,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * @class AIEngine
- * @description Handles logic, prompt construction, and provider selection. Standardized: Encapsulates all strategy instantiation and dictionary.
+ * Handles logic, prompt construction, and provider selection. 
+ * Standardized: Encapsulates all strategy instantiation and dictionary.
  * 
  * * ### Architecture
  * ```mermaid
@@ -56,6 +56,8 @@ const __dirname = path.dirname(__filename);
  * +generateAudio(task, signal, socket, progressCallback) Promise~Object~
  * }
  * ```
+ * 
+ * @class
  */
 export class AIEngine {
     /**

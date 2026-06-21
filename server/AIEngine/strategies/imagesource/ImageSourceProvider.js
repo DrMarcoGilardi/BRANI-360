@@ -30,8 +30,8 @@ import fs from 'fs/promises';
 import path from 'path';
 
 /**
- * @class ImageSourceProvider
- * @description Base Class Interface. Interface for 360-degree image acquisition strategies.
+ * Base Class Interface. 
+ * Interface for 360-degree image acquisition strategies.
  * 
  * * ### Architecture
  * ```mermaid
@@ -41,6 +41,8 @@ import path from 'path';
  * +getImage(id) Promise~Buffer~
  * }
  * ```
+ * 
+ * @class 
  */
 export class ImageSourceProvider {
     /**

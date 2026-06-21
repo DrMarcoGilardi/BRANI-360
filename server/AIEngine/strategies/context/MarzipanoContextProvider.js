@@ -29,8 +29,8 @@
 import { ContextProvider } from './ContextProvider.js'
 
 /**
- * @class MarzipanoContextProvider
- * @description Serves locational and contextual metadata logic for local Marzipano environments.
+ * EXAMPLE STRATEGY IMPLEMENTATION
+ * Serves locational and contextual metadata logic for local Marzipano environments.
  * 
  * * ### Architecture
  * ```mermaid
@@ -43,6 +43,8 @@ import { ContextProvider } from './ContextProvider.js'
  * +getPublicConfig() Object
  * }
  * ```
+ * 
+ * @class
  */
 export class MarzipanoContextProvider extends ContextProvider {
     /**

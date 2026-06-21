@@ -31,8 +31,9 @@ import axios from 'axios';
 import fs from 'fs';
 
 /**
- * @class MapillarySource
- * @description EXAMPLE STRATEGY IMPLEMENTATION Provider strategy for fetching raw equirectangular image buffers from the Mapillary API. Enforces strict filtering to reject non-360 panoramic images.
+ * EXAMPLE STRATEGY IMPLEMENTATION 
+ * Provider strategy for fetching raw equirectangular image buffers from the Mapillary API. 
+ * Enforces strict filtering to reject non-360 panoramic images.
  * 
  * * ### Architecture
  * ```mermaid
@@ -42,6 +43,8 @@ import fs from 'fs';
  * +getImage(id) Promise~Buffer~
  * }
  * ```
+ * 
+ * @class
  */
 export class MapillarySource extends ImageSourceProvider {
     /**

@@ -30,9 +30,9 @@ import { BaseTopologyProvider } from "./BaseTopologyProvider.js";
 import { SpatialUtils } from "../../Utilities/SpatialUtils.js";
 
 /**
- * 
- * @clas MapillaryTopologyProvider
- * @description EXAMPLE STRATEGY IMPLEMENTATION Resolves node geometry and constructs topological links using Mapillary sequences. Optimized with Memory-Capped LRU Caching and rate-limit throttling.
+ * EXAMPLE STRATEGY IMPLEMENTATION 
+ * Resolves node geometry and constructs topological links using Mapillary sequences. 
+ * Optimized with Memory-Capped LRU Caching and rate-limit throttling.
  * 
  * * ### Architecture
  * ```mermaid
@@ -42,6 +42,7 @@ import { SpatialUtils } from "../../Utilities/SpatialUtils.js";
  * +getNode(nodeId) Promise~Object~
  * }
  * ```
+ * 
  * @class
  */
 export class MapillaryTopologyProvider extends BaseTopologyProvider {

@@ -27,8 +27,8 @@
 */
 
 /**
- * @class WristUI
- * @description Manages a wrist-mounted 3D UI panel for WebXR. Registers the 'wrist-ui' A-Frame component, rendering an interactive raycastable menu for exiting VR and toggling floating maps.
+ * Manages a wrist-mounted 3D UI panel for WebXR. 
+ * Registers the 'wrist-ui' A-Frame component, rendering an interactive raycastable menu for exiting VR and toggling floating maps.
  *
  * ### Architecture
  * ```mermaid
@@ -37,14 +37,16 @@
  * +register() void
  * }
  * ```
+ * 
+ * @class
  */
 export class WristUI {
     /**
-         * @method syncPOV
-         * @memberof WristUI
-         * @description Registers the 'wrist-ui' component with the global A-Frame registry. Should be called once before the scene initializes.
-         * @static
-         */
+     * @method syncPOV
+     * @memberof WristUI
+     * @description Registers the 'wrist-ui' component with the global A-Frame registry. Should be called once before the scene initializes.
+     * @static
+     */
     static register() {
         if (typeof AFRAME === 'undefined' || AFRAME.components['wrist-ui']) {
             console.log(`[VR WRIST UI] AFRAME not initialised or component already registered`);

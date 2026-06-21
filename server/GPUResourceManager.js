@@ -27,8 +27,7 @@
  */
 
 /**
- * @class GPUResourceManager
- * @description Handles queuing and concurrency for hardware-intensive tasks.
+ * Handles queuing and concurrency for hardware-intensive tasks.
  * 
  * * ### Architecture
  * ```mermaid
@@ -46,6 +45,8 @@
  * +completeTask(id, success)
  * }
  * ```
+ * 
+ * @class
  */
 export class GPUResourceManager {
     /**

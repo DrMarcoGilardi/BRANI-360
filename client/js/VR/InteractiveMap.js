@@ -27,8 +27,8 @@
  */
 
 /**
- * @class InteractiveMap
- * @description Bridges 3D WebXR raycast events to a 2D HTML5 Canvas. Registers the 'interactive-map' A-Frame component to allow users to interact with UI elements like the topology radar from within VR.
+ * Bridges 3D WebXR raycast events to a 2D HTML5 Canvas. 
+ * Registers the 'interactive-map' A-Frame component to allow users to interact with UI elements like the topology radar from within VR.
  *
  * ### Architecture
  * ```mermaid
@@ -37,6 +37,8 @@
  * +register() void
  * }
  * ```
+ * 
+ * @class
  */
 export class InteractiveMap {
     /**

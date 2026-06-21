@@ -27,8 +27,8 @@
  */
 
 /**
- * @class VRManager
- * @description Main coordinator for the VR experience. Orchestrates HD visual projection and Camera sync.
+ * Main coordinator for the VR experience. 
+ * Orchestrates HD visual projection and Camera sync.
  * 
  * * ### Architecture
  * ```mermaid
@@ -40,6 +40,8 @@
  * +syncPOV(panorama)
  * }
  * ```
+ * 
+ * @class
  */
 
 import { SpatialUtils } from '../Utilities/SpatialUtils.js';

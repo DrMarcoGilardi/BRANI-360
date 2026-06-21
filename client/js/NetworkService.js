@@ -27,8 +27,7 @@
  */
 
 /**
- * @class NetworkService
- * @description Encapsulates WebSocket orchestration and High-Speed Navigation Guards.
+ * Encapsulates WebSocket orchestration and High-Speed Navigation Guards.
  * 
  * * ### Architecture
  * ```mermaid
@@ -48,6 +47,8 @@
  * +fetchAudioUrl(url, isPersistent) Promise~ArrayBuffer~
  * }
  * ```
+ * 
+ * @class
  */
 export class NetworkService {
     /**
