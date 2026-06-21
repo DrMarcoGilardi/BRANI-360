@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ABBA-360 | Environment Dashboard</title>
+    <link rel="stylesheet" href="/admin/css/styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>ABBA-360 Engine Variables</h2>
+            <div class="controls">
+                <button onclick="addNewSection()" style="background: #6a9955;">+ Add Section Header</button>
+                <button onclick="openAddModal()">+ Add Variable</button>
+                <button onclick="saveChanges()" style="background: #28a745;">Save & Sync Server</button>
+            </div>
+        </div>
+        <div id="env-container"></div>
+    </div>
+
+    <div id="add-modal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <h3>Add New Variable</h3>
+
+            <label>Placement (Target Section)</label>
+            <select id="new-var-section"></select>
+
+            <label>Key Name</label>
+            <input type="text" id="new-var-key" placeholder="e.g., CLIENT_PARAM_NEW"
+                style="width: 100%; box-sizing: border-box; margin-bottom: 15px;">
+
+            <label>Initial Value</label>
+            <input type="text" id="new-var-val" placeholder="Value..."
+                style="width: 100%; box-sizing: border-box; margin-bottom: 15px;">
+
+            <label>Documentation (Comment)</label>
+            <textarea id="new-var-comment" class="comment-input"
+                placeholder="# Describe what this variable does..."></textarea>
+
+            <div class="modal-actions">
+                <button class="btn-danger" onclick="closeAddModal()">Cancel</button>
+                <button onclick="confirmAddVariable()" style="background: #28a745;">Add Variable</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/admin/js/admin.js"></script>
+</body>
+
+</html>

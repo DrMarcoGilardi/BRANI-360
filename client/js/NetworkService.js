@@ -35,6 +35,7 @@
  * classDiagram
  * NetworkService --> UIManager : Updates HUD
  * NetworkService --> SpatialAudioPlayer : Feeds Buffers
+ * NetworkService --> Window : Triggers Client Reload
  * class NetworkService{
  * +activeNavEpoch number
  * +init(...)
@@ -240,10 +241,12 @@ export class NetworkService {
         this.socket.on('disconnect', () => this.ui.setConnectionStatus(false));
         this.socket.on('pipeline_reset', () => this.ui.resetPipeline());
 
-        this.socket.on('pipeline_progress', this._handlePipelineProgress.bind(this));
+        this.socket.on('server_reloaded', () => {
+            console.warn("[Network Guard] Server environment changed. Reloading client to apply new configurations.");
+            window.location.reload();
+        });
 
-        // MATCH SERVER EVENTS: The server emits 'instance_ready' for spatial objects 
-        // and 'node_ready' for persistent tasks (base node layer or background nodes).
+        this.socket.on('pipeline_progress', this._handlePipelineProgress.bind(this));
         this.socket.on('instance_ready', this._handleObjectReady.bind(this));
         this.socket.on('node_ready', this._handlePersistentReady.bind(this));
     }
