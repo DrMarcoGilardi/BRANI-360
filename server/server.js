@@ -99,7 +99,7 @@ async function startServer() {
     const pipelineService = new PipelineService(aiEngine, gpuManager, cacheManager, logger);
     new SocketController(io, pipelineService, gpuManager, logger);
 
-    logger.log('[Server] For the .env admin dashboard open http://localhost:3000/admin');
+    logger.log(`[Server] For the .env admin dashboard open http://localhost:${process.env.PORT}/admin`, "cyan");
 
     // --- ADMIN ROUTES (Secured via Localhost) ---
     /**
@@ -199,7 +199,7 @@ async function startServer() {
     // Serve public assets
     app.use(express.static(path.join(__dirname, 'public')));
 
-    const PORT = process.env.PORT || 3000;
+    const PORT = process.env.PORT;
     server.listen(PORT, () => logger.log(`[Server] Online at port ${PORT}`));
 }
 

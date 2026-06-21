@@ -83,6 +83,16 @@ export class LogManager {
         this.systemLogStream = fs.createWriteStream(filePath, { flags: 'a' });
         this.write(this.systemLogStream, `[SYSTEM] Log initialized at ${new Date().toISOString()}`);
         console.log(`[LogManager] System logging started: ${filename}`);
+
+        this.colourCodes = new Map([
+            ["red", "\x1b[31m"],
+            ["green", "\x1b[32m"],
+            ["yellow", "\x1b[33m"],
+            ["blue", "\x1b[34m"],
+            ["magenta", "\x1b[35m"],
+            ["cyan", "\x1b[36m"],
+            ["clear", "\x1b[0m"]
+        ]);
     }
 
     /**
@@ -140,12 +150,17 @@ export class LogManager {
      * @param {string} message - The message to log.
      * @param {string|null} [socketId=null] - Optional socket ID to route to a specific session log.
      */
-    log(message, socketId = null) {
+    log(message, colour = "clear", socketId = null) {
         const timestamp = new Date().toLocaleTimeString();
         const fullMessage = `[${timestamp}] ${message}`;
 
-        console.log(fullMessage);
-
+        let colourCode = this.colourCodes.get(colour);
+        if (colourCode !== undefined)
+            console.log(`${colourCode} ${fullMessage} \x1b[0m`);
+        else {
+            console.log(`${this.colourCodes.get("red")}Colour ${colour} not defined. Printing in white\x1b[0m`);
+            console.log(`${fullMessage}\x1b[0m`);
+        }
         this.write(this.systemLogStream, fullMessage);
 
         if (socketId && this.sessionStreams.has(socketId)) {
@@ -164,7 +179,7 @@ export class LogManager {
         const timestamp = new Date().toLocaleTimeString();
         const fullMessage = `[${timestamp}] [WARNING] ${message}`;
 
-        console.warn(fullMessage);
+        console.warn(`${this.colourCodes.get("yellow")} ${fullMessage} \x1b[0m`);
         this.write(this.systemLogStream, fullMessage);
 
         if (socketId && this.sessionStreams.has(socketId)) {
@@ -183,7 +198,7 @@ export class LogManager {
         const timestamp = new Date().toLocaleTimeString();
         const fullMessage = `[${timestamp}] [ERROR] ${message}`;
 
-        console.error(fullMessage);
+        console.error(`${this.colourCodes.get("red")} ${fullMessage} \x1b[0m`);
         this.write(this.systemLogStream, fullMessage);
 
         if (socketId && this.sessionStreams.has(socketId)) {

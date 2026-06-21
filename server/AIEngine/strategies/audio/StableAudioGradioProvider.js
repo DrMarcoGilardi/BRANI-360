@@ -90,7 +90,7 @@ export class StableAudioGradioProvider extends AudioProvider {
                 this.logger.log(`[AudioProvider] Linking to Gradio Engine at ${this.api}...`);
                 this.gradioClient = await Client.connect(this.api, { events: ["data", "status"] });
                 if (this.gradioClient)
-                    this.logger.log(`[AudioProvider] Gradio Engine linked at ${this.api}.`);
+                    this.logger.log(`[AudioProvider] Gradio Engine linked at ${this.api}`);
             } catch (e) {
                 this.logger.error(`[AudioProvider] Connection Failed: ${e.message}`);
                 this.gradioClient = null;
