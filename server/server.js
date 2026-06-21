@@ -36,12 +36,12 @@ import cors from 'cors';
 import fs from 'fs';
 
 // Core Framework Imports (Agnostic Infrastructure)
-import { CacheManager } from './CacheManager.js';
-import { GPUResourceManager } from './GPUResourceManager.js';
-import { AIEngine } from './AIEngine/AIEngine.js';
-import { LogManager } from './utilities/LogManager.js';
-import { PipelineService } from './PipelineService.js';
-import { SocketController } from './SocketController.js';
+import { AIEngine } from './engine/AIEngine.js';
+import { SocketController } from './network/SocketController.js';
+import { PipelineService } from './orchestrator/PipelineService.js';
+import { CacheManager } from './infrastructure/CacheManager.js';
+import { GPUResourceManager } from './infrastructure/GPUResourceManager.js';
+import { LogManager } from './infrastructure/LogManager.js';
 import { log } from 'console';
 
 // dotenv.config();
