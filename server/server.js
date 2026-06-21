@@ -44,10 +44,13 @@ import { PipelineService } from './PipelineService.js';
 import { SocketController } from './SocketController.js';
 import { log } from 'console';
 
-dotenv.config();
+// dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.resolve(__dirname, '.env');
+
+dotenv.config({ path: envPath });
+
 const logger = new LogManager();
 
 const isLocal = process.env.LOCAL_MODE === 'true';

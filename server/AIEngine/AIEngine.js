@@ -94,6 +94,7 @@ export class AIEngine {
             const visClassStr = this.config.VISION_PROVIDER;
             const audClassStr = this.config.AUDIO_PROVIDER;
 
+            this.logger.log(imgClassStr);
             const [ImageModule, ContextModule, VisionModule, AudioModule] = await Promise.all([
                 import(`./strategies/imagesource/${imgClassStr}.js`),
                 import(`./strategies/context/${ctxClassStr}.js`),
