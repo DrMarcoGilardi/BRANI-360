@@ -69,7 +69,7 @@ export class SocketController {
     init() {
         this.io.on('connection', (socket) => {
             const sessionLogName = this.logger.startSession(socket.id);
-            this.logger.log(`[Network] Client Connected: ${socket.id} (Logging to: ${sessionLogName})`, socket.id);
+            this.logger.log(`[Network] Client Connected: ${socket.id} (Logging to: ${sessionLogName})`, "clear", socket.id);
 
             /**
              * Primary Navigation Sync
@@ -148,7 +148,7 @@ export class SocketController {
             });
 
             socket.on('disconnect', () => {
-                this.logger.log(`[Network] Client Disconnected: ${socket.id}`, socket.id);
+                this.logger.log(`[Network] Client Disconnected: ${socket.id}`, "clear", socket.id);
                 this.pipelineService.cleanupSocket(socket.id);
                 this.logger.endSession(socket.id);
             });
