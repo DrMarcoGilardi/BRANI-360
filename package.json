@@ -23,7 +23,7 @@
     "start": "node server.js",
     "docs:client": "jsdoc2md --configure jsdoc.json \"./client/js/**/*.js\" > ./docs/CLIENT_DOCS.md",
     "docs:server": "jsdoc2md --configure jsdoc.json \"./server/**/*.js\" \"./*.js\" > ./docs/SERVER_DOCS.md",
-    "docs": "npm run docs:client && npm run docs:server && node fix-mermaid.js"
+    "docs": "npm run docs:client && npm run docs:server && node ./HelperScripts/fix-mermaid.js"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
