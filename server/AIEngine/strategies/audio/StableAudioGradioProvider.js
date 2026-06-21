@@ -42,9 +42,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION
- * StableAudioGradioProvider
- * Handles generation and transcodes of audio via Gradio API connections to a Stable Audio Open instance.
+ * @class StableAudioGradioProvider
+ * @description EXAMPLE STRATEGY IMPLEMENTATION Handles generation and transcodes of audio via Gradio API connections to a Stable Audio Open instance.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -87,7 +87,7 @@ export class StableAudioGradioProvider extends AudioProvider {
             try {
                 this.logger.log(`[AudioProvider] Linking to Gradio Engine at ${this.api}...`);
                 this.gradioClient = await Client.connect(this.api, { events: ["data", "status"] });
-                if(this.gradioClient) 
+                if (this.gradioClient)
                     this.logger.log(`[AudioProvider] Gradio Engine linked at ${this.api}.`);
             } catch (e) {
                 this.logger.error(`[AudioProvider] Connection Failed: ${e.message}`);
@@ -103,10 +103,10 @@ export class StableAudioGradioProvider extends AudioProvider {
      * @description Pre-loads the prompt tuning dictionary and pre-warms the Gradio API connection.
      * @returns {Promise<void>}
      */
-    async init(){
+    async init() {
         this.ambientsSettings = await Utils.loadDictionary(this._internalDictPath, this.logger);
         this.logger.log(`[AudioProvider] Strategy ready. Dictionary entries: ${Object.keys(this.ambientsSettings.ambients).length}`);
-        
+
         // Pre-warm the connection
         await this._getGradio();
     }
@@ -120,10 +120,10 @@ export class StableAudioGradioProvider extends AudioProvider {
      * @private
      */
     _calibrateTask(task) {
-        
+
         // Load Definitions for Audio
         const { type, envType, regenOpts } = task;
-        
+
         let steps = 75; // Default for objects
         let noiseLevel = 0.1;
         // 1. Calculate Steps based on Intent
@@ -160,20 +160,20 @@ export class StableAudioGradioProvider extends AudioProvider {
         const { prompt, type, id: taskId, nodeId, locationContext, regenOpts, navEpoch, envType } = task;
 
         const { steps, noiseLevel } = this._calibrateTask(task);
-        
+
         return new Promise(async (resolve) => {
             let submission = null;
             const startTime = Date.now();
 
             const timeoutId = setTimeout(() => {
                 this.logger.warn(`[AudioProvider] Task ${taskId} timed out. Force-releasing.`);
-                if (submission) submission.cancel().catch(() => {});
+                if (submission) submission.cancel().catch(() => { });
                 resolve({ buffer: null, duration: 0 });
             }, 180000);
 
             try {
                 await this._getGradio();
-                const client =this.gradioClient;
+                const client = this.gradioClient;
                 if (!client) {
                     clearTimeout(timeoutId);
                     return resolve({ buffer: null, duration: 0 });
@@ -207,7 +207,7 @@ export class StableAudioGradioProvider extends AudioProvider {
                     }
 
                     qualityPrompt = `clear, realistic, authentic field recording, ${cleanPrompt}, ${locationContext}, ${specificModifiers}, seamless loop, cinematic SFX, high quality, 44.1kHz`;
-                    
+
                     const baseNegative = "music, melody, rhythm, synth, instrument, static, distorted, low quality, silence, mute, empty";
                     negativePrompt = (type === 'object_organic' || type === 'object_human')
                         ? `${baseNegative}, engine, motor, machine, mechanical, rain, broadband noise`
@@ -240,12 +240,12 @@ export class StableAudioGradioProvider extends AudioProvider {
                     // 1. Whitelist Validation
                     if (!validFormats.includes(ext)) {
                         this.logger.error(`[AudioProvider] Invalid upload format rejected: ${ext}`);
-                        uploadPath = null; 
-                    } 
+                        uploadPath = null;
+                    }
                     // 2. Intercept and Transcode valid compressed formats
                     else if (ext !== '.wav') {
-                        tempWavPath = `${uploadPath}_init_${Date.now()}.wav`; 
-                        
+                        tempWavPath = `${uploadPath}_init_${Date.now()}.wav`;
+
                         try {
                             this.logger.log(`[AudioProvider] Transcoding ${ext} to WAV for PyTorch...`);
                             // Force a strict 44.1kHz stereo WAV
@@ -257,24 +257,24 @@ export class StableAudioGradioProvider extends AudioProvider {
                         }
                     }
                 }
-                
+
                 this.logger.log(`[AudioProvider] Submitting ${type.toUpperCase()}: ${taskId} (CFG: ${CFGScore})`);
-                
+
                 submission = client.submit("/generate", [
-                    qualityPrompt, 
-                    negativePrompt, 
-                    0, 
-                    48, 
-                    CFGScore, 
-                    steps, 
-                    0, 
-                    -1, 
-                    "dpmpp-3m-sde", 
-                    sigmaMin, 
-                    sigmaMax, 
-                    CFGRescale, 
-                    !!regenOpts?.useInit, 
-                    uploadPath ? handle_file(uploadPath) : null, 
+                    qualityPrompt,
+                    negativePrompt,
+                    0,
+                    48,
+                    CFGScore,
+                    steps,
+                    0,
+                    -1,
+                    "dpmpp-3m-sde",
+                    sigmaMin,
+                    sigmaMax,
+                    CFGRescale,
+                    !!regenOpts?.useInit,
+                    uploadPath ? handle_file(uploadPath) : null,
                     regenOpts?.noiseLevel || 0.1
                 ]);
 
@@ -284,8 +284,8 @@ export class StableAudioGradioProvider extends AudioProvider {
                     for await (const msg of submission) {
                         // User navigation abort check
                         if (signal?.aborted && type.startsWith('object')) {
-                            submission.cancel().catch(() => {});
-                            break; 
+                            submission.cancel().catch(() => { });
+                            break;
                         }
 
                         // 1. Capture the Data
@@ -304,7 +304,7 @@ export class StableAudioGradioProvider extends AudioProvider {
                                 // Sometimes Gradio sends a direct decimal
                                 if (typeof pData.progress === 'number') {
                                     currentProgress = pData.progress;
-                                } 
+                                }
                                 // Most of the time, Gradio tracks iterations (e.g., Step 10 of 75)
                                 else if (typeof pData.index === 'number' && typeof pData.length === 'number' && pData.length > 0) {
                                     currentProgress = pData.index / pData.length;
@@ -324,20 +324,20 @@ export class StableAudioGradioProvider extends AudioProvider {
                         if (currentProgress >= 0) {
                             if (progressCallback) progressCallback(currentProgress);
                             else if (socket) {
-                                socket.emit('pipeline_progress', { 
-                                    id: taskId, 
-                                    stage: 'audio processing', 
-                                    progress: currentProgress, 
-                                    nodeId, 
-                                    navEpoch, 
-                                    taskData: task 
+                                socket.emit('pipeline_progress', {
+                                    id: taskId,
+                                    stage: 'audio processing',
+                                    progress: currentProgress,
+                                    nodeId,
+                                    navEpoch,
+                                    taskData: task
                                 });
                             }
                         }
 
                         // Forces Node.js to resolve the Promise
                         if (msg.type === "status" && msg.stage === "complete") {
-                            break; 
+                            break;
                         }
                     }
                 } catch (streamError) {
@@ -345,9 +345,9 @@ export class StableAudioGradioProvider extends AudioProvider {
                 }
 
                 clearTimeout(timeoutId);
-                
+
                 if (tempWavPath) {
-                    fs.unlink(tempWavPath).catch(() => {});
+                    fs.unlink(tempWavPath).catch(() => { });
                 }
 
                 if (wavBuffer) {
@@ -357,7 +357,7 @@ export class StableAudioGradioProvider extends AudioProvider {
                 }
             } catch (e) {
                 clearTimeout(timeoutId);
-                if (tempWavPath) fs.unlink(tempWavPath).catch(() => {})
+                if (tempWavPath) fs.unlink(tempWavPath).catch(() => { })
                 this.logger.error(`[AudioProvider Fatal] ${e.message}`);
                 resolve({ buffer: null, duration: 0 });
             }

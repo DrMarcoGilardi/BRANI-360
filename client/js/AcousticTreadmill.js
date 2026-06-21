@@ -27,8 +27,9 @@
  */
 
 /**
- * AcousticTreadmill manages the mathematical mixing of backgrounds and aggregate progress tracking.
- * Agnostically adjusts volume levels of adjacent nodes to simulate distance.
+ * @class AcousticTreadmill 
+ * @description Manages the mathematical mixing of backgrounds and aggregate progress tracking. Agnostically adjusts volume levels of adjacent nodes to simulate distance.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -41,7 +42,7 @@
  * +refreshMix(currentNodeId, currentIsAnchor, currentNearbyAnchors, radar)
  * }
  * ```
- * @class
+
  */
 export class AcousticTreadmill {
     /**
@@ -55,7 +56,7 @@ export class AcousticTreadmill {
         this.ui = ui;
         this.clientConfig = clientConfig;
         this.spatiallycontinuous = (clientConfig?.SPATIALLY_CONTINUOUS === 'true');
-        console.log(this.spatiallycontinuous)
+        console.log(clientConfig?.SPATIALLY_CONTINUOUS);
         this.anchorTracker = {
             expectedIds: [],
             completedIds: new Set(),
@@ -127,6 +128,7 @@ export class AcousticTreadmill {
      * @param {TopologyRadar} radar - Radar topology reference.
      */
     refreshMix(currentNodeId, currentIsAnchor, currentNearbyAnchors, radar) {
+
         if (!this.spatiallycontinuous) {
             this.player.updatePersistentVolumes([{ id: String(currentNodeId), weight: 1.0 }]);
             return;

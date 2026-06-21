@@ -27,9 +27,9 @@
  */
 
 /**
- * VisionProvider (Base Class Interface)
- * Interface for multimodal analysis providers.
- * CONTRACT: Implementing classes must return an object containing an 'intents' array.
+ * @class VisionProvider
+ * @description Base class interfacr. Interface for multimodal analysis providers. CONTRACT: Implementing classes must return an object containing an 'intents' array.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram

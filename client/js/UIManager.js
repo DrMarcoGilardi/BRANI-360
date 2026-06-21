@@ -27,8 +27,9 @@
  */
 
 /**
- * UIManager handles all 2D overlays, HUD elements, and the Radar graph visualization.
- * Completely Map/Provider Agnostic. Styles are driven by topological context.
+ * @class UIManager
+ * @description Handles all 2D overlays, HUD elements, and the Radar graph visualization. Completely Map/Provider Agnostic. Styles are driven by topological context.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -189,13 +190,13 @@ export class UIManager {
         return alias;
     }
 
-   /**
-     * @method setConnectionStatus
-     * @memberof UIManager
-     * @description Updates the WebSocket connection status indicator.
-     * @param {boolean} isConnected - Connection state.
-     * @param {string|null} [socketId=null] - The active socket identifier.
-     */
+    /**
+      * @method setConnectionStatus
+      * @memberof UIManager
+      * @description Updates the WebSocket connection status indicator.
+      * @param {boolean} isConnected - Connection state.
+      * @param {string|null} [socketId=null] - The active socket identifier.
+      */
     setConnectionStatus(isConnected, socketId = null) {
         if (!this.statusEl) return;
         if (isConnected) {
@@ -672,8 +673,8 @@ export class UIManager {
      * @description Registers a callback to be executed when the global master mute toggle is triggered.
      * @param {Function} callback - The function to execute on mute toggle.
      */
-    onMuteToggle(callback) { 
-        this.muteCallback = callback; 
+    onMuteToggle(callback) {
+        this.muteCallback = callback;
     }
 
     /**
@@ -682,8 +683,8 @@ export class UIManager {
      * @description Registers a callback to be executed when a specific task regeneration is requested from the UI.
      * @param {Function} callback - The function to execute when regeneration is toggled.
      */
-    onRegenToggle(callback) { 
-        this.regenCallback = callback; 
+    onRegenToggle(callback) {
+        this.regenCallback = callback;
     }
 
     /**
@@ -760,7 +761,7 @@ export class UIManager {
             this.isEnteringVR = false;
         }
     }
-    
+
     /**
      * @method setupToggleButton
      * @memberof UIManager

@@ -27,8 +27,9 @@
  */
 
 /**
- * VRManager: Main coordinator for the VR experience.
- * Orchestrates HD visual projection and Camera sync.
+ * @class VRManager
+ * @description Main coordinator for the VR experience. Orchestrates HD visual projection and Camera sync.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -50,10 +51,10 @@ export class VRManager {
      * @param {UIManager} uiManager - Reference to the UI for progress bars.
      * @param {BaseVRLoader} vrLoaderStrategy - Injected tile loading strategy.
      */
-    constructor( uiManager, vrLoaderStrategy) {
+    constructor(uiManager, vrLoaderStrategy) {
         this.ui = uiManager;
         this.tileLoader = vrLoaderStrategy;
-        
+
         this.canvas = document.createElement('canvas');
         this.canvas.width = 4096;
         this.canvas.height = 2048;
@@ -77,13 +78,13 @@ export class VRManager {
         }
 
         try {
-           if (!this.texture) {
+            if (!this.texture) {
                 this.texture = new AFRAME.THREE.CanvasTexture(this.canvas);
                 this.texture.minFilter = AFRAME.THREE.LinearFilter;
                 skyEl.setAttribute('scale', '-1 1 1');
                 skyEl.setAttribute('geometry', { primitive: 'sphere', radius: 100, segmentsWidth: 64, segmentsHeight: 64 });
                 skyEl.setAttribute('material', { shader: 'flat', side: 'back', transparent: false });
-                
+
                 const mesh = skyEl.getObject3D('mesh');
                 if (mesh) mesh.material.map = this.texture;
             }
@@ -102,7 +103,7 @@ export class VRManager {
                 this.ui.updatePipelineProgress('Visuals', `Enhancing Level ${zoom - 1}...`, 0.1, 'vr_vis', false);
 
                 const success = await this.tileLoader.stitchProgressively(
-                    nodeId, zoom, this.ctx, this.canvas.width, this.canvas.height, 
+                    nodeId, zoom, this.ctx, this.canvas.width, this.canvas.height,
                     () => {
                         tilesLoaded++;
                         if (zoom === 3 || tilesLoaded % 4 === 0) {
@@ -114,7 +115,7 @@ export class VRManager {
                 );
 
                 this.texture.needsUpdate = true;
-                
+
                 if (!success) {
                     console.log(`[VRManager] Reached maximum available resolution at Zoom ${zoom - 1}.`);
                     break;
@@ -151,11 +152,11 @@ export class VRManager {
 
             arrow.setAttribute('geometry', { primitive: 'plane', width: 1.5, height: 1.5 });
             arrow.setAttribute('material', {
-                src: './js/VR/assets/svg/chevron.svg', 
-                color: '#ffffff',              
-                shader: 'flat', 
-                transparent: true, 
-                opacity: 0.5, 
+                src: './js/VR/assets/svg/chevron.svg',
+                color: '#ffffff',
+                shader: 'flat',
+                transparent: true,
+                opacity: 0.5,
                 side: 'double'
             });
             arrow.setAttribute('position', `${pos.x} -1.0 ${pos.z}`);
@@ -174,7 +175,7 @@ export class VRManager {
 
             arrow.addEventListener('click', () => {
                 const targetNodeId = link.id;
-                document.dispatchEvent(new CustomEvent('app:navigation_intent', { 
+                document.dispatchEvent(new CustomEvent('app:navigation_intent', {
                     detail: { nodeId: targetNodeId }
                 }));
             });
@@ -194,7 +195,7 @@ export class VRManager {
         if (!cameraEl) return null;
         const rotation = cameraEl.getAttribute('rotation');
         if (!rotation) return null;
-        
+
         return { heading: -rotation.y, pitch: rotation.x };
     }
 }

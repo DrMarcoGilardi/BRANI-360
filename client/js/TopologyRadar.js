@@ -27,8 +27,9 @@
  */
 
 /**
- * TopologyRadar (Map-Agnostic)
- * Handles topological mapping and BFS spidering of ANY node-based graph.
+ * @class TopologyRadar
+ * @description Handles map-agnostic topological mapping and BFS spidering of ANY node-based graph.
+ *
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -55,10 +56,10 @@ export class TopologyRadar {
         if (!selectionStrategy) throw new Error("[TOPOLOGY RADAR] SelectionStrategy required.");
         this.provider = topologyProvider;
         this.strategy = selectionStrategy;
-        
+
         this.anchorCache = new Map();
         this.nodeCache = new Map();
-        this.MAX_CACHE_SIZE = 2000; 
+        this.MAX_CACHE_SIZE = 2000;
     }
 
     /** 
@@ -69,7 +70,7 @@ export class TopologyRadar {
     clearCache() {
         this.anchorCache.clear();
         this.nodeCache.clear();
-        this.strategy.reset(); 
+        this.strategy.reset();
         console.log("[Radar] All caches and strategy state flushed.");
     }
 
@@ -151,7 +152,7 @@ export class TopologyRadar {
                 if (current.depth >= maxDepth) return;
                 const data = await this._getNode(current.id);
                 if (!data?.links) return;
-                
+
                 for (const link of data.links) {
                     if (!visited.has(link.id)) {
                         visited.set(link.id, current.depth + 1);
@@ -200,24 +201,24 @@ export class TopologyRadar {
 
             const currentLayer = [...queue];
             queue = [];
-            
+
             await Promise.all(currentLayer.map(async (n) => {
                 if (n.hops > maxDepth) return;
                 const d = await this._getNode(n.nodeId);
                 if (!d?.links) return;
 
                 const isAnchor = await this.isAnchorNode(n.nodeId);
-                
+
                 if (isAnchor && n.nodeId !== startNodeId) {
                     if (!foundAnchors.some(a => a.nodeId === n.nodeId)) {
-                        foundAnchors.push({ 
-                            nodeId: n.nodeId, 
-                            hops: n.hops 
+                        foundAnchors.push({
+                            nodeId: n.nodeId,
+                            hops: n.hops
                         });
                     }
                     return; // Stop spidering down this path
                 }
-                
+
                 if (n.hops < maxDepth) {
                     d.links.forEach(l => {
                         if (!visited.has(l.id)) {
@@ -230,7 +231,7 @@ export class TopologyRadar {
         }
         return foundAnchors;
     }
-    
+
     /**
      * @async
      * @method buildVisualGraph
@@ -274,7 +275,7 @@ export class TopologyRadar {
                     edges.push({ from: current.nodeId, to: link.id });
                     if (!visited.has(link.id)) {
                         visited.add(link.id);
-                        
+
                         let angle;
                         if (link.heading !== undefined) {
                             angle = (link.heading - 90) * (Math.PI / 180);

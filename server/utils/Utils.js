@@ -35,7 +35,9 @@ import { tmpdir } from 'os';
 const execAsync = promisify(exec);
 
 /**
- * Server-side utility class for file handling and audio manipulation.
+ * @class Utils
+ * @description Server-side utility class for file handling and audio manipulation.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -107,7 +109,7 @@ export class Utils {
 
             // Domain Logic: Point-source objects are mono (1), Ambients are stereo (2)
             const channels = (taskType || '').startsWith('object') ? 1 : 2;
-            
+
             let args = "";
             if (targetFormat === 'webm') {
                 args = `-c:a libopus -b:a ${channels === 1 ? '48k' : '96k'} -vbr on`;
@@ -118,13 +120,13 @@ export class Utils {
             }
 
             await execAsync(`ffmpeg -i ${tempIn} ${args} -ac ${channels} ${tempOut} -y`);
-            
+
             const outBuf = await fs.readFile(tempOut);
             logger.log(`[TRANSCODER] File Transcoded`);
             // Async Cleanup
-            await fs.unlink(tempIn).catch(() => {}); 
-            await fs.unlink(tempOut).catch(() => {});
-            
+            await fs.unlink(tempIn).catch(() => { });
+            await fs.unlink(tempOut).catch(() => { });
+
             return outBuf;
         } catch (e) {
             if (logger) logger.error(`[AudioUtils] Transcoding failed: ${e.message}`);

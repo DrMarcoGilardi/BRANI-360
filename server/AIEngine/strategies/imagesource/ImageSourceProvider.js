@@ -25,10 +25,14 @@
  * Please contact Marco.Gilardi@uws.ac.uk for commercial licensing details.
  * -------------------------------------------------------------------------
  */
+import axios from 'axios';
+import fs from 'fs/promises';
+import path from 'path';
 
 /**
- * ImageSourceProvider (Base Class)
- * Interface for 360-degree image acquisition strategies.
+ * @class ImageSourceProvider
+ * @description Base Class Interface. Interface for 360-degree image acquisition strategies.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -37,14 +41,6 @@
  * +getImage(id) Promise~Buffer~
  * }
  * ```
- */
-import axios from 'axios';
-import fs from 'fs/promises';
-import path from 'path';
-
-/**
- * ImageSourceProvider (Base Class)
- * Interface for 360-degree image acquisition strategies.
  */
 export class ImageSourceProvider {
     /**

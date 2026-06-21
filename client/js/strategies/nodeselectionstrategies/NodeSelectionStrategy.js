@@ -27,8 +27,9 @@
  */
 
 /**
- * Strategy Pattern Interface for Node Selection.
- * Determines the logical importance of a node within the topological graph.
+ * @class NodeSelectionStrategy
+ * @description Strategy Pattern Interface for Node Selection. Determines the logical importance of a node within the topological graph.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -38,7 +39,6 @@
  * +reset()
  * }
  * ```
- * @class
  */
 export class NodeSelectionStrategy {
     /**

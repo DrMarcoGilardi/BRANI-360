@@ -28,8 +28,9 @@
 
 import { NodeSelectionStrategy } from "./NodeSelectionStrategy.js";
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION
- * Enforces strict Min 3 / Max 6 spacing across topological graphs.
+ * @class EXAMPLE STRATEGY IMPLEMENTATION
+ * @description Enforces strict Min 3 / Max 6 spacing across topological graphs.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -49,6 +50,7 @@ export class AcousticHorizonStrategy extends NodeSelectionStrategy {
         this.MIN_SPACING = parseInt(clientConfig?.MIN_SPACING, 10);
         this.MAX_GAP = parseInt(clientConfig?.MAX_GAP, 10);
         this.isSpatiallyContinuous = (clientConfig.SPATIALLY_CONTINUOUS === 'true');
+        console.log(clientConfig?.SPATIALLY_CONTINUOUS);
         this.gapFillerCache = new Map();
         this.MAX_STRATEGY_CACHE = 1000;
     }

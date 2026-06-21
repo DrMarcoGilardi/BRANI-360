@@ -28,9 +28,10 @@
 
 import { BaseVRLoader } from './BaseVRLoader.js';
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION
- * MapillaryVRLoader
- * Strategy implementation for loading panoramic images from Mapillary's Graph API into the VR buffer.
+ * 
+ * @class MapillaryVRLoader
+ * @description EXAMPLE STRATEGY IMPLEMENTATION Strategy implementation for loading panoramic images from Mapillary's Graph API into the VR buffer.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -84,7 +85,7 @@ export class MapillaryVRLoader extends BaseVRLoader {
         if (onTileDrawn) onTileDrawn();
         return true;
     }
-    
+
     /**
      * @async
      * @method _fetchAndDraw
@@ -103,16 +104,16 @@ export class MapillaryVRLoader extends BaseVRLoader {
             const res = await fetch(`https://graph.mapillary.com/${nodeId}?fields=${field}&access_token=${this.key}`);
             if (!res.ok) throw new Error("Network response was not ok");
             const data = await res.json();
-            
+
             const img = new Image();
             img.crossOrigin = 'anonymous';
-            
+
             await new Promise((resolve, reject) => {
                 img.onload = resolve;
                 img.onerror = reject;
                 img.src = data[field];
             });
-            
+
             ctx.drawImage(img, 0, 0, width, height);
         } catch (e) {
             console.warn(`[MapillaryVRLoader] Fetch failed for ${field}:`, e);

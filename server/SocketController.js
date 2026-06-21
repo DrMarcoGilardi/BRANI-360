@@ -26,11 +26,10 @@
  * -------------------------------------------------------------------------
  */
 
-
 /**
- * SocketController acts as the primary research interface for WebSocket clients.
- * It coordinates real-time data flow between the frontend, the GPU queue, 
- * and the pluggable AI strategies.
+ * @class SocketController 
+ * @description Acts as the primary research interface for WebSocket clients. It coordinates real-time data flow between the frontend, the GPU queue, and the pluggable AI strategies.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -43,7 +42,6 @@
  * }
  * ```
  */
-
 export class SocketController {
     /**
      * @param {Server} io - Socket.io Server instance.
@@ -56,10 +54,10 @@ export class SocketController {
         this.pipelineService = pipelineService;
         this.gpuManager = gpuManager;
         this.logger = logger;
-        
+
         this.init();
     }
-    
+
     /**
      * @method init
      * @memberof SocketController
@@ -102,7 +100,7 @@ export class SocketController {
             socket.on('sim_push_frame', (payload) => {
                 const { id, buffer } = payload;
                 const engine = this.pipelineService.aiEngine;
-                
+
                 if (engine.imageSource && typeof engine.imageSource.updateFrame === 'function') {
                     engine.imageSource.updateFrame(id, buffer);
                     this.logger.log(`[Sim] In-memory buffer updated for Simulation ID: ${id}`, socket.id);
@@ -127,17 +125,17 @@ export class SocketController {
             socket.on('reload_research_presets', async () => {
                 try {
                     // Triggers the engine to re-read the file from its internal path
-                    await this.pipelineService.aiEngine.init(); 
+                    await this.pipelineService.aiEngine.init();
                     this.logger.log(`[System] Presets hot-reloaded successfully.`, socket.id);
-                    socket.emit('system_notification', { 
-                        type: 'success', 
+                    socket.emit('system_notification', {
+                        type: 'success',
                         message: "Dictionary reloaded."
                     });
                 } catch (e) {
                     this.logger.error(`[System] Hot-reload failed: ${e.message}`, socket.id);
-                    socket.emit('system_notification', { 
-                        type: 'error', 
-                        message: "Reload failed. Check server logs." 
+                    socket.emit('system_notification', {
+                        type: 'error',
+                        message: "Reload failed. Check server logs."
                     });
                 }
             });

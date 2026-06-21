@@ -30,10 +30,10 @@ import { BaseTopologyProvider } from "./BaseTopologyProvider.js";
 import { SpatialUtils } from "../../Utilities/SpatialUtils.js";
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION
- * MapillaryTopologyProvider
- * Resolves node geometry and constructs topological links using Mapillary sequences.
- * Optimized with Memory-Capped LRU Caching and rate-limit throttling.
+ * 
+ * @clas MapillaryTopologyProvider
+ * @description EXAMPLE STRATEGY IMPLEMENTATION Resolves node geometry and constructs topological links using Mapillary sequences. Optimized with Memory-Capped LRU Caching and rate-limit throttling.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -62,7 +62,7 @@ export class MapillaryTopologyProvider extends BaseTopologyProvider {
         this.MAX_NODES = 500;      // Holds nodes in RAM
         this.MAX_SEQUENCES = 100;   // Holds roughly 100 distinct driving routes
         this.MAX_SPATIAL_CACHES = 200;
-        
+
         this.fetchQueue = [];
         this.isFetchingQueue = false;
         this.FETCH_DELAY_MS = 50;
@@ -116,7 +116,7 @@ export class MapillaryTopologyProvider extends BaseTopologyProvider {
             const task = this.fetchQueue.shift();
             try {
                 const response = await fetch(task.url);
-                
+
                 if (response.status === 429) {
                     if (task.retries > 0) {
                         console.warn(`[MAPILLARY] 429 Rate Limit Hit. Sleeping 2 seconds...`);
@@ -130,7 +130,7 @@ export class MapillaryTopologyProvider extends BaseTopologyProvider {
             } catch (e) {
                 task.reject(e);
             }
-            
+
             // The magic bullet: Force a strict delay before the loop can grab the next request
             await new Promise(r => setTimeout(r, this.FETCH_DELAY_MS));
         }

@@ -33,9 +33,9 @@ import os from 'os';
 import { VisionProvider } from '../../VisionProvider.js';
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION
- * PythonVisionProvider
- * Interacts with external Python scripts (e.g., custom models or OpenCV pipelines) to generate sonic intents from visual buffers.
+ * @Class PythonVisionProvider
+ * @description EXAMPLE STRATEGY IMPLEMENTATION Interacts with external Python scripts (e.g., custom models or OpenCV pipelines) to generate sonic intents from visual buffers.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -149,8 +149,8 @@ export class PythonVisionProvider extends VisionProvider {
                         reject(new Error("No valid JSON found in Python standard output."));
                     }
                 });
-            } else { 
-                this.logger.error(new Error('[PYTHON VISON ADAPTER] Audio generation aborted PYTHON_EXEC not set in .env.')); 
+            } else {
+                this.logger.error(new Error('[PYTHON VISON ADAPTER] Audio generation aborted PYTHON_EXEC not set in .env.'));
             }
         });
     }

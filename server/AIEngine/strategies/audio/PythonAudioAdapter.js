@@ -33,9 +33,9 @@ import os from 'os';
 import { AudioProvider } from '../../AudioProvider.js';
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION
- * PythonAudioProvider
- * Delegate strategy for producing audio by invoking an external Python generation script (e.g., custom PyTorch inferencing).
+ * @class PythonAudioProvider
+ * @description EXAMPLE STRATEGY IMPLEMENTATION Delegate strategy for producing audio by invoking an external Python generation script (e.g., custom PyTorch inferencing).
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -130,7 +130,7 @@ export class PythonAudioProvider extends AudioProvider {
      */
     _executePython(args, signal, progressCallback, socket, task) {
         return new Promise((resolve, reject) => {
-            if (this.pythonExec || this.pythonExec==="" || this.pythonExec === " ") {
+            if (this.pythonExec || this.pythonExec === "" || this.pythonExec === " ") {
                 const process = spawn(this.pythonExec, args);
                 let stderrData = '';
             } else { reject(new Error('[PYTHON AUDIO ADAPTER] Audio generation aborted PYTHON_EXEC not set in .env.')); }

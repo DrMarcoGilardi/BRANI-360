@@ -27,8 +27,9 @@
  */
 
 /**
- * Strategy Pattern Interface for VR 360 Image Fetching.
- * Standardizes the progressive loading of high-resolution panoramas for WebXR.
+ * @class Strategy Pattern Interface for VR 360 Image Fetching.
+ * @description Standardizes the progressive loading of high-resolution panoramas for WebXR.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -38,7 +39,6 @@
  * +stitchProgressively(nodeId, zoom, ctx, onTileDrawn) Promise~boolean~
  * }
  * ```
- * @class
  */
 export class BaseVRLoader {
     /**
@@ -60,8 +60,8 @@ export class BaseVRLoader {
      * @returns {Promise<void>}
      * @throws {Error} If not implemented by the specific provider.
      */
-    async getLowResBase(nodeId, canvas, ctx) { 
-        throw new Error("[VR Loader] Method 'getLowResBase' must be implemented."); 
+    async getLowResBase(nodeId, canvas, ctx) {
+        throw new Error("[VR Loader] Method 'getLowResBase' must be implemented.");
     }
 
     /**
@@ -75,7 +75,7 @@ export class BaseVRLoader {
      * @param {Function} onTileDrawn - Callback fired whenever a tile is successfully drawn.
      * @returns {Promise<boolean>} True if the resolution level was successfully stitched.
      */
-    async stitchProgressively(nodeId, zoom, ctx, onTileDrawn) { 
-        throw new Error("[VR Loader] Method 'stitchProgressively' must be implemented."); 
+    async stitchProgressively(nodeId, zoom, ctx, onTileDrawn) {
+        throw new Error("[VR Loader] Method 'stitchProgressively' must be implemented.");
     }
 }

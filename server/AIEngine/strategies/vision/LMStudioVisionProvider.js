@@ -30,9 +30,9 @@ import { VisionProvider } from './VisionProvider.js';
 import axios from 'axios';
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION
- * LMStudioVisionProvider
- * Strategy authority for prompt engineering and intent mapping using a local LM Studio Vision-Language Model.
+ * @class MStudioVisionProvider
+ * @description EXAMPLE STRATEGY IMPLEMENTATION Strategy authority for prompt engineering and intent mapping using a local LM Studio Vision-Language Model.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram

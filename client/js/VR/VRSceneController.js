@@ -32,8 +32,10 @@ import { WristUI } from './WristUI.js';
 import { InteractiveMap } from './InteractiveMap.js';
 
 /**
- * VRSceneController manages the A-Frame Lifecycle and WebXR spatial audio syncing.
+ * @class VRSceneController 
+ * @description Manages the A-Frame Lifecycle and WebXR spatial audio syncing.
  * Acts as the bridge between agnostic 2D logic and 3D WebXR representation.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -66,7 +68,7 @@ export class VRSceneController {
         this.vrManager = new VRManager(ui, vrLoaderStrategy);
         this.vrAudio = new VRRPGAudioManager();
         this.currentEpoch = 0;
-        if (typeof WristUI !== 'undefined') WristUI.register(); 
+        if (typeof WristUI !== 'undefined') WristUI.register();
         if (typeof InteractiveMap !== 'undefined') InteractiveMap.register();
         this.setupListeners();
     }
@@ -164,7 +166,7 @@ export class VRSceneController {
             }
         }
     }
-    
+
     /**
      * @method getVRHeadtracking
      * @memberof SceneController
@@ -178,7 +180,7 @@ export class VRSceneController {
         }
         return null;
     }
-    
+
     /**
      * @method updateSkybox
      * @memberof SceneController
@@ -202,7 +204,7 @@ export class VRSceneController {
     updateVRNavigation(links) {
         const scene = document.querySelector('a-scene');
         if (scene) {
-            this.vrManager.createNavArrows(links); 
+            this.vrManager.createNavArrows(links);
         }
     }
 
@@ -276,7 +278,7 @@ export class VRSceneController {
         const mapLayer = document.getElementById('map-layer');
 
         if (scene && vrContainer) {
-            
+
             vrContainer.style.display = 'block';
             vrContainer.style.zIndex = '100';
             vrContainer.style.opacity = '1';
@@ -285,25 +287,25 @@ export class VRSceneController {
                 mapLayer.style.visibility = 'hidden';
                 mapLayer.style.zIndex = '1'; // Push map to the background
             }
-            
+
             if (nodeId) this.vrManager.updateSkybox(nodeId);
-            
+
             if (links) this.updateVRNavigation(links);
-            
+
             let mapWindow = document.getElementById('vr-floating-map');
             if (!mapWindow) {
                 mapWindow = document.createElement('a-entity');
                 mapWindow.setAttribute('id', 'vr-floating-map');
-                
+
                 mapWindow.setAttribute('position', '0 1.2 -1.5');
                 mapWindow.setAttribute('rotation', '-15 0 0');
-                
+
                 mapWindow.setAttribute('geometry', 'primitive: plane; width: 1.6; height: 0.9');
                 mapWindow.setAttribute('material', 'shader: flat; side: double');
                 mapWindow.classList.add('raycastable');
-                
+
                 mapWindow.setAttribute('visible', false);
-                
+
                 mapWindow.setAttribute('interactive-map', 'canvasId: radar-canvas');
 
                 scene.appendChild(mapWindow);

@@ -27,8 +27,9 @@
  */
 
 /**
- * AudioProvider (Base Class Interface)
- * Interface for audio synthesis providers.
+ * @class AudioProvider
+ * @description Base Class Interface. Interface for audio synthesis providers.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -38,7 +39,6 @@
  * }
  * ```
  */
-
 export class AudioProvider {
     /**
      * @async

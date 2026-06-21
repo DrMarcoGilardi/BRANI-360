@@ -27,9 +27,9 @@
  */
 
 /**
- * Strategy Pattern Interface for semantic definitions
- * Defines what a node "means" and how the engine should behave towards those meanings.
- * Extracts layer definitions away from the core orchestration.
+ * @class BaseSemanticProvider
+ * @description Strategy Pattern Interface for semantic definitions. Defines what a node "means" and how the engine should behave towards those meanings. Extracts layer definitions away from the core orchestration.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -40,7 +40,6 @@
  * +requiresBackgroundProcessing() boolean
  * }
  * ```
- * @class
  */
 export class BaseSemanticProvider {
     /** 

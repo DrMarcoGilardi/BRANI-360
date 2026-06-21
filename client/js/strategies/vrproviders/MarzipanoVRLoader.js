@@ -3,6 +3,7 @@ import { BaseVRLoader } from './BaseVRLoader.js';
 /**
  * @class MarzipanoVRLoader
  * @description Manages texture loading and image processing specific to Marzipano environments for WebXR injection.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram

@@ -4,6 +4,7 @@ import { Physics2D } from '../../Utilities/Physics2D.js';
 /**
  * @class MarzipanoViewerProvider
  * @description Provider managing the Marzipano 360 viewer, its dynamic force-directed graph UI overlay, and event orchestration.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram

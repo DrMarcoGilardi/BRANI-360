@@ -35,9 +35,7 @@ import { NavigationManager } from './NavigationManager.js';
 import { TopologyRadar } from './TopologyRadar.js';
 
 /**
- * Main application bootstrap (Dependency Injection Root).
- * Fully Agnostic Injection handler. Fetches configuration from the server 
- * and imports requested strategy patterns dynamically over the network.
+ * @description Main application bootstrap (Dependency Injection Root). Fully Agnostic Injection handler. Fetches configuration from the server and imports requested strategy patterns dynamically over the network.
  * @returns {Promise<void>}
  */
 
@@ -82,7 +80,7 @@ async function bootstrap() {
 
     try {
         const player = new SpatialAudioPlayer(config);
-        const treadmill = new AcousticTreadmill(player, ui);
+        const treadmill = new AcousticTreadmill(player, ui, config.options);
 
         // --- DYNAMIC AGNOSTIC STRATEGY INJECTION --
         const {

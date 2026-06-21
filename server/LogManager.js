@@ -34,8 +34,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * LogManager handles session-based file logging.
- * It creates a new log file for the system boot and individual files for each socket connection.
+ * @class LogManager 
+ * @description Handles session-based file logging. It creates a new log file for the system boot and individual files for each socket connection.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -58,10 +59,10 @@ export class LogManager {
         this.logsDir = path.join(__dirname, '../../cache/logs');
         this.systemLogStream = null;
         this.sessionStreams = new Map();
-        
+
         this.init();
     }
-    
+
     /**
      * @method init
      * @memberof LogManager
@@ -76,7 +77,7 @@ export class LogManager {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const filename = `system_boot_${timestamp}.log`;
         const filePath = path.join(this.logsDir, filename);
-        
+
         this.systemLogStream = fs.createWriteStream(filePath, { flags: 'a' });
         this.write(this.systemLogStream, `[SYSTEM] Log initialized at ${new Date().toISOString()}`);
         console.log(`[LogManager] System logging started: ${filename}`);
@@ -93,10 +94,10 @@ export class LogManager {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const filename = `session_${socketId}_${timestamp}.log`;
         const filePath = path.join(this.logsDir, filename);
-        
+
         const stream = fs.createWriteStream(filePath, { flags: 'a' });
         this.sessionStreams.set(socketId, stream);
-        
+
         this.write(stream, `[SESSION START] Socket: ${socketId} at ${new Date().toISOString()}`);
         return filename;
     }
@@ -140,11 +141,11 @@ export class LogManager {
     log(message, socketId = null) {
         const timestamp = new Date().toLocaleTimeString();
         const fullMessage = `[${timestamp}] ${message}`;
-        
+
         console.log(fullMessage);
-        
+
         this.write(this.systemLogStream, fullMessage);
-        
+
         if (socketId && this.sessionStreams.has(socketId)) {
             this.write(this.sessionStreams.get(socketId), fullMessage);
         }

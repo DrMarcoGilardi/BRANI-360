@@ -1,6 +1,7 @@
 /**
  * @class Physics2D
  * @description A standalone 2D physics engine using force-directed graph algorithms to dynamically layout and arrange nodes and their text labels.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram

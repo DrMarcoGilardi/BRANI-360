@@ -29,9 +29,9 @@
 import { ContextProvider } from './ContextProvider.js'
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION
- * GeoapifyContextProvider
- * Resolves geographical coordinates into location context strings using the Geoapify Reverse Geocoding API.
+ * @class GeoapifyContextProvider
+ * @description EXAMPLE STRATEGY IMPLEMENTATION Resolves geographical coordinates into location context strings using the Geoapify Reverse Geocoding API.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -82,7 +82,7 @@ export class GeoapifyContextProvider extends ContextProvider {
             return "Unknown Location";
         }
     }
-    
+
     /**
      * @method getPublicConfig
      * @memberof GeoapifyContextProvider

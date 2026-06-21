@@ -27,8 +27,9 @@
  */
 
 /**
- * GPUResourceManager
- * Handles queuing and concurrency for hardware-intensive tasks.
+ * @class GPUResourceManager
+ * @description Handles queuing and concurrency for hardware-intensive tasks.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -52,10 +53,10 @@ export class GPUResourceManager {
      * @param {number} [maxWorkers=2] - The maximum number of concurrent GPU tasks allowed.
      */
     constructor(maxWorkers = 2) {
-        this.maxWorkers = maxWorkers; 
+        this.maxWorkers = maxWorkers;
         this.activeWorkers = 0;
         this.backgroundQueue = [];
-        this.lockQueue = []; 
+        this.lockQueue = [];
 
         this.activeTasks = new Map();
         this.recentCompletions = new Set();
@@ -124,7 +125,7 @@ export class GPUResourceManager {
     queueBackgroundTask(task) {
         // ALLOW bypass if this is an explicit regeneration request
         const isRegen = !!task.regenOpts;
-        
+
         if (!isRegen && this.recentCompletions.has(task.id)) {
             return;
         }
@@ -134,7 +135,7 @@ export class GPUResourceManager {
 
         if (existingQueued || existingActive) {
             const target = existingQueued || existingActive;
-            
+
             // Update session metadata so the result can be delivered to the 
             // latest socket/epoch even if the task was started in a previous one.
             target.socket = task.socket;
@@ -167,11 +168,11 @@ export class GPUResourceManager {
      * @param {string} socketId - The client's socket identifier.
      */
     clearTasksForSocket(socketId) {
-        this.backgroundQueue = this.backgroundQueue.filter(t => 
+        this.backgroundQueue = this.backgroundQueue.filter(t =>
             t.socket?.id !== socketId || t.persistent === true
         );
     }
-    
+
     /**
      * @method completeTask
      * @memberof GPUResourceManager
@@ -179,7 +180,7 @@ export class GPUResourceManager {
      * @param {string} id - The task identifier.
      * @param {boolean} [success=true] - Whether the task finished successfully.
      */
-    completeTask(id, success=true) {
+    completeTask(id, success = true) {
         if (this.activeTasks.has(id)) {
             this.activeTasks.delete(id);
             if (success) {

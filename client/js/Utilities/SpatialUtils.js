@@ -27,9 +27,9 @@
  */
 
 /**
- * SpatialUtils
- * Agnostic mathematical utilities for geographic and topological operations.
- * Explicitly decoupled from proprietary libraries.
+ * @class SpatialUtils
+ * @description Agnostic mathematical utilities for geographic and topological operations. Explicitly decoupled from proprietary libraries.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -61,8 +61,8 @@ export const SpatialUtils = {
         const dlambda = (lon2 - lon1) * Math.PI / 180;
 
         const a = Math.sin(dphi / 2) * Math.sin(dphi / 2) +
-                  Math.cos(phi1) * Math.cos(phi2) *
-                  Math.sin(dlambda / 2) * Math.sin(dlambda / 2);
+            Math.cos(phi1) * Math.cos(phi2) *
+            Math.sin(dlambda / 2) * Math.sin(dlambda / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         return R * c;
@@ -85,8 +85,8 @@ export const SpatialUtils = {
 
         const y = Math.sin(dlambda) * Math.cos(phi2);
         const x = Math.cos(phi1) * Math.sin(phi2) -
-                  Math.sin(phi1) * Math.cos(phi2) * Math.cos(dlambda);
-        
+            Math.sin(phi1) * Math.cos(phi2) * Math.cos(dlambda);
+
         let brng = Math.atan2(y, x);
         brng = brng * 180 / Math.PI;
         return (brng + 360) % 360;

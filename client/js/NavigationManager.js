@@ -27,9 +27,9 @@
  */
 
 /**
- * NavigationManager (Provider-Agnostic)
- * Orchestrates movement using injected Strategy Providers (Viewer, Topology, UI, etc.).
- * Coordinates the fetch state and topology mapping when navigating between panoramas.
+ * @class NavigationManager
+ * @description Orchestrates movement using injected Strategy Providers (Viewer, Topology, UI, etc.) agnostically. Coordinates the fetch state and topology mapping when navigating between panoramas.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -307,21 +307,21 @@ export class NavigationManager {
         const wantsBackground = this.semanticProvider.requiresBackgroundProcessing();
         const activeLayers = this.semanticProvider.getActiveLayers();
         const backgroundLayers = this.semanticProvider.getBackgroundLayers();
-        
+
         const nearbyAnchorIds = wantsBackground ? data.nearbyAnchors.map(a => a.nodeId || a.id) : [];
-        
+
         const nearbyAnchorPayloads = wantsBackground ? data.nearbyAnchors.map(a => ({
             nodeId: a.nodeId || a.id,
             hops: a.hops,
             requestedLayers: backgroundLayers
         })) : [];
-        
+
         this.currentIsAnchor = isAnchor;
         this.currentNearbyAnchors = wantsBackground ? data.nearbyAnchors : [];
-        
+
         this.ui.setNodeInfo(nodeId, isAnchor);
         if (data.graphData) this.ui.drawRadarGraph(data.graphData, nodeId);
-        
+
         this.treadmill.reset(nodeId, nearbyAnchorIds, isAnchor);
 
         this.treadmill.refreshMix(nodeId, isAnchor, this.currentNearbyAnchors, this.radar);
@@ -329,7 +329,7 @@ export class NavigationManager {
             this.vrSceneController.updateSkybox(nodeId);
             this.vrSceneController.updateVRNavigation(data.links);
         }
-        
+
         this.networkService.emitSync({
             nodeId: nodeId,
             originNodeId: originNodeId,

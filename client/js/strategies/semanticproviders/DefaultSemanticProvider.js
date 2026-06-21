@@ -28,9 +28,9 @@
 import { BaseSemanticProvider } from "./BaseSemanticProvider.js";
 
 /**
- * EXAMPLE STRATEGY IMPLEMENTATION
- * Default Semantic Strategy
- * Implements the standard base layers: ambient, spatial, and horizon.
+ * @class DefaultSemanticProvider
+ * @description EXAMPLE STRATEGY IMPLEMENTATION Default Semantic Strategy. Implements the standard base layers: ambient, spatial, and horizon.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram

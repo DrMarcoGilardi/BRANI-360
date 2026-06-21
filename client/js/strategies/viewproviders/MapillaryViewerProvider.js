@@ -29,9 +29,9 @@
 import { BaseViewerProvider } from './BaseViewerProvider.js';
 
 /**
- * MapillaryViewerProvider
- * EXAMPLE STRATEGY IMPLEMENTATION
- * Strategy implementing the map and 360° viewer interface utilizing MapillaryJS and MapLibre GL.
+ * @class MapillaryViewerProvider
+ * @description EXAMPLE STRATEGY IMPLEMENTATION Strategy implementing the map and 360° viewer interface utilizing MapillaryJS and MapLibre GL.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -45,7 +45,6 @@ import { BaseViewerProvider } from './BaseViewerProvider.js';
  * +getNativeViewer() Object
  * }
  * ```
- * @class
  */
 export class MapillaryViewerProvider extends BaseViewerProvider {
     /**

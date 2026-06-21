@@ -27,9 +27,9 @@
  */
 
 /**
- * ContextProvider
- * Interface for location resolution and client-side configuration delivery.
- * Enforces provider-agnosticism on the backend.
+ * @calss ContextProvider
+ * @description Interface for location resolution and client-side configuration delivery. Enforces provider-agnosticism on the backend.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram

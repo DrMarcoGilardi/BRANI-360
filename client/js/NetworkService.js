@@ -27,8 +27,9 @@
  */
 
 /**
- * NetworkService
- * Encapsulates WebSocket orchestration and High-Speed Navigation Guards.
+ * @class NetworkService
+ * @description Encapsulates WebSocket orchestration and High-Speed Navigation Guards.
+ * 
  * * ### Architecture
  * ```mermaid
  * classDiagram
@@ -60,7 +61,7 @@ export class NetworkService {
         this.persistentFetchControllers = new Set();
 
         this.socket = io(this.tunnelUrl, {
-            transports: ['polling','websocket'],
+            transports: ['polling', 'websocket'],
             autoConnect: true,
             reconnection: true,
             reconnectionAttempts: Infinity,
@@ -187,13 +188,13 @@ export class NetworkService {
         try {
             const separator = url.includes('?') ? '&' : '?';
             const fetchUrl = `${this.tunnelUrl}${url}${separator}t=${Date.now()}`;
-            
+
             const response = await fetch(fetchUrl, { signal: controller.signal });
             if (!response.ok) throw new Error(`HTTP ${response.status} failed to fetch audio`);
-            
+
             return await response.arrayBuffer();
         } catch (e) {
-            throw e; 
+            throw e;
         } finally {
             targetRegistry.delete(controller);
         }
@@ -240,7 +241,7 @@ export class NetworkService {
         this.socket.on('pipeline_reset', () => this.ui.resetPipeline());
 
         this.socket.on('pipeline_progress', this._handlePipelineProgress.bind(this));
-        
+
         // MATCH SERVER EVENTS: The server emits 'instance_ready' for spatial objects 
         // and 'node_ready' for persistent tasks (base node layer or background nodes).
         this.socket.on('instance_ready', this._handleObjectReady.bind(this));
@@ -278,16 +279,16 @@ export class NetworkService {
         const payload = data.taskData ? { ...data, ...data.taskData } : { ...data };
 
         const nodeId = payload.nodeId?.toString();
-        const targetId = payload.id?.toString(); 
-        let currentNodeId =  this.navManager.currentNodeId?.toString();
+        const targetId = payload.id?.toString();
+        let currentNodeId = this.navManager.currentNodeId?.toString();
 
         const isNeighbor = this.treadmill.anchorTracker.expectedIds.includes(nodeId);
         if (nodeId && nodeId !== currentNodeId && !isNeighbor) return;
 
         // In AIEngine, persistent nodes share their ID with the node ID. 
         // Spatial instances have a unique suffixed ID.
-        const isObject = targetId !== nodeId; 
-        
+        const isObject = targetId !== nodeId;
+
         // Evaluate topological state
         const isBackgroundNode = this.treadmill.anchorTracker.expectedIds.includes(targetId) && targetId !== currentNodeId;
         const isAnchorInSession = this.navManager.currentIsAnchor && targetId === currentNodeId;
@@ -321,11 +322,11 @@ export class NetworkService {
     async _handleObjectReady(data) {
         // Merge taskData properties to the top level for the AudioPlayer
         const payload = data.taskData ? { ...data, ...data.taskData } : { ...data };
-        
+
         const nodeId = payload.nodeId?.toString();
-        const targetId = payload.id?.toString(); 
-        let currentNodeId =  this.navManager.currentNodeId?.toString();
-         
+        const targetId = payload.id?.toString();
+        let currentNodeId = this.navManager.currentNodeId?.toString();
+
 
         if (!this._isEpochValid(payload.navEpoch, `Object ${payload.label}`)) return;
         if (nodeId !== currentNodeId) return;
@@ -333,12 +334,12 @@ export class NetworkService {
         this.sceneController.ensureAudioContext();
 
         const taskPayload = payload.taskData ? { ...payload.taskData } : { ...payload };
-        delete taskPayload.audioBuffer; 
+        delete taskPayload.audioBuffer;
 
         try {
             const buffer = await this.fetchAudioUrl(payload.url, false);
             if (!buffer) return;
-            
+
             currentNodeId = this.navManager.currentNodeId?.toString();
             if (!currentNodeId) return;
 
@@ -346,7 +347,7 @@ export class NetworkService {
             if (nodeId !== currentNodeId) return;
 
             payload.audioBuffer = buffer;
-            payload.nodeId = nodeId; 
+            payload.nodeId = nodeId;
 
             this.player.playObjectSound(payload);
             if (this.sceneController.addSpatialSource) {
@@ -376,9 +377,9 @@ export class NetworkService {
      */
     async _handlePersistentReady(data) {
         const payload = data.taskData ? { ...data, ...data.taskData } : { ...data };
-        
+
         const nodeId = payload.nodeId?.toString();
-        let currentNodeId =  this.navManager.currentNodeId?.toString();
+        let currentNodeId = this.navManager.currentNodeId?.toString();
 
         if (!currentNodeId) return;
 
@@ -394,7 +395,7 @@ export class NetworkService {
             // true flag routes this fetch to the persistentFetchControllers
             const buffer = await this.fetchAudioUrl(payload.url, true);
             if (!buffer) return;
-            
+
             currentNodeId = this.navManager.currentNodeId?.toString();
             if (!currentNodeId) return;
 
@@ -413,12 +414,12 @@ export class NetworkService {
                 this.treadmill.updateAggregateProgress(nodeId, this.navManager.currentIsAnchor);
                 this.ui.updatePipelineProgress(nodeId, 'complete', 1.0, false, true, true, label, taskPayload);
             }
-            
+
             setTimeout(() => this.treadmill.refreshMix(currentNodeId, this.navManager.currentIsAnchor, this.navManager.currentNearbyAnchors, this.navManager.radar), 100);
         } catch (e) {
             if (e.name === 'AbortError') return;
             console.error(`[Audio Error] Persistent Layer ${nodeId} failed:`, e);
-            
+
             const label = this.getHUDLabel(nodeId, false, null, nodeId);
             const isBackgroundNode = nodeId !== currentNodeId;
             this.ui.updatePipelineProgress(nodeId, 'error', 1.0, false, nodeId === currentNodeId && this.navManager.currentIsAnchor, isBackgroundNode, label, taskPayload);
