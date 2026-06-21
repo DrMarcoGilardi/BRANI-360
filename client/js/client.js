@@ -34,11 +34,6 @@ import { NetworkService } from './NetworkService.js';
 import { NavigationManager } from './NavigationManager.js';
 import { TopologyRadar } from './TopologyRadar.js';
 
-/**
- * @description Main application bootstrap (Dependency Injection Root). Fully Agnostic Injection handler. Fetches configuration from the server and imports requested strategy patterns dynamically over the network.
- * @returns {Promise<void>}
- */
-
 const ZROK_UNIQUE_NAME = "uwscct"; // <--- Set the unique name you created in zrok here!
 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'; //<-- detects whether the software is running locally
 const urlParams = new URLSearchParams(window.location.search);

@@ -2,8 +2,7 @@
 
 <dl>
 <dt><a href="#AIEngine">AIEngine</a></dt>
-<dd><p>Handles logic, prompt construction, and provider selection. 
-Standardized: Encapsulates all strategy instantiation and dictionary.</p>
+<dd><p>Handles logic, prompt construction, and provider selection.<br>Standardized: Encapsulates all strategy instantiation and dictionary.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -31,7 +30,7 @@ class AIEngine{
 
 </dd>
 <dt><a href="#AudioProvider">AudioProvider</a></dt>
-<dd><p>Base Class Interface. Interface for audio synthesis providers.</p>
+<dd><p>Base Class Interface.<br>Interface for audio synthesis providers.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -49,8 +48,7 @@ class AudioProvider{
 
 </dd>
 <dt><a href="#PythonAudioProvider">PythonAudioProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
-Delegate strategy for producing audio by invoking an external Python generation script (e.g., custom PyTorch inferencing).</p>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Delegate strategy for producing audio by invoking an external Python generation script (e.g., custom PyTorch inferencing).</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -69,8 +67,7 @@ class PythonAudioProvider{
 
 </dd>
 <dt><a href="#StableAudioGradioProvider">StableAudioGradioProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
-Handles generation and transcodes of audio via Gradio API connections to a Stable Audio Open instance.</p>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Handles generation and transcodes of audio via Gradio API connections to a Stable Audio Open instance.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -89,8 +86,7 @@ class StableAudioGradioProvider{
 
 </dd>
 <dt><a href="#ContextProvider">ContextProvider</a></dt>
-<dd><p>Base Class Interface. 
-Interface for location resolution and client-side configuration delivery. Enforces provider-agnosticism on the backend.</p>
+<dd><p>Base Class Interface.<br>Interface for location resolution and client-side configuration delivery. Enforces provider-agnosticism on the backend.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -109,8 +105,7 @@ class ContextProvider{
 
 </dd>
 <dt><a href="#GeoapifyContextProvider">GeoapifyContextProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
-Resolves geographical coordinates into location context strings using the Geoapify Reverse Geocoding API.</p>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Resolves geographical coordinates into location context strings using the Geoapify Reverse Geocoding API.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -129,8 +124,7 @@ class GeoapifyContextProvider{
 
 </dd>
 <dt><a href="#MarzipanoContextProvider">MarzipanoContextProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION
-Serves locational and contextual metadata logic for local Marzipano environments.</p>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Serves locational and contextual metadata logic for local Marzipano environments.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -151,8 +145,7 @@ class MarzipanoContextProvider{
 
 </dd>
 <dt><a href="#ImageSourceProvider">ImageSourceProvider</a></dt>
-<dd><p>Base Class Interface. 
-Interface for 360-degree image acquisition strategies.</p>
+<dd><p>Base Class Interface.<br>Interface for 360-degree image acquisition strategies.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -170,9 +163,7 @@ class ImageSourceProvider{
 
 </dd>
 <dt><a href="#MapillarySource">MapillarySource</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
-Provider strategy for fetching raw equirectangular image buffers from the Mapillary API. 
-Enforces strict filtering to reject non-360 panoramic images.</p>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Provider strategy for fetching raw equirectangular image buffers from the Mapillary API.<br>Enforces strict filtering to reject non-360 panoramic images.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -208,8 +199,7 @@ class MarzipanoImageSource{
 
 </dd>
 <dt><a href="#LMStudioVisionProvider">LMStudioVisionProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
-Strategy authority for prompt engineering and intent mapping using a local LM Studio Vision-Language Model.</p>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Strategy authority for prompt engineering and intent mapping using a local LM Studio Vision-Language Model.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -228,8 +218,7 @@ class LMStudioVisionProvider{
 
 </dd>
 <dt><a href="#PythonVisionProvider">PythonVisionProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
-Interacts with external Python scripts (e.g., custom models or OpenCV pipelines) to generate sonic intents from visual buffers.</p>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Interacts with external Python scripts (e.g., custom models or OpenCV pipelines) to generate sonic intents from visual buffers.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -248,9 +237,7 @@ class PythonVisionProvider{
 
 </dd>
 <dt><a href="#VisionProvider">VisionProvider</a></dt>
-<dd><p>Base class interface. 
-Interface for multimodal analysis providers. 
-CONTRACT: Implementing classes must return an object containing an &#39;intents&#39; array.</p>
+<dd><p>Base class interface.<br>Interface for multimodal analysis providers.<br>CONTRACT: Implementing classes must return an object containing an &#39;intents&#39; array.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -269,9 +256,9 @@ class VisionProvider{
 
 </dd>
 <dt><a href="#CacheManager">CacheManager</a></dt>
-<dd><p>Implements a hybrid storage strategy:</p>
+<dd><p>Implements a hybrid storage strategy:  </p>
 <ul>
-<li>SQLite: Database of pointers and lightweight metadata.</li>
+<li>SQLite: Database of pointers and lightweight metadata.  </li>
 <li>Filesystem: Standalone storage for JSON (VLM Ouputs) and Audio outputs.</li>
 </ul>
 <ul>
@@ -328,8 +315,7 @@ class GPUResourceManager{
 
 </dd>
 <dt><a href="#LogManager">LogManager</a></dt>
-<dd><p>Handles session-based file logging. 
-It creates a new log file for the system boot and individual files for each socket connection.</p>
+<dd><p>Handles session-based file logging.<br>It creates a new log file for the system boot and individual files for each socket connection.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -352,8 +338,7 @@ class LogManager{
 
 </dd>
 <dt><a href="#PipelineService">PipelineService</a></dt>
-<dd><p>Domain-agnostic task runner. 
-It treats tasks as black boxes and moves data without editing it.</p>
+<dd><p>Domain-agnostic task runner.<br>It treats tasks as black boxes and moves data without editing it.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -380,8 +365,7 @@ class PipelineService{
 
 </dd>
 <dt><a href="#SocketController">SocketController</a></dt>
-<dd><p>Acts as the primary research interface for WebSocket clients. 
-It coordinates real-time data flow between the frontend, the GPU queue, and the pluggable AI strategies. </p>
+<dd><p>Acts as the primary research interface for WebSocket clients.<br>It coordinates real-time data flow between the frontend, the GPU queue, and the pluggable AI strategies. </p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -503,7 +487,7 @@ class Utils{
 <a name="AIEngine"></a>
 
 ## AIEngine
-Handles logic, prompt construction, and provider selection. Standardized: Encapsulates all strategy instantiation and dictionary.* ### Architecture```mermaidclassDiagramAIEngine --> ImageSourceProvider : UsesAIEngine --> ContextProvider : UsesAIEngine --> VisionProvider : UsesAIEngine --> AudioProvider : UsesAIEngine --> CacheManager : Usesclass AIEngine{+init() Promise~void~+getPublicConfig() Object+getTasksForMovement(nodeId, lat, lng, isAnchor, locationContext, requestedLayers) Promise~Array~+getTasksForHorizon(nodeId, lat, lng, locationContext, requestedLayers) Promise~Array~+createRegenTask(taskData, feedbackData, epoch) Promise~Object~+process(nodeId, lat, lng, options) Promise~Object~+generateAudio(task, signal, socket, progressCallback) Promise~Object~}```
+Handles logic, prompt construction, and provider selection.  Standardized: Encapsulates all strategy instantiation and dictionary.* ### Architecture```mermaidclassDiagramAIEngine --> ImageSourceProvider : UsesAIEngine --> ContextProvider : UsesAIEngine --> VisionProvider : UsesAIEngine --> AudioProvider : UsesAIEngine --> CacheManager : Usesclass AIEngine{+init() Promise~void~+getPublicConfig() Object+getTasksForMovement(nodeId, lat, lng, isAnchor, locationContext, requestedLayers) Promise~Array~+getTasksForHorizon(nodeId, lat, lng, locationContext, requestedLayers) Promise~Array~+createRegenTask(taskData, feedbackData, epoch) Promise~Object~+process(nodeId, lat, lng, options) Promise~Object~+generateAudio(task, signal, socket, progressCallback) Promise~Object~}```
 
 **Kind**: global class  
 
@@ -618,7 +602,7 @@ Executes the audio diffusion strategy and performs post-processing transcodes.
 <a name="AudioProvider"></a>
 
 ## AudioProvider
-Base Class Interface. Interface for audio synthesis providers.* ### Architecture```mermaidclassDiagramclass AudioProvider{<<Abstract>>+generate(task, context) Promise~Object~}```
+Base Class Interface.  Interface for audio synthesis providers.* ### Architecture```mermaidclassDiagramclass AudioProvider{<<Abstract>>+generate(task, context) Promise~Object~}```
 
 **Kind**: global class  
 <a name="AudioProvider.generate"></a>
@@ -641,7 +625,7 @@ Executes the audio generation pipeline for a given semantic task.
 <a name="PythonAudioProvider"></a>
 
 ## PythonAudioProvider
-EXAMPLE STRATEGY IMPLEMENTATION Delegate strategy for producing audio by invoking an external Python generation script (e.g., custom PyTorch inferencing).* ### Architecture```mermaidclassDiagramAudioProvider <|-- PythonAudioProviderclass PythonAudioProvider{+init() Promise~void~+generate(task, contextHooks) Promise~Object~}```
+EXAMPLE STRATEGY IMPLEMENTATION  Delegate strategy for producing audio by invoking an external Python generation script (e.g., custom PyTorch inferencing).* ### Architecture```mermaidclassDiagramAudioProvider <|-- PythonAudioProviderclass PythonAudioProvider{+init() Promise~void~+generate(task, contextHooks) Promise~Object~}```
 
 **Kind**: global class  
 
@@ -681,7 +665,7 @@ Offloads the audio task to a Python subprocess, handling the retrieval of the ge
 <a name="StableAudioGradioProvider"></a>
 
 ## StableAudioGradioProvider
-EXAMPLE STRATEGY IMPLEMENTATION Handles generation and transcodes of audio via Gradio API connections to a Stable Audio Open instance.* ### Architecture```mermaidclassDiagramAudioProvider <|-- StableAudioGradioProviderclass StableAudioGradioProvider{+init() Promise~void~+generate(task, executionContext) Promise~Object~}```
+EXAMPLE STRATEGY IMPLEMENTATION  Handles generation and transcodes of audio via Gradio API connections to a Stable Audio Open instance.* ### Architecture```mermaidclassDiagramAudioProvider <|-- StableAudioGradioProviderclass StableAudioGradioProvider{+init() Promise~void~+generate(task, executionContext) Promise~Object~}```
 
 **Kind**: global class  
 
@@ -721,7 +705,7 @@ Executes the generation cycle via Gradio API, handling prompt formulation, audio
 <a name="ContextProvider"></a>
 
 ## ContextProvider
-Base Class Interface. Interface for location resolution and client-side configuration delivery. Enforces provider-agnosticism on the backend.* ### Architecture```mermaidclassDiagramclass ContextProvider{<<Abstract>>+resolve(lat, lng) Promise~string~+getPublicConfig() Object}```
+Base Class Interface.  Interface for location resolution and client-side configuration delivery. Enforces provider-agnosticism on the backend.* ### Architecture```mermaidclassDiagramclass ContextProvider{<<Abstract>>+resolve(lat, lng) Promise~string~+getPublicConfig() Object}```
 
 **Kind**: global class  
 **Calss**:   
@@ -761,7 +745,7 @@ Exposes public configuration/credentials safely to the frontend client.
 <a name="GeoapifyContextProvider"></a>
 
 ## GeoapifyContextProvider
-EXAMPLE STRATEGY IMPLEMENTATION Resolves geographical coordinates into location context strings using the Geoapify Reverse Geocoding API.* ### Architecture```mermaidclassDiagramContextProvider <|-- GeoapifyContextProviderclass GeoapifyContextProvider{+resolve(lat, lng) Promise~string~+getPublicConfig() Object}```
+EXAMPLE STRATEGY IMPLEMENTATION  Resolves geographical coordinates into location context strings using the Geoapify Reverse Geocoding API.* ### Architecture```mermaidclassDiagramContextProvider <|-- GeoapifyContextProviderclass GeoapifyContextProvider{+resolve(lat, lng) Promise~string~+getPublicConfig() Object}```
 
 **Kind**: global class  
 
@@ -802,7 +786,7 @@ Exposes required public keys to the frontend without leaking server secrets.
 <a name="ImageSourceProvider"></a>
 
 ## ImageSourceProvider
-Base Class Interface. Interface for 360-degree image acquisition strategies.* ### Architecture```mermaidclassDiagramclass ImageSourceProvider{<<Abstract>>+getImage(id) Promise~Buffer~}```
+Base Class Interface.  Interface for 360-degree image acquisition strategies.* ### Architecture```mermaidclassDiagramclass ImageSourceProvider{<<Abstract>>+getImage(id) Promise~Buffer~}```
 
 **Kind**: global class  
 <a name="ImageSourceProvider.getImage"></a>
@@ -824,7 +808,7 @@ Fetches an equirectangular image buffer for a specific node ID.
 <a name="MapillarySource"></a>
 
 ## MapillarySource
-EXAMPLE STRATEGY IMPLEMENTATION Provider strategy for fetching raw equirectangular image buffers from the Mapillary API. Enforces strict filtering to reject non-360 panoramic images.* ### Architecture```mermaidclassDiagramImageSourceProvider <|-- MapillarySourceclass MapillarySource{+getImage(id) Promise~Buffer~}```
+EXAMPLE STRATEGY IMPLEMENTATION  Provider strategy for fetching raw equirectangular image buffers from the Mapillary API.  Enforces strict filtering to reject non-360 panoramic images.* ### Architecture```mermaidclassDiagramImageSourceProvider <|-- MapillarySourceclass MapillarySource{+getImage(id) Promise~Buffer~}```
 
 **Kind**: global class  
 
@@ -861,7 +845,7 @@ Fetches the image buffer for a given Mapillary Node ID, utilizing the cache if a
 <a name="LMStudioVisionProvider"></a>
 
 ## LMStudioVisionProvider
-EXAMPLE STRATEGY IMPLEMENTATION Strategy authority for prompt engineering and intent mapping using a local LM Studio Vision-Language Model.* ### Architecture```mermaidclassDiagramVisionProvider <|-- LMStudioVisionProviderclass LMStudioVisionProvider{+init() Promise~void~+analyse(buffer, context, options) Promise~Object~}```
+EXAMPLE STRATEGY IMPLEMENTATION  Strategy authority for prompt engineering and intent mapping using a local LM Studio Vision-Language Model.* ### Architecture```mermaidclassDiagramVisionProvider <|-- LMStudioVisionProviderclass LMStudioVisionProvider{+init() Promise~void~+analyse(buffer, context, options) Promise~Object~}```
 
 **Kind**: global class  
 
@@ -925,7 +909,7 @@ Processes the ambient layer for audio generation.
 <a name="PythonVisionProvider"></a>
 
 ## PythonVisionProvider
-EXAMPLE STRATEGY IMPLEMENTATION Interacts with external Python scripts (e.g., custom models or OpenCV pipelines) to generate sonic intents from visual buffers.* ### Architecture```mermaidclassDiagramVisionProvider <|-- PythonVisionProviderclass PythonVisionProvider{+init() Promise~void~+analyse(buffer, contextString, options) Promise~Object~}```
+EXAMPLE STRATEGY IMPLEMENTATION  Interacts with external Python scripts (e.g., custom models or OpenCV pipelines) to generate sonic intents from visual buffers.* ### Architecture```mermaidclassDiagramVisionProvider <|-- PythonVisionProviderclass PythonVisionProvider{+init() Promise~void~+analyse(buffer, contextString, options) Promise~Object~}```
 
 **Kind**: global class  
 
@@ -966,7 +950,7 @@ Writes the image buffer to disk, spawns a Python child process for analysis, and
 <a name="VisionProvider"></a>
 
 ## VisionProvider
-Base class interface. Interface for multimodal analysis providers. CONTRACT: Implementing classes must return an object containing an 'intents' array. * ### Architecture```mermaidclassDiagramclass VisionProvider{<<Abstract>>+analyse(buffer, context, options) Promise~Object~+validateResponse(data) Object}```
+Base class interface.  Interface for multimodal analysis providers.  CONTRACT: Implementing classes must return an object containing an 'intents' array. * ### Architecture```mermaidclassDiagramclass VisionProvider{<<Abstract>>+analyse(buffer, context, options) Promise~Object~+validateResponse(data) Object}```
 
 **Kind**: global class  
 
@@ -1011,7 +995,7 @@ Validation guard ensuring the provider adheres to the system pipeline schema.
 <a name="CacheManager"></a>
 
 ## CacheManager
-Implements a hybrid storage strategy: - SQLite: Database of pointers and lightweight metadata. - Filesystem: Standalone storage for JSON (VLM Ouputs) and Audio outputs.* ### Architecture```mermaidclassDiagramclass CacheManager{+dbPath string+init()+get(key, type) Promise~any~+set(key, value, type) Promise~boolean~+delete(key) Promise~boolean~+getNode(nodeId) Promise~Object~+saveNode(nodeId, data) Promise~boolean~+getImage(imageId) Promise~string~+saveImage(imageId, buffer) Promise~string~+getVLMData(nodeId) Promise~Object~+saveVLMData(nodeId, data) Promise~boolean~+getAudio(id) Promise~string~+saveAudio(id, buffer) Promise~boolean~}```
+Implements a hybrid storage strategy:   - SQLite: Database of pointers and lightweight metadata.   - Filesystem: Standalone storage for JSON (VLM Ouputs) and Audio outputs.* ### Architecture```mermaidclassDiagramclass CacheManager{+dbPath string+init()+get(key, type) Promise~any~+set(key, value, type) Promise~boolean~+delete(key) Promise~boolean~+getNode(nodeId) Promise~Object~+saveNode(nodeId, data) Promise~boolean~+getImage(imageId) Promise~string~+saveImage(imageId, buffer) Promise~string~+getVLMData(nodeId) Promise~Object~+saveVLMData(nodeId, data) Promise~boolean~+getAudio(id) Promise~string~+saveAudio(id, buffer) Promise~boolean~}```
 
 **Kind**: global class  
 
@@ -1332,7 +1316,7 @@ Marks an active task as completed and tracks it in the recent completions set.
 <a name="LogManager"></a>
 
 ## LogManager
-Handles session-based file logging. It creates a new log file for the system boot and individual files for each socket connection.* ### Architecture```mermaidclassDiagramclass LogManager{+init()+startSession(socketId) string+endSession(socketId)+write(stream, message)+log(message, socketId)+warn(message, socketId)+error(message, socketId)}```
+Handles session-based file logging.  It creates a new log file for the system boot and individual files for each socket connection.* ### Architecture```mermaidclassDiagramclass LogManager{+init()+startSession(socketId) string+endSession(socketId)+write(stream, message)+log(message, socketId)+warn(message, socketId)+error(message, socketId)}```
 
 **Kind**: global class  
 
@@ -1425,7 +1409,7 @@ Error logging method for critical failures.
 <a name="PipelineService"></a>
 
 ## PipelineService
-Domain-agnostic task runner. It treats tasks as black boxes and moves data without editing it.* ### Architecture```mermaidclassDiagramPipelineService --> AIEngine : process / getTasksPipelineService --> GPUResourceManager : queueBackgroundTaskPipelineService --> CacheManager : Checks DB / Saves AudioPipelineService --> LogManager : Records sessions / errorsclass PipelineService{+setEpoch(socketId, epoch)+cleanupSocket(socketId)+checkBatchCompletion()+processMovement(socket, data) Promise~void~+queueTask(socket, task, navEpoch, signal)+processGPUQueue() Promise~void~+regenerateTask(socket, taskData, feedbackData) Promise~void~}```
+Domain-agnostic task runner.  It treats tasks as black boxes and moves data without editing it.* ### Architecture```mermaidclassDiagramPipelineService --> AIEngine : process / getTasksPipelineService --> GPUResourceManager : queueBackgroundTaskPipelineService --> CacheManager : Checks DB / Saves AudioPipelineService --> LogManager : Records sessions / errorsclass PipelineService{+setEpoch(socketId, epoch)+cleanupSocket(socketId)+checkBatchCompletion()+processMovement(socket, data) Promise~void~+queueTask(socket, task, navEpoch, signal)+processGPUQueue() Promise~void~+regenerateTask(socket, taskData, feedbackData) Promise~void~}```
 
 **Kind**: global class  
 
@@ -1527,7 +1511,7 @@ Stateless entry for audio regeneration (human-in-the-loop). Creates a new forced
 <a name="SocketController"></a>
 
 ## SocketController
-Acts as the primary research interface for WebSocket clients. It coordinates real-time data flow between the frontend, the GPU queue, and the pluggable AI strategies. * ### Architecture```mermaidclassDiagramSocketController --> PipelineService : Routes EventsSocketController --> GPUResourceManager : Triggers CancelsSocketController --> LogManager : Tracks Sessionsclass SocketController{+io Server+init()}```
+Acts as the primary research interface for WebSocket clients.  It coordinates real-time data flow between the frontend, the GPU queue, and the pluggable AI strategies. * ### Architecture```mermaidclassDiagramSocketController --> PipelineService : Routes EventsSocketController --> GPUResourceManager : Triggers CancelsSocketController --> LogManager : Tracks Sessionsclass SocketController{+io Server+init()}```
 
 **Kind**: global class  
 

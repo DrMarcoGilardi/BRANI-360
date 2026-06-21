@@ -44,7 +44,7 @@
  * 
  * @class
  */
-export const SpatialUtils = {
+export class SpatialUtils {
     /**
      * @method getDistance
      * @memberof SpatialUtils
@@ -55,7 +55,7 @@ export const SpatialUtils = {
      * @param {number} lon2 
      * @returns {number} Distance in meters.
      */
-    getDistance(lat1, lon1, lat2, lon2) {
+    static getDistance(lat1, lon1, lat2, lon2) {
         const R = 6371e3; // Earth radius in meters
         const phi1 = lat1 * Math.PI / 180;
         const phi2 = lat2 * Math.PI / 180;
@@ -68,7 +68,7 @@ export const SpatialUtils = {
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         return R * c;
-    },
+    }
 
     /**
      * @method getBearing
@@ -79,8 +79,9 @@ export const SpatialUtils = {
      * @param {number} lat2 
      * @param {number} lon2 
      * @returns {number} Bearing in degrees (0-360).
+     * @static
      */
-    getBearing(lat1, lon1, lat2, lon2) {
+    static getBearing(lat1, lon1, lat2, lon2) {
         const phi1 = lat1 * Math.PI / 180;
         const phi2 = lat2 * Math.PI / 180;
         const dlambda = (lon2 - lon1) * Math.PI / 180;
@@ -92,17 +93,20 @@ export const SpatialUtils = {
         let brng = Math.atan2(y, x);
         brng = brng * 180 / Math.PI;
         return (brng + 360) % 360;
-    },
+    }
 
     /**
-     * Converts a lat/lng pair into relative Cartesian X/Z coordinates.
+     * @method getRelativePosition
+     * @memberof SpatialUtils
+     * @description Converts a lat/lng pair into relative Cartesian X/Z coordinates.
      * @param {number} originLat 
      * @param {number} originLng 
      * @param {number} targetLat 
      * @param {number} targetLng 
      * @returns {{x: number, z: number}}
+     * @static
      */
-    getRelativePosition(originLat, originLng, targetLat, targetLng) {
+    static getRelativePosition(originLat, originLng, targetLat, targetLng) {
         const distance = this.getDistance(originLat, originLng, targetLat, targetLng);
         const bearing = this.getBearing(originLat, originLng, targetLat, targetLng);
         const rad = (bearing - 90) * (Math.PI / 180);
@@ -111,7 +115,7 @@ export const SpatialUtils = {
             x: Math.cos(rad) * distance,
             z: Math.sin(rad) * distance
         };
-    },
+    }
 
     /**
      * @method normalizeHeading
@@ -119,10 +123,11 @@ export const SpatialUtils = {
      * @description Normalizes a heading into the standard 0-360 degree range.
      * @param {number} heading - Raw heading.
      * @returns {number} Normalized heading.
+     * @static
      */
-    normalizeHeading(heading) {
+    static normalizeHeading(heading) {
         return (heading % 360 + 360) % 360;
-    },
+    }
 
     /**
      * @method sphericalToCartesian
@@ -132,8 +137,9 @@ export const SpatialUtils = {
      * @param {number} p - Pitch/Vertical elevation (degrees).
      * @param {number} dist - Distance from origin (meters).
      * @returns {{x: number, y: number, z: number}}
+     * @static
      */
-    sphericalToCartesian(h, p, dist) {
+    static sphericalToCartesian(h, p, dist) {
         const hRad = h * (Math.PI / 180);
         const pRad = p * (Math.PI / 180);
         const x = dist * Math.cos(pRad) * Math.sin(hRad);

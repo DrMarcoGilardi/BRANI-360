@@ -33,7 +33,7 @@
  * * ### Architecture
  * ```mermaid
  * classDiagram
- * VRManager --> BaseVRLoader : Uses to fetch tiles
+ * VRManager --> BaseVRLoader : Uses to fetch images/tiles
  * class VRManager{
  * +updateSkybox(nodeId) Promise~void~
  * +createNavArrows(links, onNavigate)

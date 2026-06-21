@@ -2,8 +2,7 @@
 
 <dl>
 <dt><a href="#AcousticTreadmill">AcousticTreadmill</a></dt>
-<dd><p>Manages the mathematical mixing of backgrounds and aggregate progress tracking. 
-Agnostically adjusts volume levels of adjacent nodes to simulate distance.</p>
+<dd><p>Manages the mathematical mixing of backgrounds and aggregate progress tracking.<br>Agnostically adjusts volume levels of adjacent nodes to simulate distance.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -25,8 +24,7 @@ class AcousticTreadmill{
 
 </dd>
 <dt><a href="#NavigationManager">NavigationManager</a></dt>
-<dd><p>Orchestrates movement using injected Strategy Providers (Viewer, Topology, UI, etc.) agnostically. 
-Coordinates the fetch state and topology mapping when navigating between panoramas.</p>
+<dd><p>Orchestrates movement using injected Strategy Providers (Viewer, Topology, UI, etc.) agnostically.<br>Coordinates the fetch state and topology mapping when navigating between panoramas.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -80,8 +78,7 @@ class NetworkService{
 
 </dd>
 <dt><a href="#SpatialAudioPlayer">SpatialAudioPlayer</a></dt>
-<dd><p>Manages the A-Frame/Three.js audio lifecycle for the 3D viewer. 
-Explicitly manages 3D positional instances, local foreground washes, and neighbor background mixes.</p>
+<dd><p>Manages the A-Frame/Three.js audio lifecycle for the 3D viewer.<br>Explicitly manages 3D positional instances, local foreground washes, and neighbor background mixes.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -126,7 +123,7 @@ class AcousticHorizonStrategy{
 
 </dd>
 <dt><a href="#NodeSelectionStrategy">NodeSelectionStrategy</a></dt>
-<dd><p>Strategy Pattern Interface for Node Selection. Determines the logical importance of a node within the topological graph.</p>
+<dd><p>Strategy Pattern Interface for Node Selection.<br>Determines the logical importance of a node within the topological graph.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -145,9 +142,7 @@ class NodeSelectionStrategy{
 
 </dd>
 <dt><a href="#BaseSemanticProvider">BaseSemanticProvider</a></dt>
-<dd><p>Strategy Pattern Interface for semantic definitions. 
-Defines what a node &quot;means&quot; and how the engine should behave towards those meanings. 
-Extracts layer definitions away from the core orchestration.</p>
+<dd><p>Strategy Pattern Interface for semantic definitions.<br>Defines what a node &quot;means&quot; and how the engine should behave towards those meanings.<br>Extracts layer definitions away from the core orchestration.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -167,9 +162,7 @@ class BaseSemanticProvider{
 
 </dd>
 <dt><a href="#DefaultSemanticProvider">DefaultSemanticProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
-Default Semantic Strategy. 
-Implements the standard base layers: ambient, spatial, and horizon.</p>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Default Semantic Strategy.<br>Implements the standard base layers: ambient, spatial, and horizon.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -192,8 +185,7 @@ class DefaultSemanticProvider{
 
 </dd>
 <dt><a href="#BaseTopologyProvider">BaseTopologyProvider</a></dt>
-<dd><p>Strategy Pattern Interface for Node Topology sources. 
-Agnostic interface for fetching graph connectivity from a mapping provider.</p>
+<dd><p>Strategy Pattern Interface for Node Topology sources.<br>Agnostic interface for fetching graph connectivity from a mapping provider.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -211,9 +203,7 @@ class BaseTopologyProvider{
 
 </dd>
 <dt><a href="#MapillaryTopologyProvider">MapillaryTopologyProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
-Resolves node geometry and constructs topological links using Mapillary sequences. 
-Optimized with Memory-Capped LRU Caching and rate-limit throttling.</p>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Resolves node geometry and constructs topological links using Mapillary sequences.<br>Optimized with Memory-Capped LRU Caching and rate-limit throttling.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -231,8 +221,7 @@ class MapillaryTopologyProvider{
 
 </dd>
 <dt><a href="#MarzipanoTopologyProvider">MarzipanoTopologyProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
-Provides network topology parsing for Marzipano local tours, generating spatial routing and node relationships.</p>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Provides network topology parsing for Marzipano local tours, generating spatial routing and node relationships.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -251,8 +240,7 @@ class MarzipanoTopologyProvider{
 
 </dd>
 <dt><a href="#BaseViewerProvider">BaseViewerProvider</a></dt>
-<dd><p>Abstract Strategy Pattern for 2D/360 Viewer SDKs (Google Maps, Mapillary, etc.). 
-Standardizes event emissions and location tracking APIs.</p>
+<dd><p>Abstract Strategy Pattern for 2D/360 Viewer SDKs (Google Maps, Mapillary, etc.).<br>Standardizes event emissions and location tracking APIs.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -278,8 +266,7 @@ class BaseViewerProvider{
 
 </dd>
 <dt><a href="#MapillaryViewerProvider">MapillaryViewerProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
-Strategy implementing the map and 360° viewer interface utilizing MapillaryJS and MapLibre GL.</p>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Strategy implementing the map and 360° viewer interface utilizing MapillaryJS and MapLibre GL.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -302,8 +289,7 @@ class MapillaryViewerProvider{
 
 </dd>
 <dt><a href="#MarzipanoViewerProvider">MarzipanoViewerProvider</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
-Provider managing the Marzipano 360 viewer, its dynamic force-directed graph UI overlay, and event orchestration.</p>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Provider managing the Marzipano 360 viewer, its dynamic force-directed graph UI overlay, and event orchestration.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -330,8 +316,7 @@ class MarzipanoViewerProvider{
 
 </dd>
 <dt><a href="#BaseVRLoader">BaseVRLoader</a></dt>
-<dd><p>Strategy Pattern Interface for VR 360 Image Fetching. 
-Standardizes the progressive loading of high-resolution panoramas for WebXR.</p>
+<dd><p>Strategy Pattern Interface for VR 360 Image Fetching.<br>Standardizes the progressive loading of high-resolution panoramas for WebXR.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -350,8 +335,7 @@ class BaseVRLoader{
 
 </dd>
 <dt><a href="#MapillaryVRLoader">MapillaryVRLoader</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
-Strategy implementation for loading panoramic images from Mapillary&#39;s Graph API into the VR buffer.</p>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Strategy implementation for loading panoramic images from Mapillary&#39;s Graph API into the VR buffer.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -370,8 +354,7 @@ class MapillaryVRLoader{
 
 </dd>
 <dt><a href="#MarzipanoVRLoader">MarzipanoVRLoader</a></dt>
-<dd><p>EXAMPLE STRATEGY IMPLEMENTATION 
-Manages texture loading and image processing specific to Marzipano environments for WebXR injection.</p>
+<dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Manages texture loading and image processing specific to Marzipano environments for WebXR injection.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -414,9 +397,7 @@ class TopologyRadar{
 
 </dd>
 <dt><a href="#UIManager">UIManager</a></dt>
-<dd><p>Handles all 2D overlays, HUD elements, and the Radar graph visualization. 
-Completely Provider Agnostic. 
-Styles are driven by topological context.</p>
+<dd><p>Handles all 2D overlays, HUD elements, and the Radar graph visualization.<br>Completely Provider Agnostic.<br>Styles are driven by topological context.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -478,10 +459,28 @@ class Physics2D{
 
 </dd>
 <dt><a href="#SpatialUtils">SpatialUtils</a></dt>
-<dd></dd>
+<dd><p>Agnostic mathematical utilities for geographic and topological operations.<br>Explicitly decoupled from proprietary libraries.</p>
+<ul>
+<li><h3 id="architecture">Architecture</h3>
+</li>
+</ul>
+
+
+```mermaid
+classDiagram
+class SpatialUtils{
++getDistance(lat1, lon1, lat2, lon2) number
++getBearing(lat1, lon1, lat2, lon2) number
++getRelativePosition(originLat, originLng, targetLat, targetLng) Object
++normalizeHeading(heading) number
++sphericalToCartesian(h, p, dist) Object
+}
+```
+
+
+</dd>
 <dt><a href="#InteractiveMap">InteractiveMap</a></dt>
-<dd><p>Bridges 3D WebXR raycast events to a 2D HTML5 Canvas. 
-Registers the &#39;interactive-map&#39; A-Frame component to allow users to interact with UI elements like the topology radar from within VR.</p>
+<dd><p>Bridges 3D WebXR raycast events to a 2D HTML5 Canvas.<br>Registers the &#39;interactive-map&#39; A-Frame component to allow users to interact with UI elements like the topology radar from within VR.</p>
 <h3 id="architecture">Architecture</h3>
 
 
@@ -495,8 +494,7 @@ class InteractiveMap{
 
 </dd>
 <dt><a href="#VRManager">VRManager</a></dt>
-<dd><p>Main coordinator for the VR experience. 
-Orchestrates HD visual projection and Camera sync.</p>
+<dd><p>Main coordinator for the VR experience.<br>Orchestrates HD visual projection and Camera sync.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -505,7 +503,7 @@ Orchestrates HD visual projection and Camera sync.</p>
 
 ```mermaid
 classDiagram
-VRManager --> BaseVRLoader : Uses to fetch tiles
+VRManager --> BaseVRLoader : Uses to fetch images/tiles
 class VRManager{
 +updateSkybox(nodeId) Promise~void~
 +createNavArrows(links, onNavigate)
@@ -516,8 +514,7 @@ class VRManager{
 
 </dd>
 <dt><a href="#VRRPGAudioManager">VRRPGAudioManager</a></dt>
-<dd><p>Manages A-Frame sound entities. 
-Places sounds in the 3D space.</p>
+<dd><p>Manages A-Frame sound entities.<br>Places sounds in the 3D space.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -538,8 +535,7 @@ class VRRPGAudioManager{
 
 </dd>
 <dt><a href="#VRSceneController">VRSceneController</a></dt>
-<dd><p>Manages the A-Frame Lifecycle and WebXR spatial audio syncing.
-Acts as the bridge between agnostic 2D logic and 3D WebXR representation.</p>
+<dd><p>Manages the A-Frame Lifecycle and WebXR spatial audio syncing.<br>Acts as the bridge between agnostic 2D logic and 3D WebXR representation.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
 </li>
@@ -568,8 +564,7 @@ class VRSceneController{
 
 </dd>
 <dt><a href="#WristUI">WristUI</a></dt>
-<dd><p>Manages a wrist-mounted 3D UI panel for WebXR. 
-Registers the &#39;wrist-ui&#39; A-Frame component, rendering an interactive raycastable menu for exiting VR and toggling floating maps.</p>
+<dd><p>Manages a wrist-mounted 3D UI panel for WebXR.<br>Registers the &#39;wrist-ui&#39; A-Frame component, rendering an interactive raycastable menu for exiting VR and toggling floating maps.</p>
 <h3 id="architecture">Architecture</h3>
 
 
@@ -584,14 +579,6 @@ class WristUI{
 </dd>
 </dl>
 
-## Constants
-
-<dl>
-<dt><a href="#ZROK_UNIQUE_NAME">ZROK_UNIQUE_NAME</a> ⇒ <code>Promise.&lt;void&gt;</code></dt>
-<dd><p>Main application bootstrap (Dependency Injection Root). Fully Agnostic Injection handler. Fetches configuration from the server and imports requested strategy patterns dynamically over the network.</p>
-</dd>
-</dl>
-
 ## Functions
 
 <dl>
@@ -603,7 +590,7 @@ class WristUI{
 <a name="AcousticTreadmill"></a>
 
 ## AcousticTreadmill
-Manages the mathematical mixing of backgrounds and aggregate progress tracking. Agnostically adjusts volume levels of adjacent nodes to simulate distance.* ### Architecture```mermaidclassDiagramAcousticTreadmill --> SpatialAudioPlayer : Pushes VolumesAcousticTreadmill --> UIManager : Pushes Progressclass AcousticTreadmill{+anchorTracker Object+reset(nodeId, expectedIds, currentIsAnchor)+updateAggregateProgress(anchorId, currentIsAnchor)+refreshMix(currentNodeId, currentIsAnchor, currentNearbyAnchors, radar)}```
+Manages the mathematical mixing of backgrounds and aggregate progress tracking.  Agnostically adjusts volume levels of adjacent nodes to simulate distance.* ### Architecture```mermaidclassDiagramAcousticTreadmill --> SpatialAudioPlayer : Pushes VolumesAcousticTreadmill --> UIManager : Pushes Progressclass AcousticTreadmill{+anchorTracker Object+reset(nodeId, expectedIds, currentIsAnchor)+updateAggregateProgress(anchorId, currentIsAnchor)+refreshMix(currentNodeId, currentIsAnchor, currentNearbyAnchors, radar)}```
 
 **Kind**: global class  
 
@@ -665,7 +652,7 @@ Calculates distance-based volume weights and pushes them to the audio player.
 <a name="NavigationManager"></a>
 
 ## NavigationManager
-Orchestrates movement using injected Strategy Providers (Viewer, Topology, UI, etc.) agnostically. Coordinates the fetch state and topology mapping when navigating between panoramas.* ### Architecture```mermaidclassDiagramNavigationManager --> BaseViewerProvider : Listens toNavigationManager --> TopologyRadar : Requests GraphNavigationManager --> NetworkService : Emits SyncNavigationManager --> SpatialAudioPlayer : Syncs AudioNavigationManager --> AcousticTreadmill : Drives MixNavigationManager --> BaseSemanticProvider : Queries Intentsclass NavigationManager{+currentNodeId string+navEpoch number+setupListeners()+moveToNode(nodeId, location, isAnchor, epoch, originNodeId) Promise~void~}```
+Orchestrates movement using injected Strategy Providers (Viewer, Topology, UI, etc.) agnostically.  Coordinates the fetch state and topology mapping when navigating between panoramas.* ### Architecture```mermaidclassDiagramNavigationManager --> BaseViewerProvider : Listens toNavigationManager --> TopologyRadar : Requests GraphNavigationManager --> NetworkService : Emits SyncNavigationManager --> SpatialAudioPlayer : Syncs AudioNavigationManager --> AcousticTreadmill : Drives MixNavigationManager --> BaseSemanticProvider : Queries Intentsclass NavigationManager{+currentNodeId string+navEpoch number+setupListeners()+moveToNode(nodeId, location, isAnchor, epoch, originNodeId) Promise~void~}```
 
 **Kind**: global class  
 
@@ -850,7 +837,7 @@ Calculates the correct HUD display label for a task based on topology.
 <a name="SpatialAudioPlayer"></a>
 
 ## SpatialAudioPlayer
-Manages the A-Frame/Three.js audio lifecycle for the 3D viewer. Explicitly manages 3D positional instances, local foreground washes, and neighbor background mixes.* ### Architecture```mermaidclassDiagramclass SpatialAudioPlayer{+setSyncState(epoch, nodeId)+registerPersistentAnchor(nodeId, bufferData, url) Promise~void~+updatePersistentVolumes(mixRatios)+toggleMutePersistent(nodeId) boolean+playObjectSound(data)+stopObjectSound(uniqueId)+toggleMuteObject(uniqueId) boolean+clearSpatialObjects()+purgeAll()+startGarbageCollector(treadmill)}```
+Manages the A-Frame/Three.js audio lifecycle for the 3D viewer.  Explicitly manages 3D positional instances, local foreground washes, and neighbor background mixes.* ### Architecture```mermaidclassDiagramclass SpatialAudioPlayer{+setSyncState(epoch, nodeId)+registerPersistentAnchor(nodeId, bufferData, url) Promise~void~+updatePersistentVolumes(mixRatios)+toggleMutePersistent(nodeId) boolean+playObjectSound(data)+stopObjectSound(uniqueId)+toggleMuteObject(uniqueId) boolean+clearSpatialObjects()+purgeAll()+startGarbageCollector(treadmill)}```
 
 **Kind**: global class  
 
@@ -1043,7 +1030,7 @@ Evaluates whether a specific node should act as an acoustic anchor.
 <a name="NodeSelectionStrategy"></a>
 
 ## NodeSelectionStrategy
-Strategy Pattern Interface for Node Selection. Determines the logical importance of a node within the topological graph.* ### Architecture```mermaidclassDiagramclass NodeSelectionStrategy{<<Abstract>>+isAnchor(nodeId, radar) Promise~boolean~+reset()}```
+Strategy Pattern Interface for Node Selection.  Determines the logical importance of a node within the topological graph.* ### Architecture```mermaidclassDiagramclass NodeSelectionStrategy{<<Abstract>>+isAnchor(nodeId, radar) Promise~boolean~+reset()}```
 
 **Kind**: global class  
 
@@ -1077,7 +1064,7 @@ Optional state cleanup triggered when the engine resets.
 <a name="BaseSemanticProvider"></a>
 
 ## BaseSemanticProvider
-Strategy Pattern Interface for semantic definitions. Defines what a node "means" and how the engine should behave towards those meanings. Extracts layer definitions away from the core orchestration.* ### Architecture```mermaidclassDiagramclass BaseSemanticProvider{<<Abstract>>+getActiveLayers() Array~string~+getBackgroundLayers() Array~string~+requiresBackgroundProcessing() boolean}```
+Strategy Pattern Interface for semantic definitions.  Defines what a node "means" and how the engine should behave towards those meanings.  Extracts layer definitions away from the core orchestration.* ### Architecture```mermaidclassDiagramclass BaseSemanticProvider{<<Abstract>>+getActiveLayers() Array~string~+getBackgroundLayers() Array~string~+requiresBackgroundProcessing() boolean}```
 
 **Kind**: global class  
 
@@ -1110,7 +1097,7 @@ Determines if the current strategy dictates spidering background neighbors.
 <a name="DefaultSemanticProvider"></a>
 
 ## DefaultSemanticProvider
-EXAMPLE STRATEGY IMPLEMENTATION Default Semantic Strategy. Implements the standard base layers: ambient, spatial, and horizon.* ### Architecture```mermaidclassDiagramBaseSemanticProvider <|-- DefaultSemanticProviderclass DefaultSemanticProvider{+setLayers(layers)+onChange(callback)+notifyListeners()+getActiveLayers() Array~string~+getBackgroundLayers() Array~string~+requiresBackgroundProcessing() boolean}```
+EXAMPLE STRATEGY IMPLEMENTATION  Default Semantic Strategy.  Implements the standard base layers: ambient, spatial, and horizon.* ### Architecture```mermaidclassDiagramBaseSemanticProvider <|-- DefaultSemanticProviderclass DefaultSemanticProvider{+setLayers(layers)+onChange(callback)+notifyListeners()+getActiveLayers() Array~string~+getBackgroundLayers() Array~string~+requiresBackgroundProcessing() boolean}```
 
 **Kind**: global class  
 
@@ -1183,7 +1170,7 @@ Determines if the current strategy dictates spidering background neighbors.
 <a name="BaseTopologyProvider"></a>
 
 ## BaseTopologyProvider
-Strategy Pattern Interface for Node Topology sources. Agnostic interface for fetching graph connectivity from a mapping provider.* ### Architecture```mermaidclassDiagramclass BaseTopologyProvider{<<Abstract>>+getNode(nodeId) Promise~Object~}```
+Strategy Pattern Interface for Node Topology sources.  Agnostic interface for fetching graph connectivity from a mapping provider.* ### Architecture```mermaidclassDiagramclass BaseTopologyProvider{<<Abstract>>+getNode(nodeId) Promise~Object~}```
 
 **Kind**: global class  
 <a name="BaseTopologyProvider.getNode"></a>
@@ -1204,7 +1191,7 @@ Retrieves topological data for a given node.
 <a name="MapillaryTopologyProvider"></a>
 
 ## MapillaryTopologyProvider
-EXAMPLE STRATEGY IMPLEMENTATION Resolves node geometry and constructs topological links using Mapillary sequences. Optimized with Memory-Capped LRU Caching and rate-limit throttling.* ### Architecture```mermaidclassDiagramBaseTopologyProvider <|-- MapillaryTopologyProviderclass MapillaryTopologyProvider{+getNode(nodeId) Promise~Object~}```
+EXAMPLE STRATEGY IMPLEMENTATION  Resolves node geometry and constructs topological links using Mapillary sequences.  Optimized with Memory-Capped LRU Caching and rate-limit throttling.* ### Architecture```mermaidclassDiagramBaseTopologyProvider <|-- MapillaryTopologyProviderclass MapillaryTopologyProvider{+getNode(nodeId) Promise~Object~}```
 
 **Kind**: global class  
 
@@ -1234,7 +1221,7 @@ Public interface to retrieve node data and navigation links. Deduplicates concur
 <a name="BaseViewerProvider"></a>
 
 ## BaseViewerProvider
-Abstract Strategy Pattern for 2D/360 Viewer SDKs (Google Maps, Mapillary, etc.). Standardizes event emissions and location tracking APIs.* ### Architecture```mermaidclassDiagramclass BaseViewerProvider{<<Abstract>>+supportsCameraSync boolean+init() Promise~void~+on(event, callback)+trigger(event, data)+getCurrentNodeId() string+getLocation() Object+isVisible() boolean+getNativeViewer() Object+syncCamera(pov)}```
+Abstract Strategy Pattern for 2D/360 Viewer SDKs (Google Maps, Mapillary, etc.).  Standardizes event emissions and location tracking APIs.* ### Architecture```mermaidclassDiagramclass BaseViewerProvider{<<Abstract>>+supportsCameraSync boolean+init() Promise~void~+on(event, callback)+trigger(event, data)+getCurrentNodeId() string+getLocation() Object+isVisible() boolean+getNativeViewer() Object+syncCamera(pov)}```
 
 **Kind**: global class  
 
@@ -1332,7 +1319,7 @@ Optional implementation for external camera syncing.Only called by the orchestr
 <a name="MapillaryViewerProvider"></a>
 
 ## MapillaryViewerProvider
-EXAMPLE STRATEGY IMPLEMENTATION Strategy implementing the map and 360° viewer interface utilizing MapillaryJS and MapLibre GL.* ### Architecture```mermaidclassDiagramBaseViewerProvider <|-- MapillaryViewerProviderclass MapillaryViewerProvider{+init() Promise~void~+show360Viewer(imageId)+getCurrentNodeId() string+getLocation() string+isVisible() boolean+getNativeViewer() Object}```
+EXAMPLE STRATEGY IMPLEMENTATION  Strategy implementing the map and 360° viewer interface utilizing MapillaryJS and MapLibre GL.* ### Architecture```mermaidclassDiagramBaseViewerProvider <|-- MapillaryViewerProviderclass MapillaryViewerProvider{+init() Promise~void~+show360Viewer(imageId)+getCurrentNodeId() string+getLocation() string+isVisible() boolean+getNativeViewer() Object}```
 
 **Kind**: global class  
 
@@ -1421,7 +1408,7 @@ Executes the camera sync using Mapillary's proprietary SDK methods.
 <a name="BaseVRLoader"></a>
 
 ## BaseVRLoader
-Strategy Pattern Interface for VR 360 Image Fetching. Standardizes the progressive loading of high-resolution panoramas for WebXR.* ### Architecture```mermaidclassDiagramclass BaseVRLoader{<<Abstract>>+getLowResBase(nodeId, canvas, ctx) Promise~void~+stitchProgressively(nodeId, zoom, ctx, onTileDrawn) Promise~boolean~}```
+Strategy Pattern Interface for VR 360 Image Fetching.  Standardizes the progressive loading of high-resolution panoramas for WebXR.* ### Architecture```mermaidclassDiagramclass BaseVRLoader{<<Abstract>>+getLowResBase(nodeId, canvas, ctx) Promise~void~+stitchProgressively(nodeId, zoom, ctx, onTileDrawn) Promise~boolean~}```
 
 **Kind**: global class  
 
@@ -1473,7 +1460,7 @@ Progressively fetches and stitches high-resolution tiles over the base layer.
 <a name="MapillaryVRLoader"></a>
 
 ## MapillaryVRLoader
-EXAMPLE STRATEGY IMPLEMENTATION Strategy implementation for loading panoramic images from Mapillary's Graph API into the VR buffer.* ### Architecture```mermaidclassDiagramBaseVRLoader <|-- MapillaryVRLoaderclass MapillaryVRLoader{+getLowResBase(nodeId, ctx, width, height) Promise~void~+stitchProgressively(nodeId, zoom, ctx, width, height, onTileDrawn) Promise~boolean~}```
+EXAMPLE STRATEGY IMPLEMENTATION  Strategy implementation for loading panoramic images from Mapillary's Graph API into the VR buffer.* ### Architecture```mermaidclassDiagramBaseVRLoader <|-- MapillaryVRLoaderclass MapillaryVRLoader{+getLowResBase(nodeId, ctx, width, height) Promise~void~+stitchProgressively(nodeId, zoom, ctx, width, height, onTileDrawn) Promise~boolean~}```
 
 **Kind**: global class  
 
@@ -1604,7 +1591,7 @@ Compiles a flat visual graph representation (Nodes and Edges) for the UI Radar.
 <a name="UIManager"></a>
 
 ## UIManager
-Handles all 2D overlays, HUD elements, and the Radar graph visualization. Completely Provider Agnostic. Styles are driven by topological context.* ### Architecture```mermaidclassDiagramUIManager <-- NetworkService : Updates HUDUIManager <-- NavigationManager : Triggers Graph UpdatesUIManager <-- AcousticTreadmill : Updates Background Progressclass UIManager{+isHudVisible boolean+isRadarVisible boolean+initToggleControls()+toggleHud()+toggleRadar()+toggleMasterMute(btn)+getAlias(nodeId, isAnchor) string+setConnectionStatus(isConnected, socketId)+setNodeInfo(nodeId, isAnchor)+resetPipeline()+updatePipelineProgress(id, stage, progressPercentage, isObject, isAnchor, isBackgroundNode, displayName, taskData)+drawRadarGraph(graphData, currentNodeId)+onMuteToggle(callback)+onRegenToggle(callback)+showStartButton(onClickCallback)+setEngineVisibility(isVisible)+showXrButton()}```
+Handles all 2D overlays, HUD elements, and the Radar graph visualization.  Completely Provider Agnostic.  Styles are driven by topological context.* ### Architecture```mermaidclassDiagramUIManager <-- NetworkService : Updates HUDUIManager <-- NavigationManager : Triggers Graph UpdatesUIManager <-- AcousticTreadmill : Updates Background Progressclass UIManager{+isHudVisible boolean+isRadarVisible boolean+initToggleControls()+toggleHud()+toggleRadar()+toggleMasterMute(btn)+getAlias(nodeId, isAnchor) string+setConnectionStatus(isConnected, socketId)+setNodeInfo(nodeId, isAnchor)+resetPipeline()+updatePipelineProgress(id, stage, progressPercentage, isObject, isAnchor, isBackgroundNode, displayName, taskData)+drawRadarGraph(graphData, currentNodeId)+onMuteToggle(callback)+onRegenToggle(callback)+showStartButton(onClickCallback)+setEngineVisibility(isVisible)+showXrButton()}```
 
 **Kind**: global class  
 
@@ -1857,20 +1844,16 @@ Halts the physics simulation loop and clears pending animation frames.
 <a name="SpatialUtils"></a>
 
 ## SpatialUtils
+Agnostic mathematical utilities for geographic and topological operations.  Explicitly decoupled from proprietary libraries.* ### Architecture```mermaidclassDiagramclass SpatialUtils{+getDistance(lat1, lon1, lat2, lon2) number+getBearing(lat1, lon1, lat2, lon2) number+getRelativePosition(originLat, originLng, targetLat, targetLng) Object+normalizeHeading(heading) number+sphericalToCartesian(h, p, dist) Object}```
+
 **Kind**: global class  
 
 * [SpatialUtils](#SpatialUtils)
-    * [new SpatialUtils()](#new_SpatialUtils_new)
     * [.getDistance(lat1, lon1, lat2, lon2)](#SpatialUtils.getDistance) ⇒ <code>number</code>
     * [.getBearing(lat1, lon1, lat2, lon2)](#SpatialUtils.getBearing) ⇒ <code>number</code>
     * [.getRelativePosition(originLat, originLng, targetLat, targetLng)](#SpatialUtils.getRelativePosition) ⇒ <code>Object</code>
     * [.normalizeHeading(heading)](#SpatialUtils.normalizeHeading) ⇒ <code>number</code>
     * [.sphericalToCartesian(h, p, dist)](#SpatialUtils.sphericalToCartesian) ⇒ <code>Object</code>
-
-<a name="new_SpatialUtils_new"></a>
-
-### new SpatialUtils()
-Agnostic mathematical utilities for geographic and topological operations. Explicitly decoupled from proprietary libraries.* ### Architecture```mermaidclassDiagramclass SpatialUtils{+getDistance(lat1, lon1, lat2, lon2) number+getBearing(lat1, lon1, lat2, lon2) number+getRelativePosition(originLat, originLng, targetLat, targetLng) Object+normalizeHeading(heading) number+sphericalToCartesian(h, p, dist) Object}```
 
 <a name="SpatialUtils.getDistance"></a>
 
@@ -1944,7 +1927,7 @@ Converts Spherical coordinates to Cartesian coordinates. Crucial bridge between 
 <a name="InteractiveMap"></a>
 
 ## InteractiveMap
-Bridges 3D WebXR raycast events to a 2D HTML5 Canvas. Registers the 'interactive-map' A-Frame component to allow users to interact with UI elements like the topology radar from within VR.### Architecture```mermaidclassDiagramclass InteractiveMap{+register() void}```
+Bridges 3D WebXR raycast events to a 2D HTML5 Canvas.  Registers the 'interactive-map' A-Frame component to allow users to interact with UI elements like the topology radar from within VR.### Architecture```mermaidclassDiagramclass InteractiveMap{+register() void}```
 
 **Kind**: global class  
 <a name="InteractiveMap.register"></a>
@@ -1956,7 +1939,7 @@ Registers the 'interactive-map' component with the global A-Frame registry. Shou
 <a name="VRManager"></a>
 
 ## VRManager
-Main coordinator for the VR experience. Orchestrates HD visual projection and Camera sync.* ### Architecture```mermaidclassDiagramVRManager --> BaseVRLoader : Uses to fetch tilesclass VRManager{+updateSkybox(nodeId) Promise~void~+createNavArrows(links, onNavigate)+syncPOV(panorama)}```
+Main coordinator for the VR experience.  Orchestrates HD visual projection and Camera sync.* ### Architecture```mermaidclassDiagramVRManager --> BaseVRLoader : Uses to fetch images/tilesclass VRManager{+updateSkybox(nodeId) Promise~void~+createNavArrows(links, onNavigate)+syncPOV(panorama)}```
 
 **Kind**: global class  
 
@@ -2008,7 +1991,7 @@ Extracts the current VR headset rotation as a standardized POV object.
 <a name="VRRPGAudioManager"></a>
 
 ## VRRPGAudioManager
-Manages A-Frame sound entities. Places sounds in the 3D space.* ### Architecture```mermaidclassDiagramclass VRRPGAudioManager{+treadmill HTMLElement+ambientPool HTMLElement+addSpatialSource(id, label, audioUrl, spatialData) void+setAmbientWash(audioUrl) void+clearSpatialSources() void}```
+Manages A-Frame sound entities.  Places sounds in the 3D space.* ### Architecture```mermaidclassDiagramclass VRRPGAudioManager{+treadmill HTMLElement+ambientPool HTMLElement+addSpatialSource(id, label, audioUrl, spatialData) void+setAmbientWash(audioUrl) void+clearSpatialSources() void}```
 
 **Kind**: global class  
 
@@ -2051,7 +2034,7 @@ Destroys all currently mounted spatial sources.
 <a name="VRSceneController"></a>
 
 ## VRSceneController
-Manages the A-Frame Lifecycle and WebXR spatial audio syncing.Acts as the bridge between agnostic 2D logic and 3D WebXR representation.* ### Architecture```mermaidclassDiagramVRSceneController --> VRManager : Updates VisualsVRSceneController --> VRRPGAudioManager : Syncs Audioclass VRSceneController{+setEpoch(epoch)+setupListeners()+ensureAudioContext()+sync2DRotation(pov)+syncVRHeadtracking(nativeViewer)+updateSkybox(nodeId)+updateVRNavigation(links, nativeViewer)+addSpatialSource(data, tunnelUrl)+setAmbientWash(url)+clearSpatialSources()+enterVR(nodeId, links, nativeViewer)}```
+Manages the A-Frame Lifecycle and WebXR spatial audio syncing.  Acts as the bridge between agnostic 2D logic and 3D WebXR representation.* ### Architecture```mermaidclassDiagramVRSceneController --> VRManager : Updates VisualsVRSceneController --> VRRPGAudioManager : Syncs Audioclass VRSceneController{+setEpoch(epoch)+setupListeners()+ensureAudioContext()+sync2DRotation(pov)+syncVRHeadtracking(nativeViewer)+updateSkybox(nodeId)+updateVRNavigation(links, nativeViewer)+addSpatialSource(data, tunnelUrl)+setAmbientWash(url)+clearSpatialSources()+enterVR(nodeId, links, nativeViewer)}```
 
 **Kind**: global class  
 <a name="new_VRSceneController_new"></a>
@@ -2067,7 +2050,7 @@ Manages the A-Frame Lifecycle and WebXR spatial audio syncing.Acts as the bridg
 <a name="WristUI"></a>
 
 ## WristUI
-Manages a wrist-mounted 3D UI panel for WebXR. Registers the 'wrist-ui' A-Frame component, rendering an interactive raycastable menu for exiting VR and toggling floating maps.### Architecture```mermaidclassDiagramclass WristUI{+register() void}```
+Manages a wrist-mounted 3D UI panel for WebXR.  Registers the 'wrist-ui' A-Frame component, rendering an interactive raycastable menu for exiting VR and toggling floating maps.### Architecture```mermaidclassDiagramclass WristUI{+register() void}```
 
 **Kind**: global class  
 <a name="WristUI.syncPOV"></a>
@@ -2076,12 +2059,6 @@ Manages a wrist-mounted 3D UI panel for WebXR. Registers the 'wrist-ui' A-Frame
 Registers the 'wrist-ui' component with the global A-Frame registry. Should be called once before the scene initializes.
 
 **Kind**: static method of [<code>WristUI</code>](#WristUI)  
-<a name="ZROK_UNIQUE_NAME"></a>
-
-## ZROK\_UNIQUE\_NAME ⇒ <code>Promise.&lt;void&gt;</code>
-Main application bootstrap (Dependency Injection Root). Fully Agnostic Injection handler. Fetches configuration from the server and imports requested strategy patterns dynamically over the network.
-
-**Kind**: global constant  
 <a name="bootstrap"></a>
 
 ## bootstrap() ⇒ <code>Promise.&lt;void&gt;</code>
