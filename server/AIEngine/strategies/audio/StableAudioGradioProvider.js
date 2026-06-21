@@ -33,7 +33,7 @@ import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { AudioProvider } from './AudioProvider.js';
-import { Utils } from '../../../utils/Utils.js';
+import { Utils } from '../../../utilities/Utils.js';
 
 const execAsync = promisify(exec);
 

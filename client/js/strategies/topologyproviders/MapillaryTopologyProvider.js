@@ -27,7 +27,7 @@
  */
 
 import { BaseTopologyProvider } from "./BaseTopologyProvider.js";
-import { SpatialUtils } from "../../Utilities/SpatialUtils.js";
+import { SpatialUtils } from "../../utilities/SpatialUtils.js";
 
 /**
  * EXAMPLE STRATEGY IMPLEMENTATION  

@@ -26,7 +26,7 @@
  * -------------------------------------------------------------------------
  */
 import { BaseViewerProvider } from './BaseViewerProvider.js';
-import { Physics2D } from '../../Utilities/Physics2D.js';
+import { Physics2D } from '../../utilities/Physics2D.js';
 
 /**
  * EXAMPLE STRATEGY IMPLEMENTATION  

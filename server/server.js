@@ -39,7 +39,7 @@ import fs from 'fs';
 import { CacheManager } from './CacheManager.js';
 import { GPUResourceManager } from './GPUResourceManager.js';
 import { AIEngine } from './AIEngine/AIEngine.js';
-import { LogManager } from './LogManager.js';
+import { LogManager } from './utilities/LogManager.js';
 import { PipelineService } from './PipelineService.js';
 import { SocketController } from './SocketController.js';
 import { log } from 'console';

@@ -44,7 +44,7 @@
  * @class
  */
 
-import { SpatialUtils } from '../Utilities/SpatialUtils.js';
+import { SpatialUtils } from '../utilities/SpatialUtils.js';
 
 export class VRManager {
     /**
