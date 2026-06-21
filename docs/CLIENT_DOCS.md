@@ -113,7 +113,7 @@ class SpatialAudioPlayer{
 
 ```mermaid
 classDiagram
-NodeSelectionStrategy <|-- AcousticHorizonStrategy
+BaseNodeSelectionStrategy <|-- AcousticHorizonStrategy
 class AcousticHorizonStrategy{
 +reset()
 +isAnchor(nodeId, radar) Promise~boolean~
@@ -122,7 +122,7 @@ class AcousticHorizonStrategy{
 
 
 </dd>
-<dt><a href="#NodeSelectionStrategy">NodeSelectionStrategy</a></dt>
+<dt><a href="#BaseNodeSelectionStrategy">BaseNodeSelectionStrategy</a></dt>
 <dd><p>Strategy Pattern Interface for Node Selection.<br>Determines the logical importance of a node within the topological graph.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
@@ -132,7 +132,7 @@ class AcousticHorizonStrategy{
 
 ```mermaid
 classDiagram
-class NodeSelectionStrategy{
+class BaseNodeSelectionStrategy{
 <<Abstract>>
 +isAnchor(nodeId, radar) Promise~boolean~
 +reset()
@@ -1000,7 +1000,7 @@ Initializes a periodic garbage collection loop to remove stale background sounds
 <a name="AcousticHorizonStrategy"></a>
 
 ## AcousticHorizonStrategy
-EXAMPLE STRATEGY IMPLEMENTATION  Enforces strict Min 3 / Max 6 spacing across topological graphs.* ### Architecture```mermaidclassDiagramNodeSelectionStrategy <|-- AcousticHorizonStrategyclass AcousticHorizonStrategy{+reset()+isAnchor(nodeId, radar) Promise~boolean~}```
+EXAMPLE STRATEGY IMPLEMENTATION  Enforces strict Min 3 / Max 6 spacing across topological graphs.* ### Architecture```mermaidclassDiagramBaseNodeSelectionStrategy <|-- AcousticHorizonStrategyclass AcousticHorizonStrategy{+reset()+isAnchor(nodeId, radar) Promise~boolean~}```
 
 **Kind**: global class  
 
@@ -1027,23 +1027,23 @@ Evaluates whether a specific node should act as an acoustic anchor.
 | nodeId | <code>string</code> | The target node to evaluate. |
 | radar | [<code>TopologyRadar</code>](#TopologyRadar) | The active TopologyRadar dependency. |
 
-<a name="NodeSelectionStrategy"></a>
+<a name="BaseNodeSelectionStrategy"></a>
 
-## NodeSelectionStrategy
-Strategy Pattern Interface for Node Selection.  Determines the logical importance of a node within the topological graph.* ### Architecture```mermaidclassDiagramclass NodeSelectionStrategy{<<Abstract>>+isAnchor(nodeId, radar) Promise~boolean~+reset()}```
+## BaseNodeSelectionStrategy
+Strategy Pattern Interface for Node Selection.  Determines the logical importance of a node within the topological graph.* ### Architecture```mermaidclassDiagramclass BaseNodeSelectionStrategy{<<Abstract>>+isAnchor(nodeId, radar) Promise~boolean~+reset()}```
 
 **Kind**: global class  
 
-* [NodeSelectionStrategy](#NodeSelectionStrategy)
-    * [.isAnchor(nodeId, radar)](#NodeSelectionStrategy.isAnchor) ⇒ <code>Promise.&lt;boolean&gt;</code>
-    * [.reset()](#NodeSelectionStrategy.reset)
+* [BaseNodeSelectionStrategy](#BaseNodeSelectionStrategy)
+    * [.isAnchor(nodeId, radar)](#BaseNodeSelectionStrategy.isAnchor) ⇒ <code>Promise.&lt;boolean&gt;</code>
+    * [.reset()](#BaseNodeSelectionStrategy.reset)
 
-<a name="NodeSelectionStrategy.isAnchor"></a>
+<a name="BaseNodeSelectionStrategy.isAnchor"></a>
 
-### NodeSelectionStrategy.isAnchor(nodeId, radar) ⇒ <code>Promise.&lt;boolean&gt;</code>
+### BaseNodeSelectionStrategy.isAnchor(nodeId, radar) ⇒ <code>Promise.&lt;boolean&gt;</code>
 Evaluates whether a specific node should act as an acoustic anchor.
 
-**Kind**: static method of [<code>NodeSelectionStrategy</code>](#NodeSelectionStrategy)  
+**Kind**: static method of [<code>BaseNodeSelectionStrategy</code>](#BaseNodeSelectionStrategy)  
 **Returns**: <code>Promise.&lt;boolean&gt;</code> - True if the node is an anchor, false otherwise.  
 **Throws**:
 
@@ -1055,12 +1055,12 @@ Evaluates whether a specific node should act as an acoustic anchor.
 | nodeId | <code>string</code> | The unique identifier for the node. |
 | radar | [<code>TopologyRadar</code>](#TopologyRadar) | The active TopologyRadar instance for neighborhood context. |
 
-<a name="NodeSelectionStrategy.reset"></a>
+<a name="BaseNodeSelectionStrategy.reset"></a>
 
-### NodeSelectionStrategy.reset()
+### BaseNodeSelectionStrategy.reset()
 Optional state cleanup triggered when the engine resets.
 
-**Kind**: static method of [<code>NodeSelectionStrategy</code>](#NodeSelectionStrategy)  
+**Kind**: static method of [<code>BaseNodeSelectionStrategy</code>](#BaseNodeSelectionStrategy)  
 <a name="BaseSemanticProvider"></a>
 
 ## BaseSemanticProvider
@@ -1530,7 +1530,7 @@ Handles map-agnostic topological mapping and BFS spidering of ANY node-based gra
 | Param | Type | Description |
 | --- | --- | --- |
 | topologyProvider | [<code>BaseTopologyProvider</code>](#BaseTopologyProvider) | Injected network edge fetcher. |
-| selectionStrategy | [<code>NodeSelectionStrategy</code>](#NodeSelectionStrategy) | Injected semantic evaluation strategy. |
+| selectionStrategy | <code>NodeSelectionStrategy</code> | Injected semantic evaluation strategy. |
 
 <a name="TopologyRadar.clearCache"></a>
 

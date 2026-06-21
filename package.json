@@ -21,8 +21,8 @@
   },
   "scripts": {
     "start": "node server.js",
-    "docs:client": "jsdoc2md --configure jsdoc.json \"./client/js/**/*.js\" > ./docs/CLIENT_DOCS.md",
-    "docs:server": "jsdoc2md --configure jsdoc.json \"./server/**/*.js\" \"./*.js\" > ./docs/SERVER_DOCS.md",
+    "docs:client": "jsdoc2md --configure ./helper_scripts/jsdoc.json \"./client/js/**/*.js\" \"./*.js\"> ./docs/CLIENT_DOCS.md",
+    "docs:server": "jsdoc2md --configure ./helper_scripts/jsdoc.json \"./server/**/*.js\" \"./*.js\" > ./docs/SERVER_DOCS.md",
     "docs": "npm run docs:client && npm run docs:server && node ./helper_scripts/fix-mermaid.js"
   },
   "devDependencies": {
