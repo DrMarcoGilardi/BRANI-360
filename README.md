@@ -43,7 +43,7 @@ The framework acts as a central registry that translates visual intents into 3D 
 
 ```text
 abba360_v0/
-├── client/                     # Frontend Environment
+├── client/                     # ** Frontend Environment **
 │   ├── index.html
 |   ├── css/
 |   |   └── styles.css
@@ -72,10 +72,16 @@ abba360_v0/
 │           ├── topologyproviders/
 │           ├── viewproviders/
 │           └── vrproviders/
-├── server/                     # Backend Environment
+├── server/                     # ** Backend Environment **
 │   ├── server.js               # Bootstrapper
 │   ├── PipelineService.js      # Core Orchestrator
 │   ├── .env                    # <-- IMPLEMENT CONFIG
+│   ├── admin/
+│   |   ├── css/
+│   |       └── style.css
+│   |   ├── js/
+│   |       └── admin.js
+│   |   └── admin.html
 │   ├── AIEngine/
 │   |   ├── AIEngine.js         # Strategy Delegator
 │   |   ├── pythonscripts/      # Python code go here
@@ -83,7 +89,7 @@ abba360_v0/
 │   |       ├── audio/
 │   |       |   └── BaseAudioProvider.js       # Base class for audio generation providers
 │   |       ├── context/
-│   |       |   └── BaseContextProvider.js     # Base class for audio reverse geolocation providers
+│   |       |   └── BaseContextProvider.js     # Base class for reverse geolocation providers
 │   |       ├── imagesource/
 │   |       |   └── BaseImageSourceProvider.js # Base class for 360 image retrieval for analysis
 │   |       └── vision/
