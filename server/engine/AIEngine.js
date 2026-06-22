@@ -162,9 +162,9 @@ export class AIEngine {
             options: strategyOptions,
             audioParams: {
                 spatiallyContinuous: this.config.SPATIALLY_CONTINUOUS,
-                masterBackgroundGain: this.config.BACKGROUND_GAIN,
-                masterForegroundGain: this.config.FOREGROUND_GAIN,
-                masterSpatialGain: this.config.SPATIAL_GAIN
+                masterNeighborGain: this.config.NEIGHBOR_GAIN,
+                masterLocalGain: this.config.LOCAL_GAIN,
+                masterObjectGain: this.config.OBJECT_GAIN
             }
         };
     }

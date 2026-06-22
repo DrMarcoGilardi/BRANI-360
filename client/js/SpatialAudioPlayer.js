@@ -74,14 +74,14 @@ export class SpatialAudioPlayer {
         this.currentNodeId = null;
 
         const {
-            masterBackgroundGain: backGain,
-            masterForegroundGain: foreGain,
-            masterSpatialGain: spatialGain
+            masterNeighborGain: neighborGain,
+            masterLocalGain: localGain,
+            masterObjectGain: objectGain
         } = config.audioParams
 
-        this.masterBackgroundGain = parseFloat(backGain);
-        this.masterForegroundGain = parseFloat(foreGain);
-        this.masterSpatialGain = parseFloat(spatialGain);
+        this.masterNeighborGain = parseFloat(neighborGain);
+        this.masterLocalGain = parseFloat(localGain);
+        this.masterObjectGain = parseFloat(objectGain);
     }
 
     /**
@@ -187,7 +187,7 @@ export class SpatialAudioPlayer {
         for (const [layerId, layerMap] of this.audioSources.entries()) {
 
             const behavior = manifest[layerId]?.behavior || 'local';
-            const masterMultiplier = behavior === 'neighbor' ? this.masterBackgroundGain : this.masterForegroundGain;
+            const masterMultiplier = behavior === 'neighbor' ? this.masterNeighborGain : this.masterLocalGain;
             const safeMasterGain = !isNaN(masterMultiplier) ? masterMultiplier : 1.0;
 
             for (const [nodeId, anchorData] of layerMap.entries()) {
@@ -288,7 +288,7 @@ export class SpatialAudioPlayer {
         const cartesian = SpatialUtils.sphericalToCartesian(safeH || 0, safeP || 90, safeDist || 10);
         el.setAttribute('position', `${cartesian.x} ${cartesian.y} ${cartesian.z}`);
 
-        const initialGain = this.mutedSpatial.has(uniqueId) ? 0 : (data.isPlaceholder ? 0.2 : this.masterSpatialGain);
+        const initialGain = this.mutedSpatial.has(uniqueId) ? 0 : (data.isPlaceholder ? 0.2 : this.masterObjectGain);
 
         el.setAttribute('sound', {
             src: blobUrl,
