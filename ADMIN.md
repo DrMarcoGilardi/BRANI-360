@@ -102,6 +102,10 @@ This section provides a detailed explanation of every configuration variable ava
 
 > **Note on Core Variables:** Sections marked as **[CORE]** are essential to the architecture of the application. While you can change their values and add new variables to suit your environment, the admin editor system prevents you from renaming or deleting the **[CORE]** variables listed below, and you cannot delete the section header itself.
 
+---
+### Core variables
+The variables below are core and are used by the core infrastructure classes to initialise the system
+
 ### CORE CONFIG [CORE]
 *These variables dictate the fundamental network and file system behavior of the server.*
 
@@ -137,8 +141,9 @@ This section provides a detailed explanation of every configuration variable ava
 * **`BACKGROUND_GAIN`**: The volume level for ambient, background soundscapes.
 * **`FOREGROUND_GAIN`**: The volume level for immediate, foreground sounds.
 * **`SPATIAL_GAIN`**: The volume level for 3D mapped, point-source spatial audio objects.
-
-> **Non [CORE] variables**: The variables below are non-core and are used by the concrete strategies implementations, these can be renamed and/or deleted based on your own implementation needs
+---
+### **Non [CORE] variables**
+The variables below are non-core and are used by the concrete strategies implementations, these can be renamed and/or deleted based on your own implementation needs
 
 ### KEYS AND TOKENS
 *Authentication credentials and local file paths.*
