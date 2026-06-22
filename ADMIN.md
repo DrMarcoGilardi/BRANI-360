@@ -31,11 +31,13 @@ While **you can freely change the values** of these core variables, you **cannot
 * `CORE CONFIG`
 * `SERVER STRATEGIES`
 * `CLIENT STRATEGIES`
+* `AUDIO PARAMS`
 
 **Protected Variables:**
 * `PORT`, `DB_PATH`, `AUDIO_FORMAT`, `LOCAL_MODE`, `ALLOWED_ORIGIN`
 * `IMAGE_PROVIDER`, `CONTEXT_PROVIDER`, `VISION_PROVIDER`, `AUDIO_PROVIDER`
 * `CLIENT_VIEWER_PROVIDER`, `CLIENT_TOPOLOGY_PROVIDER`, `CLIENT_VR_LOADER_PROVIDER`, `CLIENT_NODE_SELECTION_STRATEGY`, `CLIENT_SEMANTIC_PROVIDER`, `CLIENT_SEMANTIC_LAYERS`
+* `SPATIALLY_CONTINUOUS`, `BACKGROUND_GAIN`, `FOREGROUND_GAIN`, `SPATIAL_GAIN`
 
 ---
 
@@ -87,7 +89,7 @@ If your file is getting too long, you can click the **`➖` / `➕` (Toggle Visi
 ---
 
 ## Saving Your Changes
-**Important: Changes made visually in the dashboard are NOT automatically saved to your server!** To make your configurations live:
+> **Important**: Changes made visually in the dashboard are **NOT** automatically saved to your server! To make your configurations live:
 1. Click the green **`Save & Sync Server`** button in the top right corner.
 2. The dashboard will scrape all current inputs and push a structured JSON payload to the backend.
 3. Upon success, you will receive an alert stating: *"Environment synced! The file structure was preserved and clients are refreshing."*
@@ -98,7 +100,7 @@ If your file is getting too long, you can click the **`➖` / `➕` (Toggle Visi
 
 This section provides a detailed explanation of every configuration variable available in the `.env` editor. 
 
-> **Note on Core Variables:** Sections marked as **[CORE]** are essential to the architecture of the application. While you can change their values to suit your environment, the admin editor system prevents you from renaming or deleting the keys, and you cannot delete the section header itself.
+> **Note on Core Variables:** Sections marked as **[CORE]** are essential to the architecture of the application. While you can change their values and add new variables to suit your environment, the admin editor system prevents you from renaming or deleting the **[CORE]** variables listed below, and you cannot delete the section header itself.
 
 ### CORE CONFIG [CORE]
 *These variables dictate the fundamental network and file system behavior of the server.*
@@ -135,6 +137,8 @@ This section provides a detailed explanation of every configuration variable ava
 * **`BACKGROUND_GAIN`**: The volume level for ambient, background soundscapes.
 * **`FOREGROUND_GAIN`**: The volume level for immediate, foreground sounds.
 * **`SPATIAL_GAIN`**: The volume level for 3D mapped, point-source spatial audio objects.
+
+> **Non [CORE] variables**: The variables below are non-core and are used by the concrete strategies implementations, these can be renamed and/or deleted based on your own implementation needs
 
 ### KEYS AND TOKENS
 *Authentication credentials and local file paths.*
