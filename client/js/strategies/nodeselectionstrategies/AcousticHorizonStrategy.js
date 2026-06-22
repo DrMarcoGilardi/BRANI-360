@@ -52,7 +52,7 @@ export class AcousticHorizonStrategy extends BaseNodeSelectionStrategy {
         super();
         this.MIN_SPACING = parseInt(clientConfig?.options?.MIN_SPACING, 10);
         this.MAX_GAP = parseInt(clientConfig?.options?.MAX_GAP, 10);
-        this.isSpatiallyContinuous = (clientConfig?.audioParams?.SPATIALLY_CONTINUOUS === 'true');
+        this.isSpatiallyContinuous = (clientConfig?.audioParams?.spatiallyContinuous === 'true');
         this.gapFillerCache = new Map();
         this.MAX_STRATEGY_CACHE = 1000;
     }

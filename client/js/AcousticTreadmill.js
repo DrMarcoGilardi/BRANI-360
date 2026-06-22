@@ -56,7 +56,7 @@ export class AcousticTreadmill {
         this.player = player;
         this.ui = ui;
         this.clientConfig = clientConfig;
-        this.spatiallycontinuous = (this.clientConfig?.audioParams?.SPATIALLY_CONTINUOUS === 'true');
+        this.spatiallyContinuous = (this.clientConfig?.audioParams?.spatiallyContinuous === 'true');
         this.anchorTracker = {
             expectedIds: [],
             completedIds: new Set(),
@@ -126,7 +126,7 @@ export class AcousticTreadmill {
     refreshMix(currentNodeId, currentIsAnchor, currentNearbyAnchors, radar) {
         const manifest = this.semanticProvider.getLayerManifest();
 
-        if (!this.spatiallycontinuous) {
+        if (!this.spatiallyContinuous) {
             const localLayers = Object.entries(manifest).filter(([_, conf]) => conf.behavior === 'local');
             let fallbackVolumes = [];
             localLayers.forEach(([layerId]) => {

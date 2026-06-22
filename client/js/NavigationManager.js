@@ -238,6 +238,13 @@ export class NavigationManager {
                     cachedData.links = nodeData ? nodeData.links : [];
                 }
 
+                // const currentIsAnchor = await this.radar.isAnchorNode(nodeId);
+                // cachedData.type = currentIsAnchor ? 'anchor' : 'standard';
+
+                // cachedData.nearbyAnchors = await this.radar.findNearestAnchors(nodeId, 8);
+                // const nearbyAnchorIds = cachedData.nearbyAnchors.map(a => a.nodeId || a.id);
+                // cachedData.graphData = await this.radar.buildVisualGraph(nodeId, nearbyAnchorIds);
+
                 this._applyNavigationState(nodeId, cachedData, location, currentEpoch, originNodeId);
 
                 if (cachedData.objects) {

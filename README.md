@@ -4,40 +4,44 @@ Welcome to the ABBA-360 research sandbox.
 This system is designed as a **strictly agnostic orchestration engine** for AI generation of spatial audio from interconnected 360° images.  
 The system is setup to run from GitHub Pages using zrok to connect to the server, or run to locally.  
 
-The purpose of the system is to be a research sandbox to study audio generation in networks of 360 images.  
-The sandbox is aimed to explore:  
+The purpose of the system is to provide a controlled research sandbox to study AI audio generation across graph-based spatial networks (e.g., interconnected 360° panoramas).  
+The sandbox is designed to explore four key research pillars:  
 
-**I. AI & Algorithmic Optimization**  
-Node Selection: Minimizing jarring transitions via strategies (e.g., Acoustic Horizon).  
-Prompting & Taxonomies: Experiment with linguistic constraints and registries to prevent AI hallucination  
+**I. Semantic Interpretation & AI Optimization** 
+* **Agnostic Mapping:** Exploring how effectively Vision-Language Models (VLMs) can translate raw visual data into abstract semantic layers (e.g., `local` environments vs. `neighboring` topologies).  
+* **Prompt Engineering:** Experimenting with linguistic constraints and schema validation to minimize AI hallucination during VLM analysis and latent diffusion audio generation.  
 
-**II. Human Perception & Cognition**  
-Acoustic Clutter: Defining the cognitive threshold for sensory overload in VR.  
-Spatial Discrepancies: Finding the human tolerance for AI errors in sound generation.  
-Biome Authenticity: Find the most perceptually realistic environment parameters.  
+**II. Acoustically Informed Topologies & Biome Mapping** 
+* **Contextual Sound Propagation:** Moving beyond purely mathematical distance to dictate sound behavior based on the physical reality of the space (e.g., how sound travels differently in a dense forest vs. a concrete urban canyon).  
+* **Multimodal Data Integration:** Exploring the use of geographic or satellite data (e.g., NASA Landsat, ESA Sentinel) to automatically classify biomes across a 360° image network and dynamically adjust the graph's acoustic properties.
 
-**III. Computational & Graph-Theoretic Efficiency.**  
-Distance Attenuation: Finding optimal mathematical weights for acoustic horizons.  
-Acoustic Modeling: Exploring satellite data (e.g. NASA Landsat, ESA Sentinel) to automatically model acoustic parameters for different biomes  
+**III. Strategic Node Selection Modeling** 
+* **Algorithmic Benchmarking:** Comparing purely structural node-selection strategies (e.g., selecting acoustic anchors strictly by graph distance or hop count) against context-aware, acoustically informed strategies.  
+* **Perceptual Authenticity:** Evaluating which method of distributing persistent audio anchor nodes across a spatial graph yields the most realistic and immersive user experience.
 
-**IV. User Agency & Accessibility**
-Evolutionary AI: Using real-time user feedback loops to train reinforcement learning models.  
-Sensory Translation: Automating visual-to-audio sonification for visually impaired users.  
+**IV. User Agency & Accessibility** 
+* **Dynamic Routing:** Allowing users to dynamically swap the semantic manifest (e.g., switching from an "environmental" focus to a "weather" focus) to study personalized immersion.  
+* **Sensory Translation:** Automating targeted visual-to-audio sonification to provide accessible spatial awareness for visually impaired users.  
 
-The sandbox can be used to explore research quesitons, such as:  
-**What approaches to selecting nodes return the most realistic and consistent ambient sounds?**  
-**Which graph-theoretic node selection models minimize "acoustic flickering" (jarring or sudden soundscape changes) when a user navigates a high-density spatial network rapidly?**  
-Because the topological radar uses pluggable strategies, researchers can easily test different node-selection algorithms—e.g. mathematically based VS acoustic environment based—to empirically measure which distributions minimize jarring acoustic transitions.  
+Because the architecture strictly separates the **engine** from the **meaning**, the sandbox can be used to explore broad research questions, such as:  
 
-**How do we categorize biomes and their acoustic properties?**  
-The concrete implementation of the framework externalizes this into dictionaries. Researchers can define and tweak parameters, like reverb limits and diffusion scales, in a single file to test what definitions feel most authentic to users, without touching a single line of backend code.  
+**What approach to prompting VLMs and latent diffusion models yields the highest perceptual accuracy?** By forcing models to adhere to strict schema constraints (e.g., routing intents to `local`, `neighbor`, or `object` behaviors) and utilizing real-time feedback loops, ABBA-360 provides a controlled environment to study which linguistic architectures best bridge the gap between visual interpretation and 3D sound generation.  
 
-**What approach to prompting the VLM and latent diffusion models returns the most consistent results?**  
-By forcing the Vision Language Model to adhere to strict constraints, and by utilizing a real-time user feedback loop, ABBA-360 gives us a controlled environment to study exactly which linguistic structures prevent or minimise hallucination in visual interpretation and sound generation.  
+**How do we construct semantic manifests that maximize perceptual realism?** Because the engine’s behavior is externalized into data-driven dictionaries, researchers can define entirely new semantic realities in a single file. Researchers can test how different base weights, layer definitions, and persistence rules affect the user's perception of authenticity—without touching a single line of backend code.  
 
-**How do we establish standardized parameters and labeling for generated spatial sounds?**  
-The framework acts as a central registry that translates visual intents into 3D audio generation. This provides a testbed to evaluate different Foley taxonomies and measure their perceptual accuracy within a VR headset
+**Mathematical vs. Acoustically Informed Graph Traversal: Which node-selection strategy provides the most authentic spatial immersion?** By utilizing pluggable node-selection strategies, researchers can benchmark purely structural algorithms against acoustically informed models. For instance, a strategy could ingest external satellite data to map the biomes covered by the 360° image network, anchoring background sounds specifically where acoustic propagation rules physically change (e.g., stepping from an open field into a dense forest), rather than at arbitrary mathematical hop distances.
 
+**Can Vision-Language Models accurately reconstruct period-specific acoustic ecologies from visual architectural cues?** Researchers could create a `"historical"` semantic manifest and test the AI's ability to generate period-accurate soundscapes (e.g., a bustling 18th-century market vs. a modern street) by tweaking the linguistic constraints in the VLM prompts and measuring the historical authenticity of the generated audio against archival data.
+
+**To what extent do AI-generated acoustic horizons improve spatial memory and navigation efficiency in visually restricted or highly repetitive virtual topologies?** Researchers can set up a maze-like graph of 360° nodes. By turning the `MASTER_NEIGHBOR_GAIN` (the acoustic horizon) on for one test group and off for another, researchers can quantitatively measure if users navigate the graph faster and build better mental maps when they can "hear" the adjacent nodes before seeing them.
+
+**How effectively can dynamic, AI-generated spatial audio be utilized to create escalatory exposure scenarios for anxiety disorders without altering the visual stimulus?** The visual 360° image remains a static, safe environment (like a park). However, a researcher dynamically updates the semantic manifest via the `DefaultSemanticProvider` to slowly introduce and increase the base weight of a `"crowd"` or `"dogs"` layer. The VLM generates the audio dynamically, providing infinite, non-repeating variations of the stimuli to prevent habituation.
+
+**How can dynamic spatial audio engines be utilized to foreshadow non-linear narrative branches in graph-based interactive storytelling?** As a user stands in narrative Node A, the `AcousticTreadmill` calculates the inverse-distance of narrative Nodes B and C (the choices). The audio engine bleeds the thematic soundscapes of those future story beats into the current environment as `neighbor` layers, allowing the user to "hear" the consequences of their narrative choices before making them.
+
+**Can latent diffusion audio models accurately predict and simulate the acoustic biodiversity of an environment based purely on its visual vegetation index?** By navigating a graph of natural environments, researchers can analyze if the AI successfully identifies the biome and generates the correct species' calls (e.g., generating specific bird calls for a pine forest vs. a tropical rainforest). The agnostic manifest allows researchers to isolate a `"biophony"` layer and compare the AI's output against actual field recordings from that specific Lat/Lng coordinate.
+
+**What semantic audio prioritization models best facilitate obstacle avoidance and point-of-interest discovery for visually impaired users in unfamiliar topologies?** Researchers can tweak the VLM prompts to act as a "hazard detector" (e.g., identifying crosswalks, stairs, or crowds) and map them to the `object` semantic layer. They can then test how quickly users can locate these hazards using the `SpatialAudioPlayer`'s 3D positional tracking.
 
 ## Project Structure
 
