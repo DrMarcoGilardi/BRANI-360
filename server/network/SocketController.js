@@ -106,7 +106,7 @@ export class SocketController {
 
                 if (engine.imageSource && typeof engine.imageSource.updateFrame === 'function') {
                     engine.imageSource.updateFrame(id, buffer);
-                    this.logger.log(`[Sim] In-memory buffer updated for Simulation ID: ${id}`, socket.id);
+                    this.logger.log(`[Sim] In-memory buffer updated for Simulation ID: ${id}`, "clear", socket.id);
                 } else {
                     this.logger.error(`[Sim] Push rejected: Active ImageSource strategy does not support manual frame updates.`);
                 }
@@ -118,7 +118,7 @@ export class SocketController {
              * in the server's session-based .log files.
              */
             socket.on('client_event_log', (payload) => {
-                this.logger.log(`[Client-${payload.type || 'EVENT'}] ${payload.message}`, socket.id);
+                this.logger.log(`[Client-${payload.type || 'EVENT'}] ${payload.message}`, "clear", socket.id);
             });
 
             /**
@@ -129,7 +129,7 @@ export class SocketController {
                 try {
                     // Triggers the engine to re-read the file from its internal path
                     await this.pipelineService.aiEngine.init();
-                    this.logger.log(`[System] Presets hot-reloaded successfully.`, socket.id);
+                    this.logger.log(`[System] Presets hot-reloaded successfully.`, "clear", socket.id);
                     socket.emit('system_notification', {
                         type: 'success',
                         message: "Dictionary reloaded."

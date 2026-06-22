@@ -51,7 +51,7 @@ const envPath = path.resolve(__dirname, '.env');
 
 dotenv.config({ path: envPath });
 
-const logger = new LogManager();
+const logger = new LogManager(process.env.DB_PATH);
 
 const isLocal = process.env.LOCAL_MODE === 'true';
 const allowedOrigin = isLocal ? '*' : process.env.ALLOWED_ORIGIN;
@@ -63,10 +63,9 @@ const allowedOrigin = isLocal ? '*' : process.env.ALLOWED_ORIGIN;
  * @returns {Promise<void>}
  */
 async function startServer() {
-    const absoluteDbPath = process.env.DB_PATH
-        ? path.resolve(__dirname, process.env.DB_PATH)
-        : undefined;
 
+
+    const logger = new LogManager(process.env.DB_PATH);
     const cacheManager = new CacheManager(
         { dbPath: process.env.DB_PATH, audioFormat: process.env.AUDIO_FORMAT },
         logger

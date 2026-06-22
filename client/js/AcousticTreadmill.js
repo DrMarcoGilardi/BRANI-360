@@ -56,8 +56,7 @@ export class AcousticTreadmill {
         this.player = player;
         this.ui = ui;
         this.clientConfig = clientConfig;
-        this.spatiallycontinuous = (clientConfig?.SPATIALLY_CONTINUOUS === 'true');
-        console.log(clientConfig?.SPATIALLY_CONTINUOUS);
+        this.spatiallycontinuous = (this.clientConfig?.audioParams?.SPATIALLY_CONTINUOUS === 'true');
         this.anchorTracker = {
             expectedIds: [],
             completedIds: new Set(),

@@ -68,7 +68,7 @@ export class SpatialAudioPlayer {
             masterBackgroundGain: backGain,
             masterForegroundGain: foreGain,
             masterSpatialGain: spatialGain
-        } = config.audioGains
+        } = config.audioParams
 
         this.masterBackgroundGain = parseFloat(backGain);
         this.masterForegroundGain = parseFloat(foreGain);

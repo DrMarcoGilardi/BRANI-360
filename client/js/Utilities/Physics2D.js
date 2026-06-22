@@ -69,8 +69,8 @@ export class Physics2D {
         this.repulsion = 40000 * (nodeSize / 100);
         this.springDist = Math.max(150, nodeSize * 2);
         this.springForce = 0.05;
-        this.gravity = 0.02;
-        this.damping = 0.8;
+        this.gravity = 0.001;
+        this.damping = .5;
 
         this.repulsionThreshold = Math.max(300, nodeSize * 3);
         this.labelAvoidanceThreshold = Math.max(200, nodeSize * 2);

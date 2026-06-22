@@ -155,7 +155,7 @@ export class PipelineService {
         const { nodeId, requestedLayers, fromId, navEpoch, isAnchor, nearbyAnchors, location, dbPayload } = data;
         const socketId = socket.id;
 
-        this.logger.log(`\n[Pipeline] Movement Sync: Node ${nodeId} (Epoch: ${navEpoch})`, socketId);
+        this.logger.log(`\n[Pipeline] Movement Sync: Node ${nodeId} (Epoch: ${navEpoch})`, "clear", socketId);
         this.setEpoch(socketId, navEpoch);
         this.pipelineStartTime = Date.now();
         this.activeBatchNodeId = nodeId;

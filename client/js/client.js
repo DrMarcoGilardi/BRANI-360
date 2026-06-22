@@ -74,8 +74,9 @@ async function bootstrap() {
     }
 
     try {
+        console.log(config);
         const player = new SpatialAudioPlayer(config);
-        const treadmill = new AcousticTreadmill(player, ui, config.options);
+        const treadmill = new AcousticTreadmill(player, ui, config);
 
         // --- DYNAMIC AGNOSTIC STRATEGY INJECTION --
         const {
@@ -114,7 +115,7 @@ async function bootstrap() {
         const semanticProvider = new SemanticClass(semanticLayers);
 
         const topologyProvider = new TopologyClass(config.key);
-        const nodeSelectionStrategy = new SelectionClass(config.options);
+        const nodeSelectionStrategy = new SelectionClass(config);
         const radar = new TopologyRadar(topologyProvider, nodeSelectionStrategy);
 
         const vrLoaderProvider = new VRLoaderClass(config.key);

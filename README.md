@@ -144,10 +144,10 @@ If none of the above criteria are met (no local host, no custom tunnel, no valid
 
    ```
    LOCAL_MODE=true
-   PORT=3000
+   PORT=3000       # or set to the port number you prefer to open
    ```    
    
-   *NOTE: If are running the out-of-the-box pipeline implementation, ensure you add your required API keys/tokens for Mapillary and Geoapify and install LM Studio and Pinokio with Stable Audio. Also ensure you launch the LM Studio Server and that the `LM_STUDIO_API` and `STABLE_AUDIO_API` variables are set to the correct ports in the `.env` file, they are pre-set in `.env.example` to `1234` for LM Studio and `7860` for Pinokio.*
+   > **NOTE**: *If are running the out-of-the-box pipeline implementation, ensure you add your required API keys/tokens for Mapillary and Geoapify and install LM Studio and Pinokio with Stable Audio. Also ensure you launch the LM Studio Server and that the `LM_STUDIO_API` and `STABLE_AUDIO_API` variables are set to the correct ports in the `.env` file, they are pre-set in `.env.example` to `1234` for LM Studio and `7860` for Pinokio.*
   
 4. Start the backend orchestration server:
 
@@ -155,16 +155,14 @@ If none of the above criteria are met (no local host, no custom tunnel, no valid
    node server.js
    ```
 
-   The server will now be listening for WebSocket connections and API requests on `http://localhost:3000`.
+   The server will now be listening for WebSocket connections and API requests on `http://localhost:3000` or the port you opened.
 
-   *NOTE: If you want to run the application from your own host (such as GitHub Pages) set `LOCAL_MODE` to `false` and set the `ALLOWED_ORIGIN` to the host page url in the `.env` file*  
+   > **NOTE**: *If you want to run the application from your own host (such as GitHub Pages) set* `LOCAL_MODE` *to* `false` *and set the* `ALLOWED_ORIGIN` *to the host page url in the* `.env` *file*  
    
-   *NOTE: If you intend to run your own generation pipeline implementation, remember add your own API keys/tokens for the services your are using and your configuration parameters in the `.env` file.*  
+   > **NOTE**: *If you intend to run your own generation pipeline implementation, remember add your own API keys/tokens for the services your are using and your configuration parameters in the `.env` file.*  
 
-   *NOTE: If are not using the out-of-the-box implementation and you are using your own python concrete implementation via the python adapters provided, please specify your python executable (e.g., 'python3' for Linux/macOS, 'python' for Windows)*
-   ```
-   PYTHON_EXEC=python3 
-   ```
+   > **NOTE**: *If are not using the out-of-the-box implementation and you are using your own python concrete implementation via the python adapters provided, please specify your python executable (e.g., 'python3' for Linux/macOS, 'python' for Windows) in the*  `PYTHON_EXEC` *variable*  
+
 ### 2. Frontend Setup (Client)
 
 Because the frontend utilizes ES6 modules (`type="module"`), the `index.html` file cannot simply be double-clicked to open in a browser due to strict CORS policies. It must be served via a local web server.
@@ -179,14 +177,37 @@ Because the frontend utilizes ES6 modules (`type="module"`), the `index.html` fi
 2. Open your browser and navigate to `http://localhost:8080` or whatever port you set. The client will automatically handshake with your local Node.js backend.
 
 ---
+## `.env` Variables Editor Guide
+
+> **Note**: *It is strongly recommended to use the [admin editor](server/admin/ADMIN.md) to safely edit the .env file and to avoid accidentally deleting environment variables required for the core workflow.*
+
+### What is the `.env` Editor Dashboard?
+The **ABBA-360 `.env` Variables Editor** is a secure, graphical web interface designed to help developers visually manage, organize, and document server environment variables. 
+
+Directly editing raw `.env` files can often lead to syntax errors, accidental deletions, or disorganized configurations. This dashboard solves those issues by providing a structured layout where you can group variables, add live documentation, safely edit complex multi-line strings, and instantly sync changes back to the live server.
+
+### Key Features
+* **Visual Grouping:** Organize variables into logical, collapsible sections (e.g., Database configs, API keys, SMTP settings).
+* **Safe Formatting:** Automatically sanitizes keys (forcing uppercase and restricting special characters) and safely escapes HTML characters to prevent layout breakage.
+* **Smart UI Elements:** Text areas dynamically auto-expand to fit their content exactly, removing internal scrollbars for massive multi-line keys (like RSA certificates).
+* **Drag-and-Drop Structure:** Move individual variables or entire clustered sections up and down your `.env` architecture effortlessly.
+
+### Accessing the Editor Dashboard
+
+To access the editor dashboard start the server then go to http://localhost:3000/admin where 3000 is the port used by your server.
+If you changed the port change that value to your port.
+The server console will give the correct address at start in a message coloured in cyan.  
+Example: <span style="color: #3a96dd;"> [09:24:31] [Server] For the .env admin dashboard open http://localhost:3000/admin </span>
 
 ## How to Configure Strategies (`.env`)
 
-The system uses dynamic dependency injection. It reads your `.env` file at boot and dynamically imports the exact JavaScript classes you request.  To use a custom strategy, place your file in the appropriate directory, **ensure the class name matches the filename exactly**, and update your `.env`:
+> **Note**: *It is strongly recommended to use the [admin editor](server/admin/ADMIN.md) application to safely edit the .env file and to avoid accidentally deleting environment variables required for the core workflow.*
+
+The system uses dynamic dependency injection. It reads your `.env` file at boot and dynamically imports the exact JavaScript classes you request.  To use a custom strategy, place your file in the appropriate directory, **ensure the class name matches the filename exactly**, and update your `.env` using the admin editor application:
 
 ```env
 # ==========================================
-# SERVER STRATEGIES (AI ENGINE)
+# SERVER STRATEGIES
 # ==========================================
 IMAGE_PROVIDER="MapillarySource"
 CONTEXT_PROVIDER="GeoapifyContextProvider"
@@ -194,7 +215,7 @@ VISION_PROVIDER="LMStudioVisionProvider"
 AUDIO_PROVIDER="StableAudioGradioProvider"
 
 # ==========================================
-# CLIENT STRATEGIES (MAPS/360 IMAGE NETWORK/VR 360 IMAGE SOURCE etc)
+# CLIENT STRATEGIES
 # ==========================================
 CLIENT_VIEWER_PROVIDER="MapillaryViewerProvider"
 CLIENT_TOPOLOGY_PROVIDER="MapillaryTopologyProvider"
@@ -204,19 +225,20 @@ CLIENT_SEMANTIC_PROVIDER="DefaultSemanticProvider"
 CLIENT_SEMANTIC_LAYERS="spatial, horizon"
 
 # ==========================================
-# PYTHON SCRIPTS [OPTIONAL, set to "" if unused]
+# PYTHON SCRIPTS [OPTIONAL]
 # ==========================================
 PYTHON_VISION_SCRIPT="vision_adapter.py"
 PYTHON_AUDIO_SCRIPT="audio_adapter.py"
 PYTHON_EXEC = "python3"
 ```
 ---
+## Provided Concrete Examples (Out-of-the-Box Examples)
 
-## Provided Concrete Examples (Out of the Box)
+To help you get started, the repository includes several fully functional, concrete implementations of the strategy interfaces.  These demonstrate how to wrap real-world APIs and local models. The system is configured to run with the client run locally or hosted on GitHub pages. Change the .env file using the **[admin editor](server/admin/ADMIN.md)** to swap examples.
 
-To help you get started, the repository includes several fully functional, concrete implementations of the strategy interfaces.  These demonstrate how to wrap real-world APIs and local models. The system is configured to run with the client hosted on GitHub pages. Change pinokioconfig.json adding your domain.
+> **Place your API keys in the `.env` file**. The out-of-the-box code requires a Mapillary API token and a Geoapify API key, you can get them from `https://www.mapillary.com/dashboard/developers` and `https://www.geoapify.com/get-started-with-maps-api/`.  
 
-**Place your API keys in the `.env` file**. The out of the box code requires a Mapillary API token and a Geoapify API key, you can get them from `https://www.mapillary.com/dashboard/developers` and `https://www.geoapify.com/get-started-with-maps-api/`. Once the keys are in the `.env` file the system is setup to pass them to the client.
+Once the keys are in the `.env` file the system is setup to pass them to the client.
 
 ### 1. Mapillary & MapLibre GL (Visuals & Topology)
 The system uses Mapillary as the default provider for 360-degree street-level imagery and graph navigation.
@@ -226,7 +248,15 @@ The system uses Mapillary as the default provider for 360-degree street-level im
 * **`MapillarySource` (Server):** Fetches the raw image buffer for the current panorama ID and passes it to the AI Engine for VLM analysis. Image providers must match in client and server.
 
 ### 2. Geoapify (Context Grounding)
-* **`GeoapifyContextProvider` (Server):** A reverse-geocoding adapter. It takes the raw Lat/Lng coordinates from the client and converts them into a human-readable location string (e.g., "Times Square, New York"). This string grounds the VLM prompt to ensure region-accurate sonic generation.
+* **`GeoapifyContextProvider` (Server):** A reverse-geocoding adapter. It takes the raw Lat/Lng coordinates from the client and converts them into a human-readable location string (e.g., "Times Square, New York"). This string grounds the VLM prompt to ensure region-accurate sonic generation. It also passes the mapillary key to the system config.
+
+### 3. Marzipano (Local 360 tours)
+The system uses Marzipano and a physics based graph visualisation to read local 360 torus.
+* **`MarzipanoViewerProvider` (Client):** Wraps Marzipano to render the tour graph and WebGL viewer, translating user clicks into agnostic `pov_changed` and `node_changed` events.
+* **`MarzipanoTopologyProvider` (Client):** Queries the Marzipano data.js file to extract the navigation graph (edges/links) so the Acoustic Treadmill can calculate distances to neighboring panoramas.
+* **`MarzipanoVRLoader` (Client):** Displays the high-resolution equirectangular tiles to paint onto the WebXR A-Frame sphere.
+* **`MarzipanoSource` (Server):** Stitches the Marzipano tiles together to produce a raw image buffer for the current panorama ID and passes it to the AI Engine for VLM analysis. Image providers must match in client and server.
+* **`MarzipanoContextProvider` (Server):** Returns "Unknown Location" this can be edited to give the exact location of the tour. It also passes the tour path tho the system config.
 
 ### 3. LM Studio (Vision-Language Analysis)
 * **`LMStudioVisionProvider` (Server):** An adapter for communicating with locally hosted Vision-Language Models (like LLaVA or Qwen-VL) via LM Studio's local server. It structures system prompts based on semantic layers (spatial, ambient, horizon) and parses the JSON output to locate sound sources in the 360 frame.

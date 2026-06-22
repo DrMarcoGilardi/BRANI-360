@@ -94,7 +94,6 @@ export class AIEngine {
             const visClassStr = this.config.VISION_PROVIDER;
             const audClassStr = this.config.AUDIO_PROVIDER;
 
-            this.logger.log(imgClassStr);
             const [ImageModule, ContextModule, VisionModule, AudioModule] = await Promise.all([
                 import(`./strategies/imagesource/${imgClassStr}.js`),
                 import(`./strategies/context/${ctxClassStr}.js`),
@@ -134,7 +133,7 @@ export class AIEngine {
      * @async
      * @method getPublicConfig
      * @memberof AIEngine
-     * @description Exposes public configuration parameters required by the frontend client strategies.
+     * @description Exposes public configuration parameters required by the frontend client strategies, AcousticTreadmill, and SpatialAudioPlayer.
      * @returns {Object} Configuration bundle.
      */
     getPublicConfig() {
@@ -146,7 +145,6 @@ export class AIEngine {
         for (const [key, value] of Object.entries(this.config)) {
             if (key.startsWith('CLIENT_PARAM_')) {
                 const cleanKey = key.replace('CLIENT_PARAM_', '');
-                this.logger.log(`[AI Engine] CLENAN KEY: ${cleanKey}, ${value}`);
                 strategyOptions[cleanKey] = value;
             }
         }
@@ -162,7 +160,8 @@ export class AIEngine {
                 semanticLayers: semanticLayers,
             },
             options: strategyOptions,
-            audioGains: {
+            audioParams: {
+                spatiallyContinuous: this.config.SPATIALLY_CONTINUOUS,
                 masterBackgroundGain: this.config.BACKGROUND_GAIN,
                 masterForegroundGain: this.config.FOREGROUND_GAIN,
                 masterSpatialGain: this.config.SPATIAL_GAIN

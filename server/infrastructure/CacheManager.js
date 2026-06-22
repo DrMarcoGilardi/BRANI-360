@@ -68,9 +68,9 @@ export class CacheManager {
      * @param {Object} [logger=console] - Optional logger instance.
      */
     constructor(config, logger = console) {
-        let rawPath = (config.dbPath)?.trim() || path.join(__dirname, '../..', 'cache', 'cache.db');
-        this.dbPath = path.resolve(__dirname, rawPath);
-        this.audioExt = config.audioFormat || 'wav';
+        let rawPath = (config.dbPath)?.trim();
+        this.dbPath = path.resolve(__dirname, `${rawPath}/cache.db`);
+        this.audioExt = config.audioFormat;
         this.logger = logger;
         this.db = null;
 

@@ -55,10 +55,11 @@ const __dirname = path.dirname(__filename);
  */
 export class LogManager {
     /**
+     * * @param {Object} logsPath - Configuration object containing dbPath.
      * @constructor
      */
-    constructor() {
-        this.logsDir = path.join(__dirname, '../../cache/logs');
+    constructor(logsPath) {
+        this.logsDir = path.join(__dirname, `${logsPath}/logs`);
         this.systemLogStream = null;
         this.sessionStreams = new Map();
 
