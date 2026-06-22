@@ -100,7 +100,7 @@ If your file is getting too long, you can click the **`➖` / `➕` (Toggle Visi
 
 This section provides a detailed explanation of every configuration variable available in the `.env` editor. 
 
-> **Note on Core Variables:** Sections marked as **[CORE]** are essential to the architecture of the application. While you can change their values to suit your environment, the admin editor system prevents you from renaming or deleting the keys, and you cannot delete the section header itself.
+> **Note on Core Variables:** Sections marked as **[CORE]** are essential to the architecture of the application. While you can change their values and add new variables to suit your environment, the admin editor system prevents you from renaming or deleting the **[CORE]** variables listed below, and you cannot delete the section header itself.
 
 ### CORE CONFIG [CORE]
 *These variables dictate the fundamental network and file system behavior of the server.*
