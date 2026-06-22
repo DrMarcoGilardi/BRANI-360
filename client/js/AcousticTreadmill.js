@@ -158,7 +158,7 @@ export class AcousticTreadmill {
         }
 
         localLayers.forEach(([_, conf]) => totalWeightBudget += conf.baseWeight);
-        if (validNeighbors.length > 0) {
+        if (mixTargets.length > 0) {
             neighborLayers.forEach(([_, conf]) => totalWeightBudget += conf.baseWeight);
         }
 
@@ -173,11 +173,11 @@ export class AcousticTreadmill {
             });
         });
 
-        if (validNeighbors.length > 0) {
+        if (mixTargets.length > 0) {
             let totalInvHops = 0;
             const SMOOTHING_FACTOR = 1.0;
 
-            validNeighbors.forEach(a => {
+            mixTargets.forEach(a => {
                 const safeHops = (typeof a.hops === 'number' && !isNaN(a.hops)) ? a.hops : 1;
                 totalInvHops += 1 / (SMOOTHING_FACTOR + safeHops);
             });
@@ -185,7 +185,7 @@ export class AcousticTreadmill {
             neighborLayers.forEach(([layerId, conf]) => {
                 const layerBudget = conf.baseWeight / totalWeightBudget;
 
-                validNeighbors.forEach(a => {
+                mixTargets.forEach(a => {
                     const safeHops = (typeof a.hops === 'number' && !isNaN(a.hops)) ? a.hops : 1;
                     let nodeFraction = (1 / (SMOOTHING_FACTOR + safeHops)) / totalInvHops;
 
