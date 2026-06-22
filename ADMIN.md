@@ -89,7 +89,7 @@ If your file is getting too long, you can click the **`➖` / `➕` (Toggle Visi
 ---
 
 ## Saving Your Changes
-**Important: Changes made visually in the dashboard are NOT automatically saved to your server!** To make your configurations live:
+> **Important**: Changes made visually in the dashboard are NOT automatically saved to your server! To make your configurations live:
 1. Click the green **`Save & Sync Server`** button in the top right corner.
 2. The dashboard will scrape all current inputs and push a structured JSON payload to the backend.
 3. Upon success, you will receive an alert stating: *"Environment synced! The file structure was preserved and clients are refreshing."*
