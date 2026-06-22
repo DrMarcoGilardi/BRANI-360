@@ -36,38 +36,38 @@
  * classDiagram
  * class BaseSemanticProvider{
  * <<Abstract>>
- * +getActiveLayers() Array~string~
- * +getBackgroundLayers() Array~string~
- * +requiresBackgroundProcessing() boolean
+ * +getLayerManifest() Object
+ * +onChange(callback)
+ * +notifyListeners()
  * }
  * ```
  * 
  * @class
  */
 export class BaseSemanticProvider {
-    /** 
-     * @method getActiveLayers
+    /**
+     * @method getLayerManifest
      * @memberof BaseSemanticProvider
-     * @description Retrieves the semantic layers required for the central user node.
-     * @returns {Array<string>} An array of active layer designations (e.g., ['spatial', 'ambient']).
+     * @description Returns the agnostic ruleset for active semantic layers.
+     * @returns {Object} Manifest dictating layer behavior, persistence, and mix weights.
+     * @throws {Error} If not implemented by a subclass.
      */
-    getActiveLayers() { return []; }
+    getLayerManifest() {
+        throw new Error("BaseSemanticProvider: Method 'getLayerManifest()' must be implemented by subclass.");
+    }
 
-    /** 
-     * @method getBackgroundLayers
+    /**
+     * @method onChange
      * @memberof BaseSemanticProvider
-     * @description Retrieves the semantic layers required for neighboring/background nodes.
-     * @returns {Array<string>} An array of background layer designations.
+     * @description Subscribes a listener function to be executed whenever the active layers change.
+     * @param {Function} callback - The function to execute on layer change.
      */
-    getBackgroundLayers() { return []; }
+    onChange(callback) { }
 
-    /** 
-     * @method requiresBackgroundProcessing
+    /**
+     * @method notifyListeners
      * @memberof BaseSemanticProvider
-     * @description Determines if the current strategy dictates spidering background neighbors.
-     * @returns {boolean} True if background topological processing is required.
+     * @description Iterates through and executes all subscribed change listeners.
      */
-    requiresBackgroundProcessing() { return false; }
+    notifyListeners() { }
 }
-
-

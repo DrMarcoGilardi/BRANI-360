@@ -40,9 +40,7 @@ import { BaseSemanticProvider } from "./BaseSemanticProvider.js";
  * +setLayers(layers)
  * +onChange(callback)
  * +notifyListeners()
- * +getActiveLayers() Array~string~
- * +getBackgroundLayers() Array~string~
- * +requiresBackgroundProcessing() boolean
+ * +getLayerManifest() Object
  * }
  * ```
  * 
@@ -51,12 +49,33 @@ import { BaseSemanticProvider } from "./BaseSemanticProvider.js";
 export class DefaultSemanticProvider extends BaseSemanticProvider {
     /**
      * @constructor 
-     * @param {Array<string>} [initialLayers=['ambient', 'spatial', 'horizon']] - The default layers to evaluate during navigation.
+     * @param {Array<string>} [layers=['ambient', 'spatial', 'horizon']] - The default layers to evaluate during navigation.
      */
-    constructor(initialLayers = ['ambient', 'spatial', 'horizon']) {
+    constructor(layers) {
         super();
-        this.layers = initialLayers;
+        this.layers = Array.isArray(layers) ? layers : (layers ? layers.split(',').map(s => s.trim()) : []);
         this.listeners = [];
+
+        this.layerManifest = {
+            "ambient": { behavior: "local", baseWeight: 0.5, persistent: true },
+            "horizon": { behavior: "neighbor", baseWeight: 0.5, persistent: true },
+            "spatial": { behavior: "object", baseWeight: 1.0, persistent: false }
+        };
+    }
+
+    /**
+     * @method getLayerManifest
+     * @memberof DefaultSemanticProvider
+     * @description Returns the agnostic ruleset for active semantic layers.
+     * @returns {Object} Manifest dictating layer behavior, persistence, and mix weights.
+     */
+    getLayerManifest() {
+        return Object.keys(this.layerManifest)
+            .filter(key => this.layers.includes(key))
+            .reduce((obj, key) => {
+                obj[key] = this.layerManifest[key];
+                return obj;
+            }, {});
     }
 
     /**
@@ -87,35 +106,5 @@ export class DefaultSemanticProvider extends BaseSemanticProvider {
      */
     notifyListeners() {
         this.listeners.forEach(cb => cb(this.layers));
-    }
-
-    /**
-     * @method getActiveLayers
-     * @memberof DefaultSemanticProvider
-     * @description Retrieves the semantic layers required for the central user node.
-     * @returns {Array<string>} The currently active semantic layers.
-     */
-    getActiveLayers() {
-        return this.layers;
-    }
-
-    /**
-     * @method getBackgroundLayers
-     * @memberof DefaultSemanticProvider
-     * @description Retrieves the semantic layers meant for background or neighboring nodes.
-     * @returns {Array<string>} The active background semantic layers.
-     */
-    getBackgroundLayers() {
-        return this.layers;
-    }
-
-    /**
-     * @method requiresBackgroundProcessing
-     * @memberof DefaultSemanticProvider
-     * @description Determines if the current strategy dictates spidering background neighbors.
-     * @returns {boolean} True if the engine should process acoustic data for topological neighbors.
-     */
-    requiresBackgroundProcessing() {
-        return this.layers.includes('horizon');
     }
 }

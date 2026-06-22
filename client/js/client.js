@@ -75,9 +75,6 @@ async function bootstrap() {
 
     try {
         console.log(config);
-        const player = new SpatialAudioPlayer(config);
-        const treadmill = new AcousticTreadmill(player, ui, config);
-
         // --- DYNAMIC AGNOSTIC STRATEGY INJECTION --
         const {
             viewerProvider: vName,
@@ -114,6 +111,9 @@ async function bootstrap() {
         const viewerProvider = new ViewerClass("map-layer", config.key);
         const semanticProvider = new SemanticClass(semanticLayers);
 
+        const player = new SpatialAudioPlayer(config, semanticProvider);
+        const treadmill = new AcousticTreadmill(player, ui, semanticProvider, config);
+
         const topologyProvider = new TopologyClass(config.key);
         const nodeSelectionStrategy = new SelectionClass(config);
         const radar = new TopologyRadar(topologyProvider, nodeSelectionStrategy);
@@ -121,7 +121,10 @@ async function bootstrap() {
         const vrLoaderProvider = new VRLoaderClass(config.key);
         const vrSceneController = new VRSceneController(ui, vrLoaderProvider);
 
+
         const navManager = new NavigationManager(viewerProvider, radar, networkService, ui, player, treadmill, vrSceneController, semanticProvider);
+
+        networkService.init(ui, player, vrSceneController, treadmill, navManager, semanticProvider);
 
         const originalClear = player.clearSpatialObjects.bind(player);
         player.clearSpatialObjects = () => {
@@ -137,7 +140,6 @@ async function bootstrap() {
             originalPlay(data);
         };
 
-        networkService.init(ui, player, vrSceneController, treadmill, navManager);
 
         ui.onMuteToggle((id, isObject) => {
             if (isObject) return player.toggleMuteObject(id);

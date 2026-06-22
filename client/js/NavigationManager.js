@@ -305,16 +305,18 @@ export class NavigationManager {
     _applyNavigationState(nodeId, data, location, epoch, originNodeId, isSlowPath = false) {
         const isAnchor = data.type === 'anchor' || data.type === 'end';
 
-        const wantsBackground = this.semanticProvider.requiresBackgroundProcessing();
-        const activeLayers = this.semanticProvider.getActiveLayers();
-        const backgroundLayers = this.semanticProvider.getBackgroundLayers();
+        const manifest = this.semanticProvider.getLayerManifest();
+        const activeLayers = Object.keys(manifest);
+        const neighborLayers = Object.keys(manifest).filter(layerId => manifest[layerId].behavior === 'neighbor');
+
+        const wantsBackground = neighborLayers.length > 0;
 
         const nearbyAnchorIds = wantsBackground ? data.nearbyAnchors.map(a => a.nodeId || a.id) : [];
 
         const nearbyAnchorPayloads = wantsBackground ? data.nearbyAnchors.map(a => ({
             nodeId: a.nodeId || a.id,
             hops: a.hops,
-            requestedLayers: backgroundLayers
+            requestedLayers: neighborLayers
         })) : [];
 
         this.currentIsAnchor = isAnchor;
@@ -326,6 +328,7 @@ export class NavigationManager {
         this.treadmill.reset(nodeId, nearbyAnchorIds, isAnchor);
 
         this.treadmill.refreshMix(nodeId, isAnchor, this.currentNearbyAnchors, this.radar);
+
         if (this.currentNodeId === nodeId && this.vrSceneController) {
             this.vrSceneController.updateSkybox(nodeId);
             this.vrSceneController.updateVRNavigation(data.links);
@@ -337,8 +340,8 @@ export class NavigationManager {
             navEpoch: epoch,
             isAnchor: isAnchor,
             location: location || data.location,
-            nearbyAnchors: nearbyAnchorPayloads,    // Driven strictly by the semantic provider's behavior
-            requestedLayers: activeLayers,          // Unified semantic meaning fetched from the provider
+            nearbyAnchors: nearbyAnchorPayloads,
+            requestedLayers: activeLayers,
             dbPayload: isSlowPath ? data : null
         });
     }

@@ -55,14 +55,23 @@ export class SpatialAudioPlayer {
     /**
      * @constructor
      */
-    constructor(config) {
-        this.spatialSources = new Map();
-        this.foregroundSources = new Map();
-        this.backgroundSources = new Map();
+    constructor(config, semanticProvider) {
+        this.semanticProvider = semanticProvider;
+        this.manifest = semanticProvider.getLayerManifest();
+        this.audioSources = new Map();
 
+        for (const [layerId, config] of Object.entries(this.manifest)) {
+            if (config.persistent) this.audioSources.set(layerId, new Map());
+        }
+
+        this.spatialSources = new Map();
         this.activeSpatialLabels = new Set();
+
         this.mutedPersistent = new Set();
         this.mutedSpatial = new Set();
+
+        this.currentEpoch = 0;
+        this.currentNodeId = null;
 
         const {
             masterBackgroundGain: backGain,
@@ -73,9 +82,6 @@ export class SpatialAudioPlayer {
         this.masterBackgroundGain = parseFloat(backGain);
         this.masterForegroundGain = parseFloat(foreGain);
         this.masterSpatialGain = parseFloat(spatialGain);
-
-        this.currentEpoch = 0;
-        this.currentNodeId = null;
     }
 
     /**
@@ -130,25 +136,14 @@ export class SpatialAudioPlayer {
      * @param {string} url - Origin URL used for MIME resolution.
      * @returns {Promise<void>}
      */
-    async registerPersistentAnchor(nodeId, bufferData, url) {
-        // Determine if this is a foreground sound or a background sound.
-        const isForeground = (nodeId === this.currentNodeId);
-        const targetMap = isForeground ? this.foregroundSources : this.backgroundSources;
-        const prefix = isForeground ? 'foreground-wash' : 'background';
-
-        if (isForeground && this.backgroundSources.has(nodeId)) {
-            console.log(`[Audio] Promoting Background to Foreground: ${nodeId}`);
-            const existing = this.backgroundSources.get(nodeId);
-            this.backgroundSources.delete(nodeId);
-
-            existing.entity.id = `${prefix}-${nodeId}`;
-            targetMap.set(nodeId, existing);
-
-            const targetVol = this.mutedPersistent.has(nodeId) ? 0 : this.masterForegroundGain;
-            console.log(targetVol);
-            this.fadeEntityVolume(existing.entity, targetVol, 2000); // 2-second swell
+    async registerPersistentAnchor(nodeId, layerId, bufferData, url) {
+        if (!this.manifest || !this.manifest[layerId]) {
+            console.warn(`[Audio] Layer ${layerId} not defined in manifest. Dropping audio.`);
             return;
         }
+
+        const targetMap = this.audioSources.get(layerId);
+        if (!targetMap) return;
 
         if (targetMap.has(nodeId)) {
             const current = targetMap.get(nodeId);
@@ -163,7 +158,7 @@ export class SpatialAudioPlayer {
         const blobUrl = URL.createObjectURL(blob);
 
         const el = document.createElement('a-entity');
-        el.id = `${prefix}-${nodeId}`;
+        el.id = `${layerId}-${nodeId}`;
 
         el.setAttribute('sound', {
             src: blobUrl,
@@ -176,8 +171,8 @@ export class SpatialAudioPlayer {
         const scene = document.querySelector('a-scene');
         scene.appendChild(el);
 
-        targetMap.set(nodeId, { entity: el, blobUrl, url });
-        console.log(`[Audio] Registered ${isForeground ? 'Foreground' : 'Background'} Wash: ${nodeId}`);
+        targetMap.set(nodeId, { entity: el, blobUrl, url, layerId });
+        console.log(`[Audio] Registered Wash (${layerId}): ${nodeId}`);
     }
 
     /**
@@ -187,18 +182,20 @@ export class SpatialAudioPlayer {
      * @param {Array<Object>} mixRatios - Array of objects dictating {id, weight}.
      */
     updatePersistentVolumes(mixRatios) {
-        const applyVolumes = (sourceMap, masterGain) => {
-            const safeMasterGain = !isNaN(masterGain) ? masterGain : 1.0;
+        const manifest = this.semanticProvider?.getLayerManifest() || {};
 
-            for (const [nodeId, anchorData] of sourceMap.entries()) {
-                const mix = mixRatios.find(m => String(m.id) === String(nodeId));
-                let targetVolume = 0; // Default to 0
+        for (const [layerId, layerMap] of this.audioSources.entries()) {
+
+            const behavior = manifest[layerId]?.behavior || 'local';
+            const masterMultiplier = behavior === 'neighbor' ? this.masterBackgroundGain : this.masterForegroundGain;
+            const safeMasterGain = !isNaN(masterMultiplier) ? masterMultiplier : 1.0;
+
+            for (const [nodeId, anchorData] of layerMap.entries()) {
+                const mix = mixRatios.find(m => String(m.id) === String(nodeId) && m.layerId === layerId);
+                let targetVolume = 0;
 
                 if (mix && isFinite(mix.weight)) {
-                    targetVolume = parseFloat(mix.weight * safeMasterGain);
-                    if (isNaN(targetVolume) || !isFinite(targetVolume)) targetVolume = 0;
-                } else if (sourceMap === this.foregroundSources && !mix) {
-                    targetVolume = safeMasterGain;
+                    targetVolume = parseFloat(mix.weight) * safeMasterGain;
                 }
 
                 anchorData.lastTargetVolume = targetVolume;
@@ -210,10 +207,7 @@ export class SpatialAudioPlayer {
 
                 this.fadeEntityVolume(anchorData.entity, targetVolume, 750);
             }
-        };
-
-        applyVolumes(this.backgroundSources, this.masterBackgroundGain);
-        applyVolumes(this.foregroundSources, this.masterForegroundGain);
+        }
     }
 
     /**
@@ -224,31 +218,31 @@ export class SpatialAudioPlayer {
      * @returns {boolean} True if the layer is now muted.
      */
     toggleMutePersistent(nodeId) {
+        let isNowMuted = false;
+
         const isMuted = this.mutedPersistent.has(nodeId);
 
         if (isMuted) {
             this.mutedPersistent.delete(nodeId);
+            isNowMuted = false;
         } else {
             this.mutedPersistent.add(nodeId);
+            isNowMuted = true;
         }
 
-        const isNowMuted = !isMuted;
-
-        if (this.foregroundSources.has(nodeId)) {
-            const el = this.foregroundSources.get(nodeId).entity;
-            this.fadeEntityVolume(el, isNowMuted ? 0 : this.masterForegroundGain, 0);
-        }
-
-        if (this.backgroundSources.has(nodeId)) {
-            const anchorData = this.backgroundSources.get(nodeId);
-            if (isNowMuted) {
-                this.fadeEntityVolume(anchorData.entity, 0, 0);
-            } else {
-                const restoreVol = anchorData.lastTargetVolume || 0;
-                this.fadeEntityVolume(anchorData.entity, restoreVol, 0);
+        // Apply mute/unmute transition across all dynamic maps
+        for (const layerMap of this.audioSources.values()) {
+            if (layerMap.has(nodeId)) {
+                const anchorData = layerMap.get(nodeId);
+                if (isNowMuted) {
+                    this.fadeEntityVolume(anchorData.entity, 0, 0);
+                } else {
+                    const restoreVol = anchorData.lastTargetVolume || 0;
+                    this.fadeEntityVolume(anchorData.entity, restoreVol, 0);
+                }
             }
         }
-        return !isMuted;
+        return isNowMuted;
     }
 
     // --- TRANSIENT / SPATIAL AUDIO ---
@@ -280,7 +274,7 @@ export class SpatialAudioPlayer {
 
         const el = document.createElement('a-entity');
 
-        el.id = `foreground-${uniqueId.replace(/[^a-zA-Z0-9]/g, '')}`;
+        el.id = `object-${uniqueId.replace(/[^a-zA-Z0-9]/g, '')}`;
 
         const rawH = parseFloat(data.h);
         const rawP = parseFloat(data.p);
@@ -289,7 +283,6 @@ export class SpatialAudioPlayer {
         const safeH = isNaN(rawH) ? 0 : rawH;
         const safeP = isNaN(rawP) ? 90 : rawP;
 
-        // Ensure distance is never exactly 0, which would cause an Infinity divide-by-zero crash
         const safeDist = isNaN(rawDist) ? 10 : Math.max(0.1, rawDist);
 
         const cartesian = SpatialUtils.sphericalToCartesian(safeH || 0, safeP || 90, safeDist || 10);
@@ -305,7 +298,7 @@ export class SpatialAudioPlayer {
             distanceModel: 'inverse',
             refDistance: 2,
             maxDistance: 50,
-            rolloffFactor: 1 // True 3D Audio
+            rolloffFactor: 1
         });
 
         const scene = document.querySelector('a-scene');
@@ -327,7 +320,7 @@ export class SpatialAudioPlayer {
             const data = this.spatialSources.get(uniqueId);
             this._cleanupEntity(data);
             this.spatialSources.delete(uniqueId);
-            this.activeSpatialLabels.add(uniqueId);
+            this.activeSpatialLabels.delete(uniqueId);
         }
     }
 
@@ -364,22 +357,28 @@ export class SpatialAudioPlayer {
             this.stopObjectSound(uniqueId);
         });
         this.spatialSources.clear();
+
+        if (this.manifest) {
+            for (const [layerId, config] of Object.entries(this.manifest)) {
+                if (config.behavior === 'local') {
+                    const map = this.audioSources.get(layerId);
+                    if (map) {
+                        map.forEach((obj) => this._cleanupEntity(obj));
+                        map.clear();
+                    }
+                }
+            }
+        }
+
         const scene = document.querySelector('a-scene');
         if (scene) {
-            const allEntities = scene.querySelectorAll('a-entity[id^="foreground-"]');
+            const allEntities = scene.querySelectorAll('a-entity[sound]');
             allEntities.forEach(el => {
-                if (!el.id.startsWith('foreground-wash-')) {
+                if (el.id.startsWith('object-') || (this.manifest && Object.keys(this.manifest).some(layer => el.id.startsWith(`${layer}-`)))) {
                     this._cleanupEntity({ entity: el });
                 }
             });
         }
-
-        // Clean up Foreground Wash when leaving the node!
-        // Because they are local, they must die when you navigate away.
-        this.foregroundSources.forEach((obj, nodeId) => {
-            this._cleanupEntity(obj);
-        });
-        this.foregroundSources.clear();
 
         this.mutedSpatial.clear();
         this.mutedPersistent.clear();
@@ -417,10 +416,8 @@ export class SpatialAudioPlayer {
     fadeEntityVolume(entity, targetVolume, durationMs = 2000) {
         if (!entity) return;
 
-        // Clear any existing fade to prevent tug-of-war
         if (entity._fadeInterval) clearInterval(entity._fadeInterval);
 
-        // Wait for A-Frame to attach the component if it's a newly created entity
         if (!entity.components || !entity.components.sound) {
             setTimeout(() => this.fadeEntityVolume(entity, targetVolume, durationMs), 50);
             return;
@@ -438,7 +435,6 @@ export class SpatialAudioPlayer {
             currentStep++;
             currentVol += volDelta;
 
-            // Guard against the entity being deleted during the crossfade
             if (!entity.parentNode) {
                 clearInterval(entity._fadeInterval);
                 return;
@@ -459,16 +455,15 @@ export class SpatialAudioPlayer {
      * @description Command to wipe ALL audio tracking layers.
      */
     purgeAll() {
-        // 1. Clear foregrounds and spatials
         this.clearSpatialObjects();
 
-        // 2. Destroy all background washes which survive normal navigation
-        this.backgroundSources.forEach((obj, nodeId) => {
-            this._cleanupEntity(obj);
-        });
-        this.backgroundSources.clear();
+        if (this.manifest) {
+            for (const layerMap of this.audioSources.values()) {
+                layerMap.forEach((obj) => this._cleanupEntity(obj));
+                layerMap.clear();
+            }
+        }
 
-        // 3. Kill the background garbage collector loop
         if (this.gcInterval) {
             clearInterval(this.gcInterval);
             this.gcInterval = null;
@@ -476,6 +471,7 @@ export class SpatialAudioPlayer {
 
         console.log("[Audio] Fully purged all audio layers on exit.");
     }
+
     // --- LIFECYCLE ---
     /**
      * @method startGarbageCollector
@@ -489,29 +485,35 @@ export class SpatialAudioPlayer {
         this.gcInterval = setInterval(() => {
             const activeIds = treadmill?.anchorTracker?.expectedIds || [];
 
-            // GC only touches Background sources. Foreground sources are cleaned
-            // instantly in clearSpatialObjects() when navigating.
-            for (const [nodeId, anchorData] of this.backgroundSources.entries()) {
-                if (!activeIds.includes(nodeId) && nodeId !== this.currentNodeId) {
+            if (this.manifest) {
+                for (const [layerId, config] of Object.entries(this.manifest)) {
+                    if (config.behavior === 'neighbor') {
+                        const layerMap = this.audioSources.get(layerId);
+                        if (!layerMap) continue;
 
-                    const el = anchorData.entity;
-                    if (el && el.components.sound) {
-                        let currentVol = parseFloat(el.getAttribute('sound').volume);
-                        if (isNaN(currentVol)) currentVol = 0;
-                        const fadeOut = setInterval(() => {
-                            currentVol -= 0.05;
-                            if (currentVol <= 0) {
-                                clearInterval(fadeOut);
-                                this._cleanupEntity(anchorData);
-                                this.backgroundSources.delete(nodeId);
-                                console.log(`[Audio GC] Purged stale Background: ${nodeId}`);
-                            } else {
-                                el.setAttribute('sound', 'volume', currentVol);
+                        for (const [nodeId, anchorData] of layerMap.entries()) {
+                            if (!activeIds.includes(nodeId) && nodeId !== this.currentNodeId) {
+                                const el = anchorData.entity;
+                                if (el && el.components && el.components.sound) {
+                                    let currentVol = parseFloat(el.getAttribute('sound').volume);
+                                    if (isNaN(currentVol)) currentVol = 0;
+                                    const fadeOut = setInterval(() => {
+                                        currentVol -= 0.05;
+                                        if (currentVol <= 0) {
+                                            clearInterval(fadeOut);
+                                            this._cleanupEntity(anchorData);
+                                            layerMap.delete(nodeId);
+                                            console.log(`[Audio GC] Purged stale ${layerId}: ${nodeId}`);
+                                        } else {
+                                            el.setAttribute('sound', 'volume', currentVol);
+                                        }
+                                    }, 100);
+                                } else {
+                                    this._cleanupEntity(anchorData);
+                                    layerMap.delete(nodeId);
+                                }
                             }
-                        }, 100);
-                    } else {
-                        this._cleanupEntity(anchorData);
-                        this.backgroundSources.delete(nodeId);
+                        }
                     }
                 }
             }

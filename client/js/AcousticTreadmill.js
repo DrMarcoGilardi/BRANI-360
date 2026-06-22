@@ -52,7 +52,7 @@ export class AcousticTreadmill {
      * @param {UIManager} ui - The UI HUD.
      * @param {Object} clientConfig - Configuration options for the client.
      */
-    constructor(player, ui, clientConfig = {}) {
+    constructor(player, ui, semanticProvider, clientConfig = {}) {
         this.player = player;
         this.ui = ui;
         this.clientConfig = clientConfig;
@@ -62,6 +62,7 @@ export class AcousticTreadmill {
             completedIds: new Set(),
             activeNodeId: null
         };
+        this.semanticProvider = semanticProvider;
     }
 
     /**
@@ -80,7 +81,7 @@ export class AcousticTreadmill {
         };
 
         if (!currentIsAnchor) {
-            this.ui.updatePipelineProgress(nodeId, 'syncing', 0, false, false, false, null, null);
+            this.ui.updatePipelineProgress(nodeId, 'syncing', 0, 'local', false, null, null);
         }
     }
 
@@ -103,16 +104,11 @@ export class AcousticTreadmill {
 
             if (count >= total) {
                 this.ui.updatePipelineProgress(
-                    this.anchorTracker.activeNodeId,
-                    'complete',
-                    1.0, false, false, false, null, null
+                    this.anchorTracker.activeNodeId, 'complete', 1.0, 'local', false, null, null
                 );
             } else {
-                // UI Agnostic string for background loading
                 this.ui.updatePipelineProgress(
-                    this.anchorTracker.activeNodeId,
-                    'syncing background',
-                    progress, false, false, false, null, null
+                    this.anchorTracker.activeNodeId, 'syncing neighbors', progress, 'local', false, null, null
                 );
             }
         }
@@ -128,86 +124,83 @@ export class AcousticTreadmill {
      * @param {TopologyRadar} radar - Radar topology reference.
      */
     refreshMix(currentNodeId, currentIsAnchor, currentNearbyAnchors, radar) {
+        const manifest = this.semanticProvider.getLayerManifest();
 
         if (!this.spatiallycontinuous) {
-            this.player.updatePersistentVolumes([{ id: String(currentNodeId), weight: 1.0 }]);
+            const localLayers = Object.entries(manifest).filter(([_, conf]) => conf.behavior === 'local');
+            let fallbackVolumes = [];
+            localLayers.forEach(([layerId]) => {
+                fallbackVolumes.push({ id: String(currentNodeId), layerId: layerId, weight: 1.0 });
+            });
+
+            if (currentIsAnchor) {
+                const neighborLayers = Object.entries(manifest).filter(([_, conf]) => conf.behavior === 'neighbor');
+                neighborLayers.forEach(([layerId]) => {
+                    fallbackVolumes.push({ id: String(currentNodeId), layerId: layerId, weight: 1.0 });
+                });
+            }
+
+            this.player.updatePersistentVolumes(fallbackVolumes);
             return;
         }
 
-        if (!currentNearbyAnchors || !Array.isArray(currentNearbyAnchors)) return;
+        let volumes = []; // Structure: { id, layerId, weight }
+        let totalWeightBudget = 0;
 
-        let mixTargets = [];
-        let volumes = [];
+        const localLayers = Object.entries(manifest).filter(([_, conf]) => conf.behavior === 'local');
+        const neighborLayers = Object.entries(manifest).filter(([_, conf]) => conf.behavior === 'neighbor');
 
+        const validNeighbors = (currentNearbyAnchors || []).filter(a => a.nodeId);
+
+        let mixTargets = [...validNeighbors];
         if (currentIsAnchor) {
-            // Filter out the foreground node to calculate background splits
-            currentNearbyAnchors.forEach(a => {
-                const targetId = (a.nodeId)?.toString();
-                if (targetId && targetId !== String(currentNodeId)) {
-                    mixTargets.push({ nodeId: targetId, hops: a.hops });
-                }
+            mixTargets.push({ nodeId: currentNodeId, hops: 0 });
+        }
+
+        localLayers.forEach(([_, conf]) => totalWeightBudget += conf.baseWeight);
+        if (validNeighbors.length > 0) {
+            neighborLayers.forEach(([_, conf]) => totalWeightBudget += conf.baseWeight);
+        }
+
+        if (totalWeightBudget === 0) totalWeightBudget = 1.0;
+
+        localLayers.forEach(([layerId, conf]) => {
+            const layerBudget = conf.baseWeight / totalWeightBudget;
+            volumes.push({
+                id: String(currentNodeId),
+                layerId: layerId,
+                weight: layerBudget
             });
+        });
 
-            if (mixTargets.length > 0) {
-                // Foreground gets exactly 50% of the mix
-                volumes.push({ id: String(currentNodeId), weight: 0.5 });
-
-                let totalInvHops = 0;
-                const SMOOTHING_FACTOR = 1.0;
-
-                mixTargets.forEach(a => {
-                    const safeHops = (typeof a.hops === 'number' && !isNaN(a.hops)) ? a.hops : 1;
-                    totalInvHops += 1 / (SMOOTHING_FACTOR + safeHops);
-                });
-
-                // Backgrounds share the remaining 50% 
-                mixTargets.forEach(a => {
-                    const safeHops = (typeof a.hops === 'number' && !isNaN(a.hops)) ? a.hops : 1;
-                    let calculatedWeight = (1 / (SMOOTHING_FACTOR + safeHops)) / totalInvHops;
-
-                    if (isNaN(calculatedWeight) || !isFinite(calculatedWeight)) {
-                        calculatedWeight = 0;
-                    }
-
-                    volumes.push({
-                        id: String(a.nodeId),
-                        weight: calculatedWeight * 0.5 // Scale to 50%
-                    });
-                });
-            } else {
-                // If there are no backgrounds, give the foreground 100%
-                volumes.push({ id: String(currentNodeId), weight: 1.0 });
-            }
-
-        } else if (currentNearbyAnchors.length > 0) {
-            mixTargets = currentNearbyAnchors.map(a => ({
-                nodeId: (a.nodeId)?.toString(),
-                hops: a.hops
-            })).filter(a => a.nodeId); // Filter out any broken entries
-
+        if (validNeighbors.length > 0) {
             let totalInvHops = 0;
             const SMOOTHING_FACTOR = 1.0;
 
-            mixTargets.forEach(a => {
+            validNeighbors.forEach(a => {
                 const safeHops = (typeof a.hops === 'number' && !isNaN(a.hops)) ? a.hops : 1;
                 totalInvHops += 1 / (SMOOTHING_FACTOR + safeHops);
             });
 
-            volumes = mixTargets.map(a => {
-                const safeHops = (typeof a.hops === 'number' && !isNaN(a.hops)) ? a.hops : 1;
-                let calculatedWeight = (1 / (SMOOTHING_FACTOR + safeHops)) / totalInvHops;
+            neighborLayers.forEach(([layerId, conf]) => {
+                const layerBudget = conf.baseWeight / totalWeightBudget;
 
-                if (isNaN(calculatedWeight) || !isFinite(calculatedWeight)) calculatedWeight = 0;
+                validNeighbors.forEach(a => {
+                    const safeHops = (typeof a.hops === 'number' && !isNaN(a.hops)) ? a.hops : 1;
+                    let nodeFraction = (1 / (SMOOTHING_FACTOR + safeHops)) / totalInvHops;
 
-                return {
-                    id: String(a.nodeId),
-                    weight: calculatedWeight
-                };
+                    if (isNaN(nodeFraction) || !isFinite(nodeFraction)) nodeFraction = 0;
+
+                    volumes.push({
+                        id: String(a.nodeId),
+                        layerId: layerId,
+                        weight: nodeFraction * layerBudget // Combine fractions for final mix
+                    });
+                });
             });
         }
 
         if (volumes.length > 0) {
-            // Pass the mixing math directly to the persistent/background channels in the audio player
             this.player.updatePersistentVolumes(volumes);
         }
     }

@@ -86,12 +86,13 @@ export class NetworkService {
      * @param {AcousticTreadmill} treadmill - The Audio Mixing Engine.
      * @param {NavigationManager} navManager - The primary Nav Orchestrator.
      */
-    init(ui, player, sceneController, treadmill, navManager) {
+    init(ui, player, sceneController, treadmill, navManager, semanticProvider) {
         this.ui = ui;
         this.player = player;
         this.sceneController = sceneController;
         this.treadmill = treadmill;
         this.navManager = navManager;
+        this.semanticProvider = semanticProvider;
 
         this._setupListeners();
 
@@ -212,8 +213,8 @@ export class NetworkService {
      * @param {string} nodeId - The parent node of the task.
      * @returns {string} Formatted label.
      */
-    getHUDLabel(id, isObject, displayName, nodeId) {
-        if (isObject) return displayName || id;
+    getHUDLabel(id, behavior, displayName, nodeId) {
+        if (behavior === 'object') return displayName || id;
 
         if (nodeId === this.navManager?.currentNodeId || id === this.navManager?.currentNodeId) {
             const alias = this.ui.getAlias(id, this.navManager.currentIsAnchor);
@@ -223,8 +224,7 @@ export class NetworkService {
         const isNearbyAnchor = this.navManager?.currentNearbyAnchors?.some(a => a.nodeId === id);
         if (isNearbyAnchor) {
             const alias = this.ui.getAlias(id, true);
-            // Agnostic UI label for background/neighbor nodes
-            return `${alias.replace(/^S/, 'A')} (Background)`;
+            return `${alias.replace(/^S/, 'A')} (Neighbor)`;
         }
 
         return this.ui.getAlias(id, false);
@@ -279,7 +279,6 @@ export class NetworkService {
     _handlePipelineProgress(data) {
         if (!this._isEpochValid(data.navEpoch, 'Progress')) return;
 
-        // Flatten payload to guarantee access to deep task intent data
         const payload = data.taskData ? { ...data, ...data.taskData } : { ...data };
 
         const nodeId = payload.nodeId?.toString();
@@ -289,30 +288,32 @@ export class NetworkService {
         const isNeighbor = this.treadmill.anchorTracker.expectedIds.includes(nodeId);
         if (nodeId && nodeId !== currentNodeId && !isNeighbor) return;
 
-        // In AIEngine, persistent nodes share their ID with the node ID. 
-        // Spatial instances have a unique suffixed ID.
-        const isObject = targetId !== nodeId;
+        // Dynamic Manifest Evaluation
+        const fallbackLayer = (targetId !== nodeId) ? 'spatial' : (nodeId === currentNodeId ? 'ambient' : 'horizon');
+        const layerId = payload.layerId || payload.layer || fallbackLayer;
 
-        // Evaluate topological state
-        const isBackgroundNode = this.treadmill.anchorTracker.expectedIds.includes(targetId) && targetId !== currentNodeId;
+        const manifest = this.semanticProvider?.getLayerManifest() || {};
+        const behavior = manifest[layerId]?.behavior || (fallbackLayer === 'spatial' ? 'object' : 'local');
+
         const isAnchorInSession = this.navManager.currentIsAnchor && targetId === currentNodeId;
+        const label = this.getHUDLabel(targetId, behavior, payload.displayName || payload.label || layerId.toUpperCase(), nodeId);
 
-        const label = this.getHUDLabel(targetId, isObject, payload.displayName || payload.label, nodeId);
-
+        // Strict 7-Argument Signature Push
         this.ui.updatePipelineProgress(
-            targetId, payload.stage, payload.progress, isObject, isAnchorInSession, isBackgroundNode, label, payload.taskData
+            targetId, payload.stage, payload.progress, behavior, isAnchorInSession, label, payload.taskData
         );
 
-        if (this.treadmill.anchorTracker.activeNodeId && isBackgroundNode && !this.navManager.currentIsAnchor) {
+        if (this.treadmill.anchorTracker.activeNodeId && behavior === 'neighbor' && !this.navManager.currentIsAnchor) {
             const totalExpected = this.treadmill.anchorTracker.expectedIds.length;
             if (totalExpected > 0) {
                 const baseProgress = (this.treadmill.anchorTracker.completedIds.size / totalExpected);
                 const incremental = (payload.progress / totalExpected);
-                // UI Agnostic string for background loading
-                this.ui.updatePipelineProgress(this.treadmill.anchorTracker.activeNodeId, 'syncing background', baseProgress + incremental, false, false, false, null, null);
+
+                this.ui.updatePipelineProgress(this.treadmill.anchorTracker.activeNodeId, 'syncing neighbors', baseProgress + incremental, 'local', false, null, null);
             }
         }
     }
+
 
     /**
      * @async
@@ -324,13 +325,11 @@ export class NetworkService {
      * @private
      */
     async _handleObjectReady(data) {
-        // Merge taskData properties to the top level for the AudioPlayer
         const payload = data.taskData ? { ...data, ...data.taskData } : { ...data };
 
         const nodeId = payload.nodeId?.toString();
         const targetId = payload.id?.toString();
         let currentNodeId = this.navManager.currentNodeId?.toString();
-
 
         if (!this._isEpochValid(payload.navEpoch, `Object ${payload.label}`)) return;
         if (nodeId !== currentNodeId) return;
@@ -359,13 +358,13 @@ export class NetworkService {
             }
 
             this.ui.updatePipelineProgress(
-                targetId, 'complete', 1.0, true, false, false, payload.displayName || payload.label, taskPayload
+                targetId, 'complete', 1.0, 'object', false, payload.displayName || payload.label, taskPayload
             );
         } catch (e) {
             if (e.name === 'AbortError') return;
             console.error(`[Audio Error] Object ${payload.displayName || payload.label} failed:`, e);
             if (nodeId === currentNodeId) {
-                this.ui.updatePipelineProgress(targetId, 'error', 1.0, true, false, false, payload.displayName || payload.label, taskPayload);
+                this.ui.updatePipelineProgress(targetId, 'error', 1.0, 'object', false, payload.displayName || payload.label, taskPayload);
             }
         }
     }
@@ -396,7 +395,6 @@ export class NetworkService {
         delete taskPayload.audioBuffer;
 
         try {
-            // true flag routes this fetch to the persistentFetchControllers
             const buffer = await this.fetchAudioUrl(payload.url, true);
             if (!buffer) return;
 
@@ -405,18 +403,21 @@ export class NetworkService {
 
             if (!this.treadmill.anchorTracker.expectedIds.includes(nodeId) && nodeId !== currentNodeId) return;
 
-            // Use the new agnostic method name
-            await this.player.registerPersistentAnchor(nodeId, buffer, payload.url);
-            const label = this.getHUDLabel(nodeId, false, null, nodeId);
+            const targetLayer = payload.layer || payload.layerId || "horizon";
+            this.player.registerPersistentAnchor(payload.nodeId, targetLayer, buffer, payload.url);
+
+            const manifest = this.semanticProvider?.getLayerManifest() || {};
+            const behavior = manifest[targetLayer]?.behavior || 'local';
+            const label = this.getHUDLabel(nodeId, behavior, null, nodeId);
 
             if (nodeId === currentNodeId) {
                 if (this.sceneController.setAmbientWash) {
                     this.sceneController.setAmbientWash(`${this.tunnelUrl}${payload.url}`);
                 }
-                this.ui.updatePipelineProgress(nodeId, 'complete', 1.0, false, this.navManager.currentIsAnchor, false, label, taskPayload);
+                this.ui.updatePipelineProgress(nodeId, 'complete', 1.0, behavior, this.navManager.currentIsAnchor, label, taskPayload);
             } else {
                 this.treadmill.updateAggregateProgress(nodeId, this.navManager.currentIsAnchor);
-                this.ui.updatePipelineProgress(nodeId, 'complete', 1.0, false, true, true, label, taskPayload);
+                this.ui.updatePipelineProgress(nodeId, 'complete', 1.0, 'neighbor', true, label, taskPayload);
             }
 
             setTimeout(() => this.treadmill.refreshMix(currentNodeId, this.navManager.currentIsAnchor, this.navManager.currentNearbyAnchors, this.navManager.radar), 100);
@@ -424,9 +425,14 @@ export class NetworkService {
             if (e.name === 'AbortError') return;
             console.error(`[Audio Error] Persistent Layer ${nodeId} failed:`, e);
 
-            const label = this.getHUDLabel(nodeId, false, null, nodeId);
-            const isBackgroundNode = nodeId !== currentNodeId;
-            this.ui.updatePipelineProgress(nodeId, 'error', 1.0, false, nodeId === currentNodeId && this.navManager.currentIsAnchor, isBackgroundNode, label, taskPayload);
+            // Re-declare scoping variables required strictly for the error hook
+            const targetLayer = payload.layer || payload.layerId || "horizon";
+            const manifest = this.semanticProvider?.getLayerManifest() || {};
+            const behavior = manifest[targetLayer]?.behavior || (nodeId === currentNodeId ? 'local' : 'neighbor');
+            const label = this.getHUDLabel(nodeId, behavior, null, nodeId);
+            const isAnchorError = nodeId === currentNodeId && this.navManager.currentIsAnchor;
+
+            this.ui.updatePipelineProgress(nodeId, 'error', 1.0, behavior, isAnchorError, label, taskPayload);
         }
     }
 }

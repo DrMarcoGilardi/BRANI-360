@@ -241,6 +241,31 @@ export class UIManager {
      * @memberof UIManager
      * @description Flushes the DOM pipeline containers for a new node hop. 
      */
+    // resetPipeline() {
+    //     this.taskElements.clear();
+    //     if (this.progressContainer) {
+    //         this.progressContainer.innerHTML = `
+    //             <div id="pipeline-header-group" style="display: none; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #444; padding-bottom: 6px;">
+    //                 <div id="pipeline-current-node-title" style="font-weight: bold; font-size: 12px; letter-spacing: 1px;"></div>
+    //                 <button id="master-mute-btn" style="background: none; border: 1px solid #00ffaa; color: #00ffaa; font-size: 9px; padding: 3px 6px; cursor: pointer; border-radius: 3px; transition: background 0.2s;">MUTE ALL</button>
+    //             </div>
+
+    //             <div id="background-tasks-container" style="display: flex; flex-direction: column; gap: 0px;"></div>
+
+    //             <div id="spatial-header" style="display: none; font-size: 10px; color: #aaa; margin-top: 12px; margin-bottom: 6px; border-bottom: 1px solid #333; padding-bottom: 3px; font-weight: bold; letter-spacing: 1px;">SPATIAL OBJECTS</div>
+    //             <div id="spatial-tasks-container" style="display: flex; flex-direction: column; gap: 0px;"></div>
+    //         `;
+
+    //         const masterMuteBtn = this.progressContainer.querySelector('#master-mute-btn');
+    //         if (masterMuteBtn) {
+    //             masterMuteBtn.onclick = (e) => {
+    //                 e.stopPropagation();
+    //                 this.toggleMasterMute(masterMuteBtn);
+    //             };
+    //         }
+    //         this.isMasterMuted = false;
+    //     }
+    // }
     resetPipeline() {
         this.taskElements.clear();
         if (this.progressContainer) {
@@ -250,10 +275,13 @@ export class UIManager {
                     <button id="master-mute-btn" style="background: none; border: 1px solid #00ffaa; color: #00ffaa; font-size: 9px; padding: 3px 6px; cursor: pointer; border-radius: 3px; transition: background 0.2s;">MUTE ALL</button>
                 </div>
                 
-                <div id="background-tasks-container" style="display: flex; flex-direction: column; gap: 0px;"></div>
+                <div id="behavior-local-container" style="display: flex; flex-direction: column; gap: 0px;"></div>
                 
-                <div id="spatial-header" style="display: none; font-size: 10px; color: #aaa; margin-top: 12px; margin-bottom: 6px; border-bottom: 1px solid #333; padding-bottom: 3px; font-weight: bold; letter-spacing: 1px;">SPATIAL OBJECTS</div>
-                <div id="spatial-tasks-container" style="display: flex; flex-direction: column; gap: 0px;"></div>
+                <div id="behavior-neighbor-header" style="display: none; font-size: 10px; color: #888; margin-top: 12px; margin-bottom: 6px; border-bottom: 1px solid #333; padding-bottom: 3px; font-weight: bold; letter-spacing: 1px;">NEIGHBORING LAYERS</div>
+                <div id="behavior-neighbor-container" style="display: flex; flex-direction: column; gap: 0px;"></div>
+                
+                <div id="behavior-object-header" style="display: none; font-size: 10px; color: #aaa; margin-top: 12px; margin-bottom: 6px; border-bottom: 1px solid #333; padding-bottom: 3px; font-weight: bold; letter-spacing: 1px;">SCENE OBJECTS</div>
+                <div id="behavior-object-container" style="display: flex; flex-direction: column; gap: 0px;"></div>
             `;
 
             const masterMuteBtn = this.progressContainer.querySelector('#master-mute-btn');
@@ -280,21 +308,241 @@ export class UIManager {
      * @param {string|null} [displayName=null] - Explicit UI label.
      * @param {Object|null} [taskData=null] - Raw task JSON attached to the DOM for regen triggers.
      */
-    updatePipelineProgress(id, stage, progressPercentage, isObject = false, isAnchor = false, isBackgroundNode = false, displayName = null, taskData = null) {
+    // updatePipelineProgress(id, stage, progressPercentage, isObject = false, isAnchor = false, isBackgroundNode = false, displayName = null, taskData = null) {
+    //     const key = id;
+    //     let el = this.taskElements.get(key);
+    //     const isMainNode = !isObject && !isBackgroundNode;
+
+    //     if (!el) {
+    //         el = document.createElement('div');
+    //         el.className = 'task-item';
+
+    //         if (isBackgroundNode) {
+    //             Object.assign(el.style, { opacity: '0.6', borderLeft: '2px solid #555', paddingLeft: '8px', marginBottom: '6px' });
+    //         } else if (isObject) {
+    //             Object.assign(el.style, { borderLeft: '2px solid #00bfff', paddingLeft: '8px', marginBottom: '6px' });
+    //         } else {
+    //             // Main Node formatting
+    //             Object.assign(el.style, { borderLeft: '2px solid #ffdd00', paddingLeft: '8px', marginBottom: '8px' });
+    //         }
+
+    //         el.innerHTML = `
+    //             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+    //                 <div class="task-title" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 75%; font-weight: bold; font-size: 11px;"></div>
+    //                 <div style="display: flex;">
+    //                     <button class="regen-btn" style="display: none; background: none; border: 1px solid #ffdd00; color: #ffdd00; font-size: 9px; padding: 2px 5px; cursor: pointer; border-radius: 3px; margin-right: 4px; transition: background 0.2s;">REGEN</button>
+    //                     <button class="mute-btn" style="display: none; background: none; border: 1px solid #00ffaa; color: #00ffaa; font-size: 9px; padding: 2px 5px; cursor: pointer; border-radius: 3px; transition: background 0.2s;">MUTE</button>
+    //                 </div>
+    //             </div>
+    //             <div style="font-size: 9px; margin-bottom: 4px; letter-spacing: 0.5px;"><span class="stage-text">${stage}</span></div>
+    //             <div class="progress-bar" style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
+    //                 <div class="progress-fill" style="height: 100%; width: 0%; transition: width 0.3s ease, background 0.3s ease;"></div>
+    //             </div>  
+    //             <div class="regen-form" style="display: none; flex-direction: column; gap: 4px; padding: 5px; background: rgba(0,0,0,0.5); border-radius: 4px; margin-top: 5px; border: 1px solid #444;">
+    //                 <input type="text" class="regen-feedback" placeholder="What's wrong? (e.g., dog barking)" style="font-size: 9px; background: #222; color: #fff; border: 1px solid #555; border-radius: 2px; padding: 3px;">
+    //                 <label style="display: flex; align-items: center; gap: 4px; font-size: 8px; color: #ffdd00; cursor: pointer; margin: 2px 0;">
+    //                     <input type="checkbox" class="regen-scratch" style="margin:0; width: auto;"> 
+    //                     <span>REGEN FROM SCRATCH (DISCARD OLD)</span>
+    //                 </label>
+    //                 <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
+    //                     <div class="slider-zone" style="display: flex; align-items: center; gap: 6px; flex-grow: 1; font-size: 8px; color: #aaa; transition: all 0.2s ease;">
+    //                         <span>TWEAK</span>
+    //                         <input type="range" class="regen-rating" min="1" max="10" value="5" style="flex-grow: 1;">
+    //                         <span>NUKE</span>
+    //                     </div>
+    //                     <button class="regen-submit" style="background: #ffdd00; color: #000; border: none; border-radius: 2px; padding: 2px 6px; font-weight: bold; cursor: pointer; margin-left: 8px;">GO</button>
+    //                 </div>
+    //             </div>
+    //         `;
+
+    //         const muteBtn = el.querySelector('.mute-btn');
+    //         if (muteBtn) {
+    //             muteBtn.addEventListener('click', (e) => {
+    //                 e.stopPropagation();
+    //                 if (this.muteCallback) {
+    //                     let muteKey = id;
+    //                     const isMuted = this.muteCallback(muteKey, isObject);
+
+    //                     muteBtn.innerText = isMuted ? 'UNMUTE' : 'MUTE';
+    //                     muteBtn.style.color = isMuted ? '#ff0055' : '#00ffaa';
+    //                     muteBtn.style.borderColor = isMuted ? '#ff0055' : '#00ffaa';
+    //                 }
+    //             });
+    //         }
+
+    //         const scratchCheckbox = el.querySelector('.regen-scratch');
+    //         const ratingSlider = el.querySelector('.regen-rating');
+    //         const sliderZone = el.querySelector('.slider-zone');
+
+    //         if (scratchCheckbox && ratingSlider && sliderZone) {
+    //             scratchCheckbox.addEventListener('change', () => {
+    //                 const fromScratch = scratchCheckbox.checked;
+    //                 ratingSlider.disabled = fromScratch;
+    //                 sliderZone.style.opacity = fromScratch ? '0.3' : '1.0';
+    //                 sliderZone.style.filter = fromScratch ? 'grayscale(1)' : 'none';
+    //                 sliderZone.style.pointerEvents = fromScratch ? 'none' : 'auto';
+    //             });
+    //         }
+
+    //         // Route the UI element to the correct DOM container
+    //         const bgContainer = document.getElementById('background-tasks-container');
+    //         const spatialContainer = document.getElementById('spatial-tasks-container');
+    //         const spatialHeader = document.getElementById('spatial-header');
+
+    //         if (isObject) {
+    //             if (spatialContainer) spatialContainer.appendChild(el);
+    //             if (spatialHeader) spatialHeader.style.display = 'block';
+    //         } else if (isMainNode) {
+    //             // Formatting the main group header dynamically
+    //             const headerGroup = document.getElementById('pipeline-header-group');
+    //             const titleEl = document.getElementById('pipeline-current-node-title');
+    //             if (headerGroup && titleEl) {
+    //                 headerGroup.style.display = 'flex';
+    //                 const alias = this.getAlias(id, isAnchor);
+    //                 titleEl.innerText = isAnchor ? `${alias} [ANCHOR]` : `${alias} [STANDARD]`;
+    //                 titleEl.style.color = isAnchor ? '#ffdd00' : '#00bfff';
+    //             }
+    //             // Prepend main node to sit at the very top of the background group
+    //             if (bgContainer) bgContainer.prepend(el);
+    //         } else {
+    //             if (bgContainer) bgContainer.appendChild(el);
+    //         }
+
+    //         this.taskElements.set(key, el);
+    //         if (this.hudEl) this.hudEl.scrollTop = this.hudEl.scrollHeight;
+    //     }
+
+    //     const titleEl = el.querySelector('.task-title');
+    //     const fill = el.querySelector('.progress-fill');
+    //     const text = el.querySelector('.stage-text');
+    //     const muteBtn = el.querySelector('.mute-btn');
+    //     const regenBtn = el.querySelector('.regen-btn');
+    //     const regenForm = el.querySelector('.regen-form');
+    //     const submitBtn = el.querySelector('.regen-submit');
+    //     const feedbackInput = el.querySelector('.regen-feedback');
+    //     const ratingInput = el.querySelector('.regen-rating');
+    //     const scratchCheckbox = el.querySelector('.regen-scratch');
+
+    //     if ((stage === 'complete' || stage === 'error') && regenForm && regenForm.style.display === 'flex') {
+    //         return;
+    //     }
+
+    //     let displayTitle = displayName || id;
+    //     if (!isObject && !displayName) {
+    //         const alias = this.getAlias(id, isAnchor);
+    //         displayTitle = isBackgroundNode ? `${alias} (Background)` : (isAnchor ? `${alias} [ANCHOR]` : alias);
+    //     }
+
+    //     if (titleEl) {
+    //         titleEl.innerText = displayTitle.toUpperCase();
+    //         titleEl.style.color = isBackgroundNode ? '#888' : (isAnchor ? '#ffdd00' : '#fff');
+    //     }
+
+    //     const lowerStage = stage.toLowerCase();
+    //     if (text) {
+    //         text.innerText = lowerStage.toUpperCase();
+    //         if (lowerStage.includes('vlm')) text.style.color = '#ff00ff';
+    //         else if (lowerStage.includes('queued')) text.style.color = '#888888';
+    //         else if (lowerStage.includes('audio processing')) text.style.color = '#00f0ff';
+    //         else if (lowerStage === 'complete') text.style.color = '#00ffaa';
+    //         else if (lowerStage === 'error' || lowerStage === 'aborted') text.style.color = '#ff0055';
+    //         else text.style.color = '#ffffff';
+    //     }
+
+    //     if (progressPercentage !== null) {
+    //         fill.style.width = `${Math.max(5, progressPercentage * 100)}%`;
+    //         if (lowerStage.includes('vlm')) fill.style.background = '#ff00ff';
+    //         else if (lowerStage.includes('queued')) fill.style.background = '#555';
+    //         else if (lowerStage.includes('audio processing')) fill.style.background = '#00f0ff';
+    //         else if (lowerStage === 'complete') fill.style.background = '#00ffaa';
+    //         else if (lowerStage === 'error' || lowerStage === 'aborted') fill.style.background = '#ff0055';
+    //     }
+
+    //     if (taskData) {
+    //         el.dataset.taskData = JSON.stringify(taskData);
+    //     }
+
+    //     if (stage === 'complete' || stage === 'error' || stage === 'aborted') {
+    //         if (stage === 'complete') {
+    //             if (fill) { fill.style.width = '100%'; fill.style.background = '#00ffaa'; }
+    //             if (text) text.style.color = '#00ffaa';
+    //         } else {
+    //             if (fill) { fill.style.width = '100%'; fill.style.background = '#ff0055'; }
+    //             if (text) text.style.color = '#ff0055';
+    //         }
+
+    //         if (isBackgroundNode) el.style.opacity = '1';
+
+    //         if (muteBtn) {
+    //             if (!isObject && !isAnchor) {
+    //                 muteBtn.style.display = 'none';
+    //             } else {
+    //                 muteBtn.style.display = (stage === 'complete') ? 'block' : 'none';
+    //                 // Inherit Master Mute state if a new sound finishes loading while Master Mute is ON
+    //                 if (stage === 'complete' && this.isMasterMuted && muteBtn.innerText === 'MUTE') {
+    //                     setTimeout(() => muteBtn.click(), 10);
+    //                 }
+    //             }
+    //         }
+
+    //         if (el.dataset.taskData) {
+    //             if (!isObject && !isAnchor) {
+    //                 if (regenBtn) regenBtn.style.display = 'none';
+    //                 if (regenForm) regenForm.style.display = 'none';
+    //             } else {
+    //                 if (regenBtn) regenBtn.style.display = 'block';
+    //                 if (regenForm) regenForm.style.display = 'none';
+
+    //                 if (regenBtn) {
+    //                     regenBtn.onclick = (e) => {
+    //                         e.stopPropagation();
+    //                         regenBtn.style.display = 'none';
+    //                         regenForm.style.display = 'flex';
+
+    //                         setTimeout(() => {
+    //                             if (this.hudEl) this.hudEl.scrollTop = this.hudEl.scrollHeight;
+    //                         }, 10);
+    //                     };
+    //                 }
+    //             }
+    //             if (submitBtn) {
+    //                 submitBtn.onclick = (e) => {
+    //                     e.stopPropagation();
+    //                     const storedTaskData = JSON.parse(el.dataset.taskData);
+    //                     const feedbackData = {
+    //                         text: feedbackInput.value.trim(),
+    //                         rating: parseInt(ratingInput.value, 10),
+    //                         fromScratch: scratchCheckbox.checked
+    //                     };
+
+    //                     if (this.regenCallback) {
+    //                         this.updatePipelineProgress(id, 'regenerating', 0.1, isObject, isAnchor, isBackgroundNode, displayName);
+    //                         regenForm.style.display = 'none';
+    //                         this.regenCallback(storedTaskData, feedbackData);
+    //                     }
+    //                 };
+    //             }
+    //         }
+    //     } else {
+    //         if (regenBtn) regenBtn.style.display = 'none';
+    //         if (regenForm) regenForm.style.display = 'none';
+    //         if (muteBtn) muteBtn.style.display = 'none';
+    //     }
+    // }
+    updatePipelineProgress(id, stage, progressPercentage, behavior = 'local', isAnchor = false, displayName = null, taskData = null) {
         const key = id;
         let el = this.taskElements.get(key);
-        const isMainNode = !isObject && !isBackgroundNode;
 
         if (!el) {
             el = document.createElement('div');
             el.className = 'task-item';
 
-            if (isBackgroundNode) {
+            if (behavior === 'neighbor') {
                 Object.assign(el.style, { opacity: '0.6', borderLeft: '2px solid #555', paddingLeft: '8px', marginBottom: '6px' });
-            } else if (isObject) {
+            } else if (behavior === 'object') {
                 Object.assign(el.style, { borderLeft: '2px solid #00bfff', paddingLeft: '8px', marginBottom: '6px' });
             } else {
-                // Main Node formatting
+                // Local Main Node formatting
                 Object.assign(el.style, { borderLeft: '2px solid #ffdd00', paddingLeft: '8px', marginBottom: '8px' });
             }
 
@@ -333,7 +581,7 @@ export class UIManager {
                     e.stopPropagation();
                     if (this.muteCallback) {
                         let muteKey = id;
-                        const isMuted = this.muteCallback(muteKey, isObject);
+                        const isMuted = this.muteCallback(muteKey, behavior === 'object');
 
                         muteBtn.innerText = isMuted ? 'UNMUTE' : 'MUTE';
                         muteBtn.style.color = isMuted ? '#ff0055' : '#00ffaa';
@@ -356,16 +604,19 @@ export class UIManager {
                 });
             }
 
-            // Route the UI element to the correct DOM container
-            const bgContainer = document.getElementById('background-tasks-container');
-            const spatialContainer = document.getElementById('spatial-tasks-container');
-            const spatialHeader = document.getElementById('spatial-header');
+            const localContainer = document.getElementById('behavior-local-container');
+            const neighborContainer = document.getElementById('behavior-neighbor-container');
+            const objectContainer = document.getElementById('behavior-object-container');
 
-            if (isObject) {
-                if (spatialContainer) spatialContainer.appendChild(el);
-                if (spatialHeader) spatialHeader.style.display = 'block';
-            } else if (isMainNode) {
-                // Formatting the main group header dynamically
+            if (behavior === 'object') {
+                if (objectContainer) objectContainer.appendChild(el);
+                const objHeader = document.getElementById('behavior-object-header');
+                if (objHeader) objHeader.style.display = 'block';
+            } else if (behavior === 'neighbor') {
+                if (neighborContainer) neighborContainer.appendChild(el);
+                const neighborHeader = document.getElementById('behavior-neighbor-header');
+                if (neighborHeader) neighborHeader.style.display = 'block';
+            } else {
                 const headerGroup = document.getElementById('pipeline-header-group');
                 const titleEl = document.getElementById('pipeline-current-node-title');
                 if (headerGroup && titleEl) {
@@ -374,10 +625,7 @@ export class UIManager {
                     titleEl.innerText = isAnchor ? `${alias} [ANCHOR]` : `${alias} [STANDARD]`;
                     titleEl.style.color = isAnchor ? '#ffdd00' : '#00bfff';
                 }
-                // Prepend main node to sit at the very top of the background group
-                if (bgContainer) bgContainer.prepend(el);
-            } else {
-                if (bgContainer) bgContainer.appendChild(el);
+                if (localContainer) localContainer.prepend(el);
             }
 
             this.taskElements.set(key, el);
@@ -400,14 +648,14 @@ export class UIManager {
         }
 
         let displayTitle = displayName || id;
-        if (!isObject && !displayName) {
+        if (behavior !== 'object' && !displayName) {
             const alias = this.getAlias(id, isAnchor);
-            displayTitle = isBackgroundNode ? `${alias} (Background)` : (isAnchor ? `${alias} [ANCHOR]` : alias);
+            displayTitle = (behavior === 'neighbor') ? `${alias} (Neighbor)` : (isAnchor ? `${alias} [ANCHOR]` : alias);
         }
 
         if (titleEl) {
             titleEl.innerText = displayTitle.toUpperCase();
-            titleEl.style.color = isBackgroundNode ? '#888' : (isAnchor ? '#ffdd00' : '#fff');
+            titleEl.style.color = (behavior === 'neighbor') ? '#888' : (isAnchor ? '#ffdd00' : '#fff');
         }
 
         const lowerStage = stage.toLowerCase();
@@ -443,14 +691,13 @@ export class UIManager {
                 if (text) text.style.color = '#ff0055';
             }
 
-            if (isBackgroundNode) el.style.opacity = '1';
+            if (behavior === 'neighbor') el.style.opacity = '1';
 
             if (muteBtn) {
-                if (!isObject && !isAnchor) {
+                if (behavior !== 'object' && !isAnchor) {
                     muteBtn.style.display = 'none';
                 } else {
                     muteBtn.style.display = (stage === 'complete') ? 'block' : 'none';
-                    // Inherit Master Mute state if a new sound finishes loading while Master Mute is ON
                     if (stage === 'complete' && this.isMasterMuted && muteBtn.innerText === 'MUTE') {
                         setTimeout(() => muteBtn.click(), 10);
                     }
@@ -458,7 +705,7 @@ export class UIManager {
             }
 
             if (el.dataset.taskData) {
-                if (!isObject && !isAnchor) {
+                if (behavior !== 'object' && !isAnchor) {
                     if (regenBtn) regenBtn.style.display = 'none';
                     if (regenForm) regenForm.style.display = 'none';
                 } else {
@@ -488,7 +735,7 @@ export class UIManager {
                         };
 
                         if (this.regenCallback) {
-                            this.updatePipelineProgress(id, 'regenerating', 0.1, isObject, isAnchor, isBackgroundNode, displayName);
+                            this.updatePipelineProgress(id, 'regenerating', 0.1, behavior, isAnchor, displayName);
                             regenForm.style.display = 'none';
                             this.regenCallback(storedTaskData, feedbackData);
                         }

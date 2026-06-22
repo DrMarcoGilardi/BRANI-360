@@ -136,13 +136,13 @@ If none of the above criteria are met (no local host, no custom tunnel, no valid
 
 2. Install the backend dependencies:
 
-   ```
+   ```bash
    npm install
    ```
 
 3. Duplicate the `.env.example` file, rename it to `.env`, and configure it for local mode:
 
-   ```
+   ```env
    LOCAL_MODE=true
    PORT=3000       # or set to the port number you prefer to open
    ```    
@@ -151,7 +151,7 @@ If none of the above criteria are met (no local host, no custom tunnel, no valid
   
 4. Start the backend orchestration server:
 
-   ```
+   ```bash
    node server.js
    ```
 
@@ -199,6 +199,8 @@ If you changed the port change that value to your port.
 The server console will give the correct address at start in a message coloured in cyan.  
 Example: <span style="color: #3a96dd;"> [09:24:31] [Server] For the .env admin dashboard open http://localhost:3000/admin </span>
 
+---
+
 ## How to Configure Strategies (`.env`)
 
 > **Note**: *It is strongly recommended to use the [admin editor](ADMIN.md) application to safely edit the .env file and to avoid accidentally deleting environment variables required for the core workflow.*
@@ -231,7 +233,122 @@ PYTHON_VISION_SCRIPT="vision_adapter.py"
 PYTHON_AUDIO_SCRIPT="audio_adapter.py"
 PYTHON_EXEC = "python3"
 ```
+
 ---
+## Implementation Guide: Building Custom Strategies
+
+ABBA-360 is built entirely on the **Strategy Pattern**. This means the core engine (which handles WebSocket syncing, AI queueing, and UI rendering) never directly touches a specific API, map SDK, or AI model. Instead, it talks to **Base Classes** (abstract interfaces). 
+
+To add a new mapping SDK, a new AI Vision model, or a new acoustic logic system, you do **not** edit the core orchestrator. Instead, you create a "Concrete Class" that extends a Base Class.
+
+### 1. The Strict Contract System
+Because JavaScript does not have native `interface` keywords, ABBA-360 enforces architecture via strict runtime contracts. If you look inside any Base Class (e.g., `BaseViewerProvider.js` or `BaseSemanticProvider.js`), you will see methods that look like this:
+
+```javascript
+getCurrentNodeId() { 
+    throw new Error("BaseViewerProvider: Method 'getCurrentNodeId()' must be implemented by subclass."); 
+}
+```
+
+If your custom class fails to override these required methods, the system will instantly throw this error in the console at boot, preventing silent failures downstream.
+
+### 2. Step-by-Step: Implementing a Custom Strategy
+Here is an in-depth guide to building and injecting your own strategy. In this example, we will build a custom Semantic Provider that adds a `"weather"` layer.
+
+#### **Step A: Locate the correct directory**
+Find the directory for the type of strategy you want to build. 
+* *Example:* Client-side semantic strategies belong in `client/js/strategies/semanticproviders/`.
+
+#### **Step B: Create the File & Match the Class Name**
+Create a new file.
+> **CRITICAL:** The filename must exactly match the exported class name, or the dynamic `.env` injector will fail to load it.
+* *Filename:* `WeatherSemanticProvider.js`
+
+#### **Step C: Import and Extend the Base Class**
+Open your new file, import the base interface, and extend it. Look at the base class file to see which methods throw an error—you **must** implement those. Methods that do not throw an error are optional capabilities.
+
+```javascript
+// 1. Import the Base Class
+import { BaseSemanticProvider } from "./BaseSemanticProvider.js";
+
+// 2. Class name MUST match filename
+export class WeatherSemanticProvider extends BaseSemanticProvider {
+    
+    constructor(layers) {
+        super();
+        // Initialize your custom state
+        this.layers = Array.isArray(layers) ? layers : (layers ? layers.split(',').map(s => s.trim()) : []);
+        
+        // Define your custom dictionary
+        this.layerManifest = {
+            "ambient": { behavior: "local", baseWeight: 0.5, persistent: true },
+            "horizon": { behavior: "neighbor", baseWeight: 0.5, persistent: true },
+            "spatial": { behavior: "object", baseWeight: 1.0, persistent: false },
+            "weather": { behavior: "local", baseWeight: 0.8, persistent: true } // <-- New Custom Layer
+        };
+    }
+
+    // 3. SATISFY THE STRICT CONTRACT
+    // BaseSemanticProvider dictates that getLayerManifest() MUST be implemented.
+    getLayerManifest() {
+        return Object.keys(this.layerManifest)
+            .filter(key => this.layers.includes(key))
+            .reduce((obj, key) => {
+                obj[key] = this.layerManifest[key];
+                return obj;
+            }, {});
+    }
+
+    // 4. OPTIONAL OVERRIDES
+    // onChange() and notifyListeners() are empty no-ops in the base class.
+    // You only need to override them if your strategy requires dynamic updates.
+}
+```
+
+#### **Step D: Handling Asynchronous Init and Events (Viewer / AI Providers)**
+Some base classes (like `BaseViewerProvider` or `BaseVisionProvider`) require asynchronous setup or event triggering. 
+
+If extending a Viewer Provider, you must call the base class's `this.trigger()` method to alert the core engine when things happen in your custom map SDK:
+
+```javascript
+export class CustomViewerProvider extends BaseViewerProvider {
+    async init() {
+        // Initialize your custom 3D map SDK
+        this.myMap = new CustomMapSDK(this.containerId);
+        
+        // Translate the SDK's native events into ABBA-360's agnostic events
+        this.myMap.onMove(() => {
+            const heading = this.myMap.getHeading();
+            const pitch = this.myMap.getPitch();
+            
+            // Push the agnostic payload back up to the engine
+            this.trigger('pov_changed', { heading, pitch });
+        });
+    }
+    
+    // ... implement remaining strict getters ...
+}
+```
+
+#### **Step E: Activate via `.env`**
+Once your class is written and saved, you simply tell the system to use it. You do not need to alter any HTML files or core `import` statements. 
+
+Open your `.env` editor dashboard and update the relevant target variable to exactly match your new class name:
+
+```env
+# Before
+CLIENT_SEMANTIC_PROVIDER="DefaultSemanticProvider"
+CLIENT_SEMANTIC_LAYERS="spatial, horizon"
+
+# After
+CLIENT_SEMANTIC_PROVIDER="WeatherSemanticProvider"
+CLIENT_SEMANTIC_LAYERS="spatial, horizon, weather"
+```
+
+When you refresh the browser, `client.js` will dynamically read the `.env` over the network, dynamically import `./strategies/semanticproviders/WeatherSemanticProvider.js`, instantiate it, and seamlessly inject it into the core `NavigationManager` and `SpatialAudioPlayer`.
+
+---
+
 ## Provided Concrete Examples (Out-of-the-Box Examples)
 
 To help you get started, the repository includes several fully functional, concrete implementations of the strategy interfaces.  These demonstrate how to wrap real-world APIs and local models. The system is configured to run with the client run locally or hosted on GitHub pages. Change the .env file using the **[admin editor](ADMIN.md)** to swap examples.
@@ -346,7 +463,7 @@ Emitted by `NetworkService` when navigating to a new panorama.
   "navEpoch": 14,                   
   "isAnchor": true,                 
   "location": { "lat": 40.7128, "lng": -74.0060 },
-  "requestedLayers": ["spatial", "ambient"],
+  "requestedLayers": ["ambient", "horizon", "spatial"],
   "nearbyAnchors": [                
     {
       "nodeId": "98237498237",
@@ -582,15 +699,22 @@ export class MySelectionStrategy extends NodeSelectionStrategy {
 
 ### 4. `BaseSemanticProvider`
 **Location:** `client/js/strategies/semanticproviders/`  
-**Purpose:** Defines the semantic layers the system should look for.
+**Purpose:** Defines the agnostic ruleset for what semantic layers exist and how the engine should behave towards them mathematically.
 
 ```javascript
 import { BaseSemanticProvider } from './BaseSemanticProvider.js';
 
 export class MySemanticProvider extends BaseSemanticProvider {
-    getActiveLayers() { return ['spatial', 'ambient']; }
-    getBackgroundLayers() { return ['horizon']; }
-    requiresBackgroundProcessing() { return true; }
+    /**
+     * @returns {Object} Manifest dictating layer behavior, persistence, and mix weights.
+     */
+    getLayerManifest() { 
+        return {
+            "ambient": { behavior: "local", baseWeight: 0.5, persistent: true },
+            "horizon": { behavior: "neighbor", baseWeight: 0.5, persistent: true },
+            "spatial": { behavior: "object", baseWeight: 1.0, persistent: false }
+        }; 
+    }
 }
 ```
 

@@ -60,52 +60,90 @@ export class BaseViewerProvider {
     }
 
     /**
-     * Initializes the underlying map SDK.
-     * @returns {Promise<void>}
-     * @throws {Error} If not implemented by the specific provider.
-     */
-    async init() { throw new Error("Not implemented"); }
-
-    /**
-     * Binds a callback to standardized viewer events (e.g., 'node_changed', 'pov_changed').
-     * @param {string} event - The agnostic event name.
-     * @param {Function} callback - Execution callback.
+     * @method on
+     * @memberof BaseViewerProvider
+     * @description Subscribes a listener to a standardized, agnostic viewer event.
+     * @param {string} event - The normalized event name (e.g., 'node_changed', 'pov_changed').
+     * @param {Function} callback - The execution closure to trigger when the event fires.
      */
     on(event, callback) { if (this.callbacks[event]) this.callbacks[event].push(callback); }
 
     /**
-     * Safely executes attached callbacks.
-     * @param {string} event - The agnostic event name.
-     * @param {any} data - Event payload.
+     * @method trigger
+     * @memberof BaseViewerProvider
+     * @description Safely executes all attached callbacks for a given agnostic event.
+     * @param {string} event - The normalized event name.
+     * @param {any} data - The standardized payload injected into the callback.
      */
     trigger(event, data) { if (this.callbacks[event]) this.callbacks[event].forEach(cb => cb(data)); }
 
-    /** @returns {string|null} Current agnostic node ID. */
-    getCurrentNodeId() { return null; }
-
-    /** @returns {Object|string} Unified location coordinate string or object. */
-    getLocation() { return "0,0"; }
-
-    /** @returns {boolean} Whether the street level view is actively visible. */
-    isVisible() { return false; }
-
-    /** @returns {any} A raw reference to the underlying SDK map object. */
-    getNativeViewer() { return null; }
+    // --- ABSTRACT CONTRACT (Subclasses MUST override) ---
 
     /**
-     * CAPABILITY FLAG: Does this viewer support external camera syncing?
-     * Override this to return true if the viewer can be programmatically rotated
-     * (e.g., by UI compass clicks, Minimaps, or VR headsets).
-     * @returns {boolean}
+     * @async
+     * @method init
+     * @memberof BaseViewerProvider
+     * @description Initializes the underlying third-party map SDK and mounts it to the DOM.
+     * @returns {Promise<void>} Resolves when the viewer is fully loaded and ready for interaction.
+     * @throws {Error} If not implemented by a subclass.
+     */
+    async init() { throw new Error("Not implemented"); }
+
+    /**
+     * @method getCurrentNodeId
+     * @memberof BaseViewerProvider
+     * @description Retrieves the unique identifier of the currently loaded panoramic node.
+     * @returns {string} The agnostic node identifier.
+     * @throws {Error} If not implemented by a subclass.
+     */
+    getCurrentNodeId() { throw new Error("BaseViewerProvider: 'getCurrentNodeId()' must be implemented."); }
+
+    /**
+     * @method getLocation
+     * @memberof BaseViewerProvider
+     * @description Extracts the geographical or spatial coordinates of the current node.
+     * @returns {Object|string} Unified location coordinate string or spatial object representation.
+     * @throws {Error} If not implemented by a subclass.
+     */
+    getLocation() { throw new Error("BaseViewerProvider: 'getLocation()' must be implemented."); }
+
+    /**
+     * @method isVisible
+     * @memberof BaseViewerProvider
+     * @description Checks if the street-level/360 panoramic view is currently active and visible to the user on screen.
+     * @returns {boolean} True if the panorama canvas is visible.
+     * @throws {Error} If not implemented by a subclass.
+     */
+    isVisible() { throw new Error("BaseViewerProvider: 'isVisible()' must be implemented."); }
+
+    /**
+     * @method getNativeViewer
+     * @memberof BaseViewerProvider
+     * @description Returns a raw, direct reference to the underlying native SDK object (e.g., the google.maps.StreetViewPanorama instance). Use with extreme caution as this breaks agnostic boundaries.
+     * @returns {any} The instantiated native viewer object.
+     * @throws {Error} If not implemented by a subclass.
+     */
+    getNativeViewer() { throw new Error("BaseViewerProvider: 'getNativeViewer()' must be implemented."); }
+
+    // --- OPTIONAL CAPABILITIES (Subclasses CAN override) ---
+
+    /**
+     * @member {boolean} supportsCameraSync
+     * @memberof BaseViewerProvider
+     * @description CAPABILITY FLAG: Indicates whether this specific viewer provider allows for external programmatic control of its pitch and heading.
+     * @returns {boolean} True if the viewer's camera can be synchronized by external UI modules. Defaults to false.
      */
     get supportsCameraSync() {
         return false;
     }
 
     /**
-     * Optional implementation for external camera syncing.
-     * Only called by the orchestrator if supportsCameraSync returns true.
-     * @param {Object} pov - Standardized { heading, pitch } object
+     * @method syncCamera
+     * @memberof BaseViewerProvider
+     * @description Optional implementation for external camera syncing. Called by the orchestrator (e.g., VR headsets, Minimaps) only if `supportsCameraSync` returns true.
+     * @param {Object} pov - Standardized Point of View object.
+     * @param {number} pov.heading - The camera yaw angle in degrees (0-360).
+     * @param {number} pov.pitch - The camera pitch angle in degrees (-90 to 90).
      */
     syncCamera(pov) {
         console.warn("syncCamera called but supportsCameraSync is false.");
