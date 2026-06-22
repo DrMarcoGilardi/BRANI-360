@@ -2,7 +2,7 @@
 ## Introduction  
 Welcome to the ABBA-360 research sandbox.  
 This system is designed as a **strictly agnostic orchestration engine** for AI generation of spatial audio from interconnected 360° images.  
-The system is setup to run from GitHub Pages using zrok to connect to the server, however it can be configured to run locally through the `.env` configuration file.  
+The system is setup to run from GitHub Pages using zrok to connect to the server, or run to locally.  
 
 The purpose of the system is to be a research sandbox to study audio generation in networks of 360 images.  
 The sandbox is aimed to explore:  
