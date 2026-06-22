@@ -162,7 +162,7 @@ class BaseImageSourceProvider{
 
 
 </dd>
-<dt><a href="#MapillarySource">MapillarySource</a></dt>
+<dt><a href="#MapillaryImageSource">MapillaryImageSource</a></dt>
 <dd><p>EXAMPLE STRATEGY IMPLEMENTATION<br>Provider strategy for fetching raw equirectangular image buffers from the Mapillary API.<br>Enforces strict filtering to reject non-360 panoramic images.</p>
 <ul>
 <li><h3 id="architecture">Architecture</h3>
@@ -250,33 +250,6 @@ BaseVisionProvider <|-- PythonVisionProvider
 class PythonVisionProvider{
 +init() Promise~void~
 +analyse(buffer, contextString, options) Promise~Object~
-}
-```
-
-
-</dd>
-<dt><a href="#PipelineService">PipelineService</a></dt>
-<dd><p>Domain-agnostic task runner.<br>It treats tasks as black boxes and moves data without editing it.</p>
-<ul>
-<li><h3 id="architecture">Architecture</h3>
-</li>
-</ul>
-
-
-```mermaid
-classDiagram
-PipelineService --> AIEngine : process / getTasks
-PipelineService --> GPUResourceManager : queueBackgroundTask
-PipelineService --> CacheManager : Checks DB / Saves Audio
-PipelineService --> LogManager : Records sessions / errors
-class PipelineService{
-+setEpoch(socketId, epoch)
-+cleanupSocket(socketId)
-+checkBatchCompletion()
-+processMovement(socket, data) Promise~void~
-+queueTask(socket, task, navEpoch, signal)
-+processGPUQueue() Promise~void~
-+regenerateTask(socket, taskData, feedbackData) Promise~void~
 }
 ```
 
@@ -385,6 +358,33 @@ class SocketController{
 
 
 </dd>
+<dt><a href="#PipelineService">PipelineService</a></dt>
+<dd><p>Domain-agnostic task runner.<br>It treats tasks as black boxes and moves data without editing it.</p>
+<ul>
+<li><h3 id="architecture">Architecture</h3>
+</li>
+</ul>
+
+
+```mermaid
+classDiagram
+PipelineService --> AIEngine : process / getTasks
+PipelineService --> GPUResourceManager : queueBackgroundTask
+PipelineService --> CacheManager : Checks DB / Saves Audio
+PipelineService --> LogManager : Records sessions / errors
+class PipelineService{
++setEpoch(socketId, epoch)
++cleanupSocket(socketId)
++checkBatchCompletion()
++processMovement(socket, data) Promise~void~
++queueTask(socket, task, navEpoch, signal)
++processGPUQueue() Promise~void~
++regenerateTask(socket, taskData, feedbackData) Promise~void~
+}
+```
+
+
+</dd>
 <dt><a href="#Utils">Utils</a></dt>
 <dd><p>Server-side utility class for file handling and audio manipulation.</p>
 <ul>
@@ -416,6 +416,17 @@ class Utils{
 </dd>
 </dl>
 
+## Constants
+
+<dl>
+<dt><a href="#PROTECTED_SECTIONS">PROTECTED_SECTIONS</a> : <code>Array.&lt;string&gt;</code></dt>
+<dd><p>A strict list of section titles (in uppercase) that represent core architecture. The UI prevents these sections from being deleted or renamed.</p>
+</dd>
+<dt><a href="#PROTECTED_VARIABLES">PROTECTED_VARIABLES</a> : <code>Array.&lt;string&gt;</code></dt>
+<dd><p>A strict list of environment variable keys that represent core application state. The UI prevents these specific keys from being deleted or renamed (though their values can still be edited).</p>
+</dd>
+</dl>
+
 ## Functions
 
 <dl>
@@ -435,7 +446,7 @@ class Utils{
 <dd><p>Scrapes all current input values from the screen and updates the internal <code>envItems</code> array state. Prevents unsaved text edits from disappearing when the UI is forced to re-render.</p>
 </dd>
 <dt><a href="#render">render()</a> ⇒ <code>void</code></dt>
-<dd><p>Flushes the container and iterates over the <code>envItems</code> array to draw the UI. Respects the &#39;collapsed&#39; state of sections to hide/show their child variables.</p>
+<dd><p>Flushes the container and iterates over the <code>envItems</code> array to draw the UI. Respects the &#39;collapsed&#39; state of sections and enforces read-only UI rules for protected variables/sections.</p>
 </dd>
 <dt><a href="#toggleCollapse">toggleCollapse(index)</a> ⇒ <code>void</code></dt>
 <dd><p>Flips the visibility state for the variables nested under a specific section header.</p>
@@ -465,7 +476,7 @@ class Utils{
 <dd><p>Syncs the DOM state, then appends a new Section Header template to the bottom of the state flow.</p>
 </dd>
 <dt><a href="#removeItem">removeItem(index)</a> ⇒ <code>void</code></dt>
-<dd><p>Syncs the DOM state, destroys a specific block, and re-renders the UI. Warns if removing a parent section.</p>
+<dd><p>Syncs the DOM state, destroys a specific block, and re-renders the UI. Runs an additional code-level guard against deleting protected core elements in case the UI lock is bypassed.</p>
 </dd>
 <dt><a href="#saveChanges">saveChanges()</a> ⇒ <code>Promise.&lt;void&gt;</code></dt>
 <dd><p>Syncs the DOM state, then executes a POST request to the backend to write the updated <code>.env</code> array to disk.</p>
@@ -487,7 +498,27 @@ class Utils{
 <a name="AIEngine"></a>
 
 ## AIEngine
-Handles logic, prompt construction, and provider selection.  Standardized: Encapsulates all strategy instantiation and dictionary.* ### Architecture```mermaidclassDiagramAIEngine --> ImageSourceProvider : UsesAIEngine --> ContextProvider : UsesAIEngine --> VisionProvider : UsesAIEngine --> AudioProvider : UsesAIEngine --> CacheManager : Usesclass AIEngine{+init() Promise~void~+getPublicConfig() Object+getTasksForMovement(nodeId, lat, lng, isAnchor, locationContext, requestedLayers) Promise~Array~+getTasksForHorizon(nodeId, lat, lng, locationContext, requestedLayers) Promise~Array~+createRegenTask(taskData, feedbackData, epoch) Promise~Object~+process(nodeId, lat, lng, options) Promise~Object~+generateAudio(task, signal, socket, progressCallback) Promise~Object~}```
+Handles logic, prompt construction, and provider selection.  
+Standardized: Encapsulates all strategy instantiation and dictionary.
+
+* ### Architecture
+```mermaid
+classDiagram
+AIEngine --> ImageSourceProvider : Uses
+AIEngine --> ContextProvider : Uses
+AIEngine --> VisionProvider : Uses
+AIEngine --> AudioProvider : Uses
+AIEngine --> CacheManager : Uses
+class AIEngine{
++init() Promise~void~
++getPublicConfig() Object
++getTasksForMovement(nodeId, lat, lng, isAnchor, locationContext, requestedLayers) Promise~Array~
++getTasksForHorizon(nodeId, lat, lng, locationContext, requestedLayers) Promise~Array~
++createRegenTask(taskData, feedbackData, epoch) Promise~Object~
++process(nodeId, lat, lng, options) Promise~Object~
++generateAudio(task, signal, socket, progressCallback) Promise~Object~
+}
+```
 
 **Kind**: global class  
 
@@ -518,7 +549,7 @@ Instantiates the configured strategy providers via dynamic imports based on the 
 <a name="AIEngine.getPublicConfig"></a>
 
 ### AIEngine.getPublicConfig() ⇒ <code>Object</code>
-Exposes public configuration parameters required by the frontend client strategies.
+Exposes public configuration parameters required by the frontend client strategies, AcousticTreadmill, and SpatialAudioPlayer.
 
 **Kind**: static method of [<code>AIEngine</code>](#AIEngine)  
 **Returns**: <code>Object</code> - Configuration bundle.  
@@ -602,7 +633,17 @@ Executes the audio diffusion strategy and performs post-processing transcodes.
 <a name="BaseAudioProvider"></a>
 
 ## BaseAudioProvider
-Base Class Interface.  Interface for audio synthesis providers.* ### Architecture```mermaidclassDiagramclass BaseAudioProvider{<<Abstract>>+generate(task, context) Promise~Object~}```
+Base Class Interface.  
+Interface for audio synthesis providers.
+
+* ### Architecture
+```mermaid
+classDiagram
+class BaseAudioProvider{
+<<Abstract>>
++generate(task, context) Promise~Object~
+}
+```
 
 **Kind**: global class  
 <a name="BaseAudioProvider.generate"></a>
@@ -625,7 +666,18 @@ Executes the audio generation pipeline for a given semantic task.
 <a name="PythonAudioProvider"></a>
 
 ## PythonAudioProvider
-EXAMPLE STRATEGY IMPLEMENTATION  Delegate strategy for producing audio by invoking an external Python generation script (e.g., custom PyTorch inferencing).* ### Architecture```mermaidclassDiagramBaseAudioProvider <|-- PythonAudioProviderclass PythonAudioProvider{+init() Promise~void~+generate(task, contextHooks) Promise~Object~}```
+EXAMPLE STRATEGY IMPLEMENTATION  
+Delegate strategy for producing audio by invoking an external Python generation script (e.g., custom PyTorch inferencing).
+
+* ### Architecture
+```mermaid
+classDiagram
+BaseAudioProvider <|-- PythonAudioProvider
+class PythonAudioProvider{
++init() Promise~void~
++generate(task, contextHooks) Promise~Object~
+}
+```
 
 **Kind**: global class  
 
@@ -665,7 +717,18 @@ Offloads the audio task to a Python subprocess, handling the retrieval of the ge
 <a name="StableAudioGradioProvider"></a>
 
 ## StableAudioGradioProvider
-EXAMPLE STRATEGY IMPLEMENTATION  Handles generation and transcodes of audio via Gradio API connections to a Stable Audio Open instance.* ### Architecture```mermaidclassDiagramBaseAudioProvider <|-- StableAudioGradioProviderclass StableAudioGradioProvider{+init() Promise~void~+generate(task, executionContext) Promise~Object~}```
+EXAMPLE STRATEGY IMPLEMENTATION  
+Handles generation and transcodes of audio via Gradio API connections to a Stable Audio Open instance.
+
+* ### Architecture
+```mermaid
+classDiagram
+BaseAudioProvider <|-- StableAudioGradioProvider
+class StableAudioGradioProvider{
++init() Promise~void~
++generate(task, executionContext) Promise~Object~
+}
+```
 
 **Kind**: global class  
 
@@ -705,7 +768,18 @@ Executes the generation cycle via Gradio API, handling prompt formulation, audio
 <a name="BaseContextProvider"></a>
 
 ## BaseContextProvider
-Base Class Interface.  Interface for location resolution and client-side configuration delivery. Enforces provider-agnosticism on the backend.* ### Architecture```mermaidclassDiagramclass BaseContextProvider{<<Abstract>>+resolve(lat, lng) Promise~string~+getPublicConfig() Object}```
+Base Class Interface.  
+Interface for location resolution and client-side configuration delivery. Enforces provider-agnosticism on the backend.
+
+* ### Architecture
+```mermaid
+classDiagram
+class BaseContextProvider{
+<<Abstract>>
++resolve(lat, lng) Promise~string~
++getPublicConfig() Object
+}
+```
 
 **Kind**: global class  
 **Calss**:   
@@ -745,7 +819,18 @@ Exposes public configuration/credentials safely to the frontend client.
 <a name="GeoapifyContextProvider"></a>
 
 ## GeoapifyContextProvider
-EXAMPLE STRATEGY IMPLEMENTATION  Resolves geographical coordinates into location context strings using the Geoapify Reverse Geocoding API.* ### Architecture```mermaidclassDiagramBaseContextProvider <|-- GeoapifyContextProviderclass GeoapifyContextProvider{+resolve(lat, lng) Promise~string~+getPublicConfig() Object}```
+EXAMPLE STRATEGY IMPLEMENTATION  
+Resolves geographical coordinates into location context strings using the Geoapify Reverse Geocoding API.
+
+* ### Architecture
+```mermaid
+classDiagram
+BaseContextProvider <|-- GeoapifyContextProvider
+class GeoapifyContextProvider{
++resolve(lat, lng) Promise~string~
++getPublicConfig() Object
+}
+```
 
 **Kind**: global class  
 
@@ -786,7 +871,17 @@ Exposes required public keys to the frontend without leaking server secrets.
 <a name="BaseImageSourceProvider"></a>
 
 ## BaseImageSourceProvider
-Base Class Interface.  Interface for 360-degree image acquisition strategies.* ### Architecture```mermaidclassDiagramclass BaseImageSourceProvider{<<Abstract>>+getImage(id) Promise~Buffer~}```
+Base Class Interface.  
+Interface for 360-degree image acquisition strategies.
+
+* ### Architecture
+```mermaid
+classDiagram
+class BaseImageSourceProvider{
+<<Abstract>>
++getImage(id) Promise~Buffer~
+}
+```
 
 **Kind**: global class  
 <a name="BaseImageSourceProvider.getImage"></a>
@@ -805,20 +900,26 @@ Fetches an equirectangular image buffer for a specific node ID.
 | --- | --- | --- |
 | id | <code>string</code> | The agnostic node identifier. |
 
-<a name="MapillarySource"></a>
+<a name="MapillaryImageSource"></a>
 
-## MapillarySource
-EXAMPLE STRATEGY IMPLEMENTATION  Provider strategy for fetching raw equirectangular image buffers from the Mapillary API.  Enforces strict filtering to reject non-360 panoramic images.* ### Architecture```mermaidclassDiagramBaseImageSourceProvider <|-- MapillarySourceclass MapillarySource{+getImage(id) Promise~Buffer~}```
+## MapillaryImageSource
+EXAMPLE STRATEGY IMPLEMENTATION  
+Provider strategy for fetching raw equirectangular image buffers from the Mapillary API.  
+Enforces strict filtering to reject non-360 panoramic images.
+
+* ### Architecture
+```mermaid
+classDiagram
+BaseImageSourceProvider <|-- MapillarySource
+class MapillarySource{
++getImage(id) Promise~Buffer~
+}
+```
 
 **Kind**: global class  
+<a name="new_MapillaryImageSource_new"></a>
 
-* [MapillarySource](#MapillarySource)
-    * [new MapillarySource(options, logger, [cacheManager])](#new_MapillarySource_new)
-    * [.getImage(id)](#MapillarySource.getImage) ⇒ <code>Promise.&lt;Buffer&gt;</code>
-
-<a name="new_MapillarySource_new"></a>
-
-### new MapillarySource(options, logger, [cacheManager])
+### new MapillaryImageSource(options, logger, [cacheManager])
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -826,26 +927,22 @@ EXAMPLE STRATEGY IMPLEMENTATION  Provider strategy for fetching raw equirectang
 | logger | <code>Object</code> |  | System Logger. |
 | [cacheManager] | <code>Object</code> | <code></code> | Optional disk caching manager. |
 
-<a name="MapillarySource.getImage"></a>
-
-### MapillarySource.getImage(id) ⇒ <code>Promise.&lt;Buffer&gt;</code>
-Fetches the image buffer for a given Mapillary Node ID, utilizing the cache if available.
-
-**Kind**: static method of [<code>MapillarySource</code>](#MapillarySource)  
-**Returns**: <code>Promise.&lt;Buffer&gt;</code> - The image data buffer.  
-**Throws**:
-
-- <code>Error</code> If the image is not a 360 panorama or the fetch fails.
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| id | <code>string</code> | Mapillary Image ID. |
-
 <a name="BaseVisionProvider"></a>
 
 ## BaseVisionProvider
-Base class interface.  Interface for multimodal analysis providers.  CONTRACT: Implementing classes must return an object containing an 'intents' array. * ### Architecture```mermaidclassDiagramclass BaseVisionProvider{<<Abstract>>+analyse(buffer, context, options) Promise~Object~+validateResponse(data) Object}```
+Base class interface.  
+Interface for multimodal analysis providers.  
+CONTRACT: Implementing classes must return an object containing an 'intents' array.
+ 
+* ### Architecture
+```mermaid
+classDiagram
+class BaseVisionProvider{
+<<Abstract>>
++analyse(buffer, context, options) Promise~Object~
++validateResponse(data) Object
+}
+```
 
 **Kind**: global class  
 
@@ -890,7 +987,18 @@ Validation guard ensuring the provider adheres to the system pipeline schema.
 <a name="LMStudioVisionProvider"></a>
 
 ## LMStudioVisionProvider
-EXAMPLE STRATEGY IMPLEMENTATION  Strategy authority for prompt engineering and intent mapping using a local LM Studio Vision-Language Model.* ### Architecture```mermaidclassDiagramBaseVisionProvider <|-- LMStudioVisionProviderclass LMStudioVisionProvider{+init() Promise~void~+analyse(buffer, context, options) Promise~Object~}```
+EXAMPLE STRATEGY IMPLEMENTATION  
+Strategy authority for prompt engineering and intent mapping using a local LM Studio Vision-Language Model.
+
+* ### Architecture
+```mermaid
+classDiagram
+BaseVisionProvider <|-- LMStudioVisionProvider
+class LMStudioVisionProvider{
++init() Promise~void~
++analyse(buffer, context, options) Promise~Object~
+}
+```
 
 **Kind**: global class  
 
@@ -954,7 +1062,18 @@ Processes the ambient layer for audio generation.
 <a name="PythonVisionProvider"></a>
 
 ## PythonVisionProvider
-EXAMPLE STRATEGY IMPLEMENTATION  Interacts with external Python scripts (e.g., custom models or OpenCV pipelines) to generate sonic intents from visual buffers.* ### Architecture```mermaidclassDiagramBaseVisionProvider <|-- PythonVisionProviderclass PythonVisionProvider{+init() Promise~void~+analyse(buffer, contextString, options) Promise~Object~}```
+EXAMPLE STRATEGY IMPLEMENTATION  
+Interacts with external Python scripts (e.g., custom models or OpenCV pipelines) to generate sonic intents from visual buffers.
+
+* ### Architecture
+```mermaid
+classDiagram
+BaseVisionProvider <|-- PythonVisionProvider
+class PythonVisionProvider{
++init() Promise~void~
++analyse(buffer, contextString, options) Promise~Object~
+}
+```
 
 **Kind**: global class  
 
@@ -992,112 +1111,32 @@ Writes the image buffer to disk, spawns a Python child process for analysis, and
 | contextString | <code>string</code> |  | Physical location string to pass to the model. |
 | [options] | <code>Object</code> | <code>{}</code> | Additional execution flags. |
 
-<a name="PipelineService"></a>
-
-## PipelineService
-Domain-agnostic task runner.  It treats tasks as black boxes and moves data without editing it.* ### Architecture```mermaidclassDiagramPipelineService --> AIEngine : process / getTasksPipelineService --> GPUResourceManager : queueBackgroundTaskPipelineService --> CacheManager : Checks DB / Saves AudioPipelineService --> LogManager : Records sessions / errorsclass PipelineService{+setEpoch(socketId, epoch)+cleanupSocket(socketId)+checkBatchCompletion()+processMovement(socket, data) Promise~void~+queueTask(socket, task, navEpoch, signal)+processGPUQueue() Promise~void~+regenerateTask(socket, taskData, feedbackData) Promise~void~}```
-
-**Kind**: global class  
-
-* [PipelineService](#PipelineService)
-    * [new PipelineService(aiEngine, gpuManager, cacheManager, logger)](#new_PipelineService_new)
-    * [.setEpoch(socketId, epoch)](#PipelineService.setEpoch)
-    * [.cleanupSocket(socketId)](#PipelineService.cleanupSocket)
-    * [.checkBatchCompletion()](#PipelineService.checkBatchCompletion)
-    * [.processMovement(socket, data)](#PipelineService.processMovement) ⇒ <code>Promise.&lt;void&gt;</code>
-    * [.queueTask(socket, task, navEpoch, signal)](#PipelineService.queueTask)
-    * [.processGPUQueue()](#PipelineService.processGPUQueue) ⇒ <code>Promise.&lt;void&gt;</code>
-    * [.regenerateTask(socket, taskData, feedbackData)](#PipelineService.regenerateTask) ⇒ <code>Promise.&lt;void&gt;</code>
-
-<a name="new_PipelineService_new"></a>
-
-### new PipelineService(aiEngine, gpuManager, cacheManager, logger)
-
-| Param | Type | Description |
-| --- | --- | --- |
-| aiEngine | [<code>AIEngine</code>](#AIEngine) | The central AI processing engine. |
-| gpuManager | [<code>GPUResourceManager</code>](#GPUResourceManager) | The queue/concurrency manager. |
-| cacheManager | [<code>CacheManager</code>](#CacheManager) | The hybrid caching system. |
-| logger | [<code>LogManager</code>](#LogManager) | The system logger. |
-
-<a name="PipelineService.setEpoch"></a>
-
-### PipelineService.setEpoch(socketId, epoch)
-Registers the current navigation epoch for a specific client socket.
-
-**Kind**: static method of [<code>PipelineService</code>](#PipelineService)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| socketId | <code>string</code> | The client's socket identifier. |
-| epoch | <code>number</code> | The current navigation tick. |
-
-<a name="PipelineService.cleanupSocket"></a>
-
-### PipelineService.cleanupSocket(socketId)
-Aborts active tasks and removes epoch tracking for a disconnected client.
-
-**Kind**: static method of [<code>PipelineService</code>](#PipelineService)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| socketId | <code>string</code> | The client's socket identifier. |
-
-<a name="PipelineService.checkBatchCompletion"></a>
-
-### PipelineService.checkBatchCompletion()
-Evaluates if all queued tasks for the active batch have concluded to log completion times.
-
-**Kind**: static method of [<code>PipelineService</code>](#PipelineService)  
-<a name="PipelineService.processMovement"></a>
-
-### PipelineService.processMovement(socket, data) ⇒ <code>Promise.&lt;void&gt;</code>
-Primary entry point for syncing audio generation when a user navigates to a new node. Coordinates VLM analysis, foreground layer generation, and background horizon fetching.
-
-**Kind**: static method of [<code>PipelineService</code>](#PipelineService)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| socket | <code>Socket</code> | The client's socket. |
-| data | <code>Object</code> | Navigation payload including coordinates, anchors, and requested layers. |
-
-<a name="PipelineService.queueTask"></a>
-
-### PipelineService.queueTask(socket, task, navEpoch, signal)
-Routes a single synthesized task to either the active Cache or the GPU queue.
-
-**Kind**: static method of [<code>PipelineService</code>](#PipelineService)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| socket | <code>Socket</code> | The client's socket. |
-| task | <code>Object</code> | The task configuration. |
-| navEpoch | <code>number</code> | The navigation tick tracking task relevance. |
-| signal | <code>AbortSignal</code> | The controller signal for cancellation. |
-
-<a name="PipelineService.processGPUQueue"></a>
-
-### PipelineService.processGPUQueue() ⇒ <code>Promise.&lt;void&gt;</code>
-Continuously pulls tasks from the GPU queue until saturation is reached.
-
-**Kind**: static method of [<code>PipelineService</code>](#PipelineService)  
-<a name="PipelineService.regenerateTask"></a>
-
-### PipelineService.regenerateTask(socket, taskData, feedbackData) ⇒ <code>Promise.&lt;void&gt;</code>
-Stateless entry for audio regeneration (human-in-the-loop). Creates a new forced-bypass task using user feedback.
-
-**Kind**: static method of [<code>PipelineService</code>](#PipelineService)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| socket | <code>Socket</code> | The client's socket. |
-| taskData | <code>Object</code> | The original task metadata. |
-| feedbackData | <code>Object</code> | The user's feedback payload (text, ratings). |
-
 <a name="CacheManager"></a>
 
 ## CacheManager
-Implements a hybrid storage strategy:   - SQLite: Database of pointers and lightweight metadata.   - Filesystem: Standalone storage for JSON (VLM Ouputs) and Audio outputs.* ### Architecture```mermaidclassDiagramclass CacheManager{+dbPath string+init()+get(key, type) Promise~any~+set(key, value, type) Promise~boolean~+delete(key) Promise~boolean~+getNode(nodeId) Promise~Object~+saveNode(nodeId, data) Promise~boolean~+getImage(imageId) Promise~string~+saveImage(imageId, buffer) Promise~string~+getVLMData(nodeId) Promise~Object~+saveVLMData(nodeId, data) Promise~boolean~+getAudio(id) Promise~string~+saveAudio(id, buffer) Promise~boolean~}```
+Implements a hybrid storage strategy:  
+ - SQLite: Database of pointers and lightweight metadata.  
+ - Filesystem: Standalone storage for JSON (VLM Ouputs) and Audio outputs.
+
+* ### Architecture
+```mermaid
+classDiagram
+class CacheManager{
++dbPath string
++init()
++get(key, type) Promise~any~
++set(key, value, type) Promise~boolean~
++delete(key) Promise~boolean~
++getNode(nodeId) Promise~Object~
++saveNode(nodeId, data) Promise~boolean~
++getImage(imageId) Promise~string~
++saveImage(imageId, buffer) Promise~string~
++getVLMData(nodeId) Promise~Object~
++saveVLMData(nodeId, data) Promise~boolean~
++getAudio(id) Promise~string~
++saveAudio(id, buffer) Promise~boolean~
+}
+```
 
 **Kind**: global class  
 
@@ -1322,7 +1361,24 @@ Deletes an audio file and its database reference.
 <a name="GPUResourceManager"></a>
 
 ## GPUResourceManager
-Handles queuing and concurrency for hardware-intensive tasks.* ### Architecture```mermaidclassDiagramclass GPUResourceManager{+maxWorkers number+activeWorkers number+isBusy() boolean+isTaskActive(id) boolean+acquireLock() Promise~void~+releaseLock()+queueBackgroundTask(task)+getNextBackgroundTask() Object+clearTasksForSocket(socketId)+completeTask(id, success)}```
+Handles queuing and concurrency for hardware-intensive tasks.
+
+* ### Architecture
+```mermaid
+classDiagram
+class GPUResourceManager{
++maxWorkers number
++activeWorkers number
++isBusy() boolean
++isTaskActive(id) boolean
++acquireLock() Promise~void~
++releaseLock()
++queueBackgroundTask(task)
++getNextBackgroundTask() Object
++clearTasksForSocket(socketId)
++completeTask(id, success)
+}
+```
 
 **Kind**: global class  
 
@@ -1418,11 +1474,27 @@ Marks an active task as completed and tracks it in the recent completions set.
 <a name="LogManager"></a>
 
 ## LogManager
-Handles session-based file logging.  It creates a new log file for the system boot and individual files for each socket connection.* ### Architecture```mermaidclassDiagramclass LogManager{+init()+startSession(socketId) string+endSession(socketId)+write(stream, message)+log(message, socketId)+warn(message, socketId)+error(message, socketId)}```
+Handles session-based file logging.  
+It creates a new log file for the system boot and individual files for each socket connection.
+
+* ### Architecture
+```mermaid
+classDiagram
+class LogManager{
++init()
++startSession(socketId) string
++endSession(socketId)
++write(stream, message)
++log(message, socketId)
++warn(message, socketId)
++error(message, socketId)
+}
+```
 
 **Kind**: global class  
 
 * [LogManager](#LogManager)
+    * [new LogManager()](#new_LogManager_new)
     * [.init()](#LogManager.init)
     * [.startSession(socketId)](#LogManager.startSession) ⇒ <code>string</code>
     * [.endSession(socketId)](#LogManager.endSession)
@@ -1430,6 +1502,11 @@ Handles session-based file logging.  It creates a new log file for the system b
     * [.log(message, [socketId])](#LogManager.log)
     * [.warn(message, [socketId])](#LogManager.warn)
     * [.error(message, [socketId])](#LogManager.error)
+
+<a name="new_LogManager_new"></a>
+
+### new LogManager()
+* @param {Object} logsPath - Configuration object containing dbPath.
 
 <a name="LogManager.init"></a>
 
@@ -1511,7 +1588,20 @@ Error logging method for critical failures.
 <a name="SocketController"></a>
 
 ## SocketController
-Acts as the primary research interface for WebSocket clients.  It coordinates real-time data flow between the frontend, the GPU queue, and the pluggable AI strategies. * ### Architecture```mermaidclassDiagramSocketController --> PipelineService : Routes EventsSocketController --> GPUResourceManager : Triggers CancelsSocketController --> LogManager : Tracks Sessionsclass SocketController{+io Server+init()}```
+Acts as the primary research interface for WebSocket clients.  
+It coordinates real-time data flow between the frontend, the GPU queue, and the pluggable AI strategies. 
+
+* ### Architecture
+```mermaid
+classDiagram
+SocketController --> PipelineService : Routes Events
+SocketController --> GPUResourceManager : Triggers Cancels
+SocketController --> LogManager : Tracks Sessions
+class SocketController{
++io Server
++init()
+}
+```
 
 **Kind**: global class  
 
@@ -1536,10 +1626,140 @@ Acts as the primary research interface for WebSocket clients.  It coordinates r
 Binds event listeners to incoming connections (spatial_sync, cancel_tasks, regenerate).
 
 **Kind**: static method of [<code>SocketController</code>](#SocketController)  
+<a name="PipelineService"></a>
+
+## PipelineService
+Domain-agnostic task runner.  
+It treats tasks as black boxes and moves data without editing it.
+
+* ### Architecture
+```mermaid
+classDiagram
+PipelineService --> AIEngine : process / getTasks
+PipelineService --> GPUResourceManager : queueBackgroundTask
+PipelineService --> CacheManager : Checks DB / Saves Audio
+PipelineService --> LogManager : Records sessions / errors
+class PipelineService{
++setEpoch(socketId, epoch)
++cleanupSocket(socketId)
++checkBatchCompletion()
++processMovement(socket, data) Promise~void~
++queueTask(socket, task, navEpoch, signal)
++processGPUQueue() Promise~void~
++regenerateTask(socket, taskData, feedbackData) Promise~void~
+}
+```
+
+**Kind**: global class  
+
+* [PipelineService](#PipelineService)
+    * [new PipelineService(aiEngine, gpuManager, cacheManager, logger)](#new_PipelineService_new)
+    * [.setEpoch(socketId, epoch)](#PipelineService.setEpoch)
+    * [.cleanupSocket(socketId)](#PipelineService.cleanupSocket)
+    * [.checkBatchCompletion()](#PipelineService.checkBatchCompletion)
+    * [.processMovement(socket, data)](#PipelineService.processMovement) ⇒ <code>Promise.&lt;void&gt;</code>
+    * [.queueTask(socket, task, navEpoch, signal)](#PipelineService.queueTask)
+    * [.processGPUQueue()](#PipelineService.processGPUQueue) ⇒ <code>Promise.&lt;void&gt;</code>
+    * [.regenerateTask(socket, taskData, feedbackData)](#PipelineService.regenerateTask) ⇒ <code>Promise.&lt;void&gt;</code>
+
+<a name="new_PipelineService_new"></a>
+
+### new PipelineService(aiEngine, gpuManager, cacheManager, logger)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| aiEngine | [<code>AIEngine</code>](#AIEngine) | The central AI processing engine. |
+| gpuManager | [<code>GPUResourceManager</code>](#GPUResourceManager) | The queue/concurrency manager. |
+| cacheManager | [<code>CacheManager</code>](#CacheManager) | The hybrid caching system. |
+| logger | [<code>LogManager</code>](#LogManager) | The system logger. |
+
+<a name="PipelineService.setEpoch"></a>
+
+### PipelineService.setEpoch(socketId, epoch)
+Registers the current navigation epoch for a specific client socket.
+
+**Kind**: static method of [<code>PipelineService</code>](#PipelineService)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| socketId | <code>string</code> | The client's socket identifier. |
+| epoch | <code>number</code> | The current navigation tick. |
+
+<a name="PipelineService.cleanupSocket"></a>
+
+### PipelineService.cleanupSocket(socketId)
+Aborts active tasks and removes epoch tracking for a disconnected client.
+
+**Kind**: static method of [<code>PipelineService</code>](#PipelineService)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| socketId | <code>string</code> | The client's socket identifier. |
+
+<a name="PipelineService.checkBatchCompletion"></a>
+
+### PipelineService.checkBatchCompletion()
+Evaluates if all queued tasks for the active batch have concluded to log completion times.
+
+**Kind**: static method of [<code>PipelineService</code>](#PipelineService)  
+<a name="PipelineService.processMovement"></a>
+
+### PipelineService.processMovement(socket, data) ⇒ <code>Promise.&lt;void&gt;</code>
+Primary entry point for syncing audio generation when a user navigates to a new node. Coordinates VLM analysis, foreground layer generation, and background horizon fetching.
+
+**Kind**: static method of [<code>PipelineService</code>](#PipelineService)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| socket | <code>Socket</code> | The client's socket. |
+| data | <code>Object</code> | Navigation payload including coordinates, anchors, and requested layers. |
+
+<a name="PipelineService.queueTask"></a>
+
+### PipelineService.queueTask(socket, task, navEpoch, signal)
+Routes a single synthesized task to either the active Cache or the GPU queue.
+
+**Kind**: static method of [<code>PipelineService</code>](#PipelineService)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| socket | <code>Socket</code> | The client's socket. |
+| task | <code>Object</code> | The task configuration. |
+| navEpoch | <code>number</code> | The navigation tick tracking task relevance. |
+| signal | <code>AbortSignal</code> | The controller signal for cancellation. |
+
+<a name="PipelineService.processGPUQueue"></a>
+
+### PipelineService.processGPUQueue() ⇒ <code>Promise.&lt;void&gt;</code>
+Continuously pulls tasks from the GPU queue until saturation is reached.
+
+**Kind**: static method of [<code>PipelineService</code>](#PipelineService)  
+<a name="PipelineService.regenerateTask"></a>
+
+### PipelineService.regenerateTask(socket, taskData, feedbackData) ⇒ <code>Promise.&lt;void&gt;</code>
+Stateless entry for audio regeneration (human-in-the-loop). Creates a new forced-bypass task using user feedback.
+
+**Kind**: static method of [<code>PipelineService</code>](#PipelineService)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| socket | <code>Socket</code> | The client's socket. |
+| taskData | <code>Object</code> | The original task metadata. |
+| feedbackData | <code>Object</code> | The user's feedback payload (text, ratings). |
+
 <a name="Utils"></a>
 
 ## Utils
-Server-side utility class for file handling and audio manipulation.* ### Architecture```mermaidclassDiagramclass Utils{+loadDictionary(filePath, logger)$ Promise~Object~+transcode(wavBuffer, targetFormat, taskType, logger)$ Promise~Buffer~}```
+Server-side utility class for file handling and audio manipulation.
+
+* ### Architecture
+```mermaid
+classDiagram
+class Utils{
++loadDictionary(filePath, logger)$ Promise~Object~
++transcode(wavBuffer, targetFormat, taskType, logger)$ Promise~Buffer~
+}
+```
 
 **Kind**: global class  
 
@@ -1587,6 +1807,18 @@ Stores the ordered sequence of document blocks (sections and variables) fetched 
 Tracks the array index of the variable currently selected to move sections via the move modal. A value of -1 indicates no variable is currently queued to move.
 
 **Kind**: global variable  
+<a name="PROTECTED_SECTIONS"></a>
+
+## PROTECTED\_SECTIONS : <code>Array.&lt;string&gt;</code>
+A strict list of section titles (in uppercase) that represent core architecture. The UI prevents these sections from being deleted or renamed.
+
+**Kind**: global constant  
+<a name="PROTECTED_VARIABLES"></a>
+
+## PROTECTED\_VARIABLES : <code>Array.&lt;string&gt;</code>
+A strict list of environment variable keys that represent core application state. The UI prevents these specific keys from being deleted or renamed (though their values can still be edited).
+
+**Kind**: global constant  
 <a name="loadEnv"></a>
 
 ## loadEnv() ⇒ <code>Promise.&lt;void&gt;</code>
@@ -1637,7 +1869,7 @@ Scrapes all current input values from the screen and updates the internal `envIt
 <a name="render"></a>
 
 ## render() ⇒ <code>void</code>
-Flushes the container and iterates over the `envItems` array to draw the UI. Respects the 'collapsed' state of sections to hide/show their child variables.
+Flushes the container and iterates over the `envItems` array to draw the UI. Respects the 'collapsed' state of sections and enforces read-only UI rules for protected variables/sections.
 
 **Kind**: global function  
 <a name="toggleCollapse"></a>
@@ -1713,7 +1945,7 @@ Syncs the DOM state, then appends a new Section Header template to the bottom of
 <a name="removeItem"></a>
 
 ## removeItem(index) ⇒ <code>void</code>
-Syncs the DOM state, destroys a specific block, and re-renders the UI. Warns if removing a parent section.
+Syncs the DOM state, destroys a specific block, and re-renders the UI. Runs an additional code-level guard against deleting protected core elements in case the UI lock is bypassed.
 
 **Kind**: global function  
 
