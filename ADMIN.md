@@ -138,6 +138,8 @@ This section provides a detailed explanation of every configuration variable ava
 * **`FOREGROUND_GAIN`**: The volume level for immediate, foreground sounds.
 * **`SPATIAL_GAIN`**: The volume level for 3D mapped, point-source spatial audio objects.
 
+> **Non [CORE] variables**: The variables below are non-core and are used by the concrete strategies implementations, these can be renamed and/or deleted based on your own implementation needs
+
 ### KEYS AND TOKENS
 *Authentication credentials and local file paths.*
 
