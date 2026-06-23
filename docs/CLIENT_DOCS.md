@@ -153,9 +153,9 @@ class BaseNodeSelectionStrategy{
 classDiagram
 class BaseSemanticProvider{
 <<Abstract>>
-+getActiveLayers() Array~string~
-+getBackgroundLayers() Array~string~
-+requiresBackgroundProcessing() boolean
++getLayerManifest() Object
++onChange(callback)
++notifyListeners()
 }
 ```
 
@@ -176,9 +176,7 @@ class DefaultSemanticProvider{
 +setLayers(layers)
 +onChange(callback)
 +notifyListeners()
-+getActiveLayers() Array~string~
-+getBackgroundLayers() Array~string~
-+requiresBackgroundProcessing() boolean
++getLayerManifest() Object
 }
 ```
 
@@ -1064,60 +1062,72 @@ Optional state cleanup triggered when the engine resets.
 <a name="BaseSemanticProvider"></a>
 
 ## BaseSemanticProvider
-Strategy Pattern Interface for semantic definitions.  Defines what a node "means" and how the engine should behave towards those meanings.  Extracts layer definitions away from the core orchestration.* ### Architecture```mermaidclassDiagramclass BaseSemanticProvider{<<Abstract>>+getActiveLayers() Array~string~+getBackgroundLayers() Array~string~+requiresBackgroundProcessing() boolean}```
+Strategy Pattern Interface for semantic definitions.  Defines what a node "means" and how the engine should behave towards those meanings.  Extracts layer definitions away from the core orchestration.* ### Architecture```mermaidclassDiagramclass BaseSemanticProvider{<<Abstract>>+getLayerManifest() Object+onChange(callback)+notifyListeners()}```
 
 **Kind**: global class  
 
 * [BaseSemanticProvider](#BaseSemanticProvider)
-    * [.getActiveLayers()](#BaseSemanticProvider.getActiveLayers) ⇒ <code>Array.&lt;string&gt;</code>
-    * [.getBackgroundLayers()](#BaseSemanticProvider.getBackgroundLayers) ⇒ <code>Array.&lt;string&gt;</code>
-    * [.requiresBackgroundProcessing()](#BaseSemanticProvider.requiresBackgroundProcessing) ⇒ <code>boolean</code>
+    * [.getLayerManifest()](#BaseSemanticProvider.getLayerManifest) ⇒ <code>Object</code>
+    * [.onChange(callback)](#BaseSemanticProvider.onChange)
+    * [.notifyListeners()](#BaseSemanticProvider.notifyListeners)
 
-<a name="BaseSemanticProvider.getActiveLayers"></a>
+<a name="BaseSemanticProvider.getLayerManifest"></a>
 
-### BaseSemanticProvider.getActiveLayers() ⇒ <code>Array.&lt;string&gt;</code>
-Retrieves the semantic layers required for the central user node.
-
-**Kind**: static method of [<code>BaseSemanticProvider</code>](#BaseSemanticProvider)  
-**Returns**: <code>Array.&lt;string&gt;</code> - An array of active layer designations (e.g., ['spatial', 'ambient']).  
-<a name="BaseSemanticProvider.getBackgroundLayers"></a>
-
-### BaseSemanticProvider.getBackgroundLayers() ⇒ <code>Array.&lt;string&gt;</code>
-Retrieves the semantic layers required for neighboring/background nodes.
+### BaseSemanticProvider.getLayerManifest() ⇒ <code>Object</code>
+Returns the agnostic ruleset for active semantic layers.
 
 **Kind**: static method of [<code>BaseSemanticProvider</code>](#BaseSemanticProvider)  
-**Returns**: <code>Array.&lt;string&gt;</code> - An array of background layer designations.  
-<a name="BaseSemanticProvider.requiresBackgroundProcessing"></a>
+**Returns**: <code>Object</code> - Manifest dictating layer behavior, persistence, and mix weights.  
+**Throws**:
 
-### BaseSemanticProvider.requiresBackgroundProcessing() ⇒ <code>boolean</code>
-Determines if the current strategy dictates spidering background neighbors.
+- <code>Error</code> If not implemented by a subclass.
+
+<a name="BaseSemanticProvider.onChange"></a>
+
+### BaseSemanticProvider.onChange(callback)
+Subscribes a listener function to be executed whenever the active layers change.
 
 **Kind**: static method of [<code>BaseSemanticProvider</code>](#BaseSemanticProvider)  
-**Returns**: <code>boolean</code> - True if background topological processing is required.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| callback | <code>function</code> | The function to execute on layer change. |
+
+<a name="BaseSemanticProvider.notifyListeners"></a>
+
+### BaseSemanticProvider.notifyListeners()
+Iterates through and executes all subscribed change listeners.
+
+**Kind**: static method of [<code>BaseSemanticProvider</code>](#BaseSemanticProvider)  
 <a name="DefaultSemanticProvider"></a>
 
 ## DefaultSemanticProvider
-EXAMPLE STRATEGY IMPLEMENTATION  Default Semantic Strategy.  Implements the standard base layers: ambient, spatial, and horizon.* ### Architecture```mermaidclassDiagramBaseSemanticProvider <|-- DefaultSemanticProviderclass DefaultSemanticProvider{+setLayers(layers)+onChange(callback)+notifyListeners()+getActiveLayers() Array~string~+getBackgroundLayers() Array~string~+requiresBackgroundProcessing() boolean}```
+EXAMPLE STRATEGY IMPLEMENTATION  Default Semantic Strategy.  Implements the standard base layers: ambient, spatial, and horizon.* ### Architecture```mermaidclassDiagramBaseSemanticProvider <|-- DefaultSemanticProviderclass DefaultSemanticProvider{+setLayers(layers)+onChange(callback)+notifyListeners()+getLayerManifest() Object}```
 
 **Kind**: global class  
 
 * [DefaultSemanticProvider](#DefaultSemanticProvider)
-    * [new DefaultSemanticProvider([initialLayers])](#new_DefaultSemanticProvider_new)
+    * [new DefaultSemanticProvider([layers])](#new_DefaultSemanticProvider_new)
+    * [.getLayerManifest()](#DefaultSemanticProvider.getLayerManifest) ⇒ <code>Object</code>
     * [.setLayers(layers)](#DefaultSemanticProvider.setLayers)
     * [.onChange(callback)](#DefaultSemanticProvider.onChange)
     * [.notifyListeners()](#DefaultSemanticProvider.notifyListeners)
-    * [.getActiveLayers()](#DefaultSemanticProvider.getActiveLayers) ⇒ <code>Array.&lt;string&gt;</code>
-    * [.getBackgroundLayers()](#DefaultSemanticProvider.getBackgroundLayers) ⇒ <code>Array.&lt;string&gt;</code>
-    * [.requiresBackgroundProcessing()](#DefaultSemanticProvider.requiresBackgroundProcessing) ⇒ <code>boolean</code>
 
 <a name="new_DefaultSemanticProvider_new"></a>
 
-### new DefaultSemanticProvider([initialLayers])
+### new DefaultSemanticProvider([layers])
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| [initialLayers] | <code>Array.&lt;string&gt;</code> | <code>[&#x27;ambient&#x27;, &#x27;spatial&#x27;, &#x27;horizon&#x27;]</code> | The default layers to evaluate during navigation. |
+| [layers] | <code>Array.&lt;string&gt;</code> | <code>[&#x27;ambient&#x27;, &#x27;spatial&#x27;, &#x27;horizon&#x27;]</code> | The default layers to evaluate during navigation. |
 
+<a name="DefaultSemanticProvider.getLayerManifest"></a>
+
+### DefaultSemanticProvider.getLayerManifest() ⇒ <code>Object</code>
+Returns the agnostic ruleset for active semantic layers.
+
+**Kind**: static method of [<code>DefaultSemanticProvider</code>](#DefaultSemanticProvider)  
+**Returns**: <code>Object</code> - Manifest dictating layer behavior, persistence, and mix weights.  
 <a name="DefaultSemanticProvider.setLayers"></a>
 
 ### DefaultSemanticProvider.setLayers(layers)
@@ -1146,27 +1156,6 @@ Subscribes a listener function to be executed whenever the active layers change.
 Iterates through and executes all subscribed change listeners.
 
 **Kind**: static method of [<code>DefaultSemanticProvider</code>](#DefaultSemanticProvider)  
-<a name="DefaultSemanticProvider.getActiveLayers"></a>
-
-### DefaultSemanticProvider.getActiveLayers() ⇒ <code>Array.&lt;string&gt;</code>
-Retrieves the semantic layers required for the central user node.
-
-**Kind**: static method of [<code>DefaultSemanticProvider</code>](#DefaultSemanticProvider)  
-**Returns**: <code>Array.&lt;string&gt;</code> - The currently active semantic layers.  
-<a name="DefaultSemanticProvider.getBackgroundLayers"></a>
-
-### DefaultSemanticProvider.getBackgroundLayers() ⇒ <code>Array.&lt;string&gt;</code>
-Retrieves the semantic layers meant for background or neighboring nodes.
-
-**Kind**: static method of [<code>DefaultSemanticProvider</code>](#DefaultSemanticProvider)  
-**Returns**: <code>Array.&lt;string&gt;</code> - The active background semantic layers.  
-<a name="DefaultSemanticProvider.requiresBackgroundProcessing"></a>
-
-### DefaultSemanticProvider.requiresBackgroundProcessing() ⇒ <code>boolean</code>
-Determines if the current strategy dictates spidering background neighbors.
-
-**Kind**: static method of [<code>DefaultSemanticProvider</code>](#DefaultSemanticProvider)  
-**Returns**: <code>boolean</code> - True if the engine should process acoustic data for topological neighbors.  
 <a name="BaseTopologyProvider"></a>
 
 ## BaseTopologyProvider
@@ -1227,15 +1216,15 @@ Abstract Strategy Pattern for 2D/360 Viewer SDKs (Google Maps, Mapillary, etc.).
 
 * [BaseViewerProvider](#BaseViewerProvider)
     * [new BaseViewerProvider(containerId)](#new_BaseViewerProvider_new)
-    * [.supportsCameraSync](#BaseViewerProvider+supportsCameraSync) ⇒ <code>boolean</code>
-    * [.init()](#BaseViewerProvider+init) ⇒ <code>Promise.&lt;void&gt;</code>
-    * [.on(event, callback)](#BaseViewerProvider+on)
-    * [.trigger(event, data)](#BaseViewerProvider+trigger)
-    * [.getCurrentNodeId()](#BaseViewerProvider+getCurrentNodeId) ⇒ <code>string</code> \| <code>null</code>
-    * [.getLocation()](#BaseViewerProvider+getLocation) ⇒ <code>Object</code> \| <code>string</code>
-    * [.isVisible()](#BaseViewerProvider+isVisible) ⇒ <code>boolean</code>
-    * [.getNativeViewer()](#BaseViewerProvider+getNativeViewer) ⇒ <code>any</code>
-    * [.syncCamera(pov)](#BaseViewerProvider+syncCamera)
+    * [.supportsCameraSync](#BaseViewerProvider.supportsCameraSync) ⇒ <code>boolean</code>
+    * [.on(event, callback)](#BaseViewerProvider.on)
+    * [.trigger(event, data)](#BaseViewerProvider.trigger)
+    * [.init()](#BaseViewerProvider.init) ⇒ <code>Promise.&lt;void&gt;</code>
+    * [.getCurrentNodeId()](#BaseViewerProvider.getCurrentNodeId) ⇒ <code>string</code>
+    * [.getLocation()](#BaseViewerProvider.getLocation) ⇒ <code>Object</code> \| <code>string</code>
+    * [.isVisible()](#BaseViewerProvider.isVisible) ⇒ <code>boolean</code>
+    * [.getNativeViewer()](#BaseViewerProvider.getNativeViewer) ⇒ <code>any</code>
+    * [.syncCamera(pov)](#BaseViewerProvider.syncCamera)
 
 <a name="new_BaseViewerProvider_new"></a>
 
@@ -1245,76 +1234,104 @@ Abstract Strategy Pattern for 2D/360 Viewer SDKs (Google Maps, Mapillary, etc.).
 | --- | --- | --- |
 | containerId | <code>string</code> | The DOM ID for mounting the viewer. |
 
-<a name="BaseViewerProvider+supportsCameraSync"></a>
+<a name="BaseViewerProvider.supportsCameraSync"></a>
 
-### baseViewerProvider.supportsCameraSync ⇒ <code>boolean</code>
-CAPABILITY FLAG: Does this viewer support external camera syncing?Override this to return true if the viewer can be programmatically rotated(e.g., by UI compass clicks, Minimaps, or VR headsets).
+### BaseViewerProvider.supportsCameraSync ⇒ <code>boolean</code>
+CAPABILITY FLAG: Indicates whether this specific viewer provider allows for external programmatic control of its pitch and heading.
 
-**Kind**: instance property of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
-<a name="BaseViewerProvider+init"></a>
+**Kind**: static property of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+**Returns**: <code>boolean</code> - True if the viewer's camera can be synchronized by external UI modules. Defaults to false.  
+<a name="BaseViewerProvider.on"></a>
 
-### baseViewerProvider.init() ⇒ <code>Promise.&lt;void&gt;</code>
-Initializes the underlying map SDK.
+### BaseViewerProvider.on(event, callback)
+Subscribes a listener to a standardized, agnostic viewer event.
 
-**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+**Kind**: static method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| event | <code>string</code> | The normalized event name (e.g., 'node_changed', 'pov_changed'). |
+| callback | <code>function</code> | The execution closure to trigger when the event fires. |
+
+<a name="BaseViewerProvider.trigger"></a>
+
+### BaseViewerProvider.trigger(event, data)
+Safely executes all attached callbacks for a given agnostic event.
+
+**Kind**: static method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| event | <code>string</code> | The normalized event name. |
+| data | <code>any</code> | The standardized payload injected into the callback. |
+
+<a name="BaseViewerProvider.init"></a>
+
+### BaseViewerProvider.init() ⇒ <code>Promise.&lt;void&gt;</code>
+Initializes the underlying third-party map SDK and mounts it to the DOM.
+
+**Kind**: static method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+**Returns**: <code>Promise.&lt;void&gt;</code> - Resolves when the viewer is fully loaded and ready for interaction.  
 **Throws**:
 
-- <code>Error</code> If not implemented by the specific provider.
+- <code>Error</code> If not implemented by a subclass.
 
-<a name="BaseViewerProvider+on"></a>
+<a name="BaseViewerProvider.getCurrentNodeId"></a>
 
-### baseViewerProvider.on(event, callback)
-Binds a callback to standardized viewer events (e.g., 'node_changed', 'pov_changed').
+### BaseViewerProvider.getCurrentNodeId() ⇒ <code>string</code>
+Retrieves the unique identifier of the currently loaded panoramic node.
 
-**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+**Kind**: static method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+**Returns**: <code>string</code> - The agnostic node identifier.  
+**Throws**:
+
+- <code>Error</code> If not implemented by a subclass.
+
+<a name="BaseViewerProvider.getLocation"></a>
+
+### BaseViewerProvider.getLocation() ⇒ <code>Object</code> \| <code>string</code>
+Extracts the geographical or spatial coordinates of the current node.
+
+**Kind**: static method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+**Returns**: <code>Object</code> \| <code>string</code> - Unified location coordinate string or spatial object representation.  
+**Throws**:
+
+- <code>Error</code> If not implemented by a subclass.
+
+<a name="BaseViewerProvider.isVisible"></a>
+
+### BaseViewerProvider.isVisible() ⇒ <code>boolean</code>
+Checks if the street-level/360 panoramic view is currently active and visible to the user on screen.
+
+**Kind**: static method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+**Returns**: <code>boolean</code> - True if the panorama canvas is visible.  
+**Throws**:
+
+- <code>Error</code> If not implemented by a subclass.
+
+<a name="BaseViewerProvider.getNativeViewer"></a>
+
+### BaseViewerProvider.getNativeViewer() ⇒ <code>any</code>
+Returns a raw, direct reference to the underlying native SDK object (e.g., the google.maps.StreetViewPanorama instance). Use with extreme caution as this breaks agnostic boundaries.
+
+**Kind**: static method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
+**Returns**: <code>any</code> - The instantiated native viewer object.  
+**Throws**:
+
+- <code>Error</code> If not implemented by a subclass.
+
+<a name="BaseViewerProvider.syncCamera"></a>
+
+### BaseViewerProvider.syncCamera(pov)
+Optional implementation for external camera syncing. Called by the orchestrator (e.g., VR headsets, Minimaps) only if `supportsCameraSync` returns true.
+
+**Kind**: static method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| event | <code>string</code> | The agnostic event name. |
-| callback | <code>function</code> | Execution callback. |
-
-<a name="BaseViewerProvider+trigger"></a>
-
-### baseViewerProvider.trigger(event, data)
-Safely executes attached callbacks.
-
-**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| event | <code>string</code> | The agnostic event name. |
-| data | <code>any</code> | Event payload. |
-
-<a name="BaseViewerProvider+getCurrentNodeId"></a>
-
-### baseViewerProvider.getCurrentNodeId() ⇒ <code>string</code> \| <code>null</code>
-**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
-**Returns**: <code>string</code> \| <code>null</code> - Current agnostic node ID.  
-<a name="BaseViewerProvider+getLocation"></a>
-
-### baseViewerProvider.getLocation() ⇒ <code>Object</code> \| <code>string</code>
-**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
-**Returns**: <code>Object</code> \| <code>string</code> - Unified location coordinate string or object.  
-<a name="BaseViewerProvider+isVisible"></a>
-
-### baseViewerProvider.isVisible() ⇒ <code>boolean</code>
-**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
-**Returns**: <code>boolean</code> - Whether the street level view is actively visible.  
-<a name="BaseViewerProvider+getNativeViewer"></a>
-
-### baseViewerProvider.getNativeViewer() ⇒ <code>any</code>
-**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
-**Returns**: <code>any</code> - A raw reference to the underlying SDK map object.  
-<a name="BaseViewerProvider+syncCamera"></a>
-
-### baseViewerProvider.syncCamera(pov)
-Optional implementation for external camera syncing.Only called by the orchestrator if supportsCameraSync returns true.
-
-**Kind**: instance method of [<code>BaseViewerProvider</code>](#BaseViewerProvider)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| pov | <code>Object</code> | Standardized { heading, pitch } object |
+| pov | <code>Object</code> | Standardized Point of View object. |
+| pov.heading | <code>number</code> | The camera yaw angle in degrees (0-360). |
+| pov.pitch | <code>number</code> | The camera pitch angle in degrees (-90 to 90). |
 
 <a name="MapillaryViewerProvider"></a>
 
