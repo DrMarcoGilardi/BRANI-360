@@ -311,6 +311,32 @@ export class VRSceneController {
 
                 scene.appendChild(mapWindow);
             }
+
+            let wristUI = document.getElementById('vr-wrist-menu');
+            if (!wristUI) {
+                wristUI = document.createElement('a-entity');
+                wristUI.setAttribute('id', 'vr-wrist-menu');
+                wristUI.setAttribute('wrist-ui', ''); // Apply your custom component
+
+                // Attempt to attach it to the Left Hand controller if it exists
+                let leftHand = document.querySelector('[hand-controls="hand: left"]') || document.querySelector('#leftHand');
+
+                if (leftHand) {
+                    leftHand.appendChild(wristUI);
+                } else {
+                    // Fallback: If no hand controllers are present, attach it to the camera as a HUD
+                    const camera = document.querySelector('[camera]') || document.querySelector('a-camera');
+                    if (camera) {
+                        // Position it slightly down and to the left of the view
+                        wristUI.setAttribute('position', '-0.3 -0.3 -0.6');
+                        // Re-adjust rotation so it faces the camera (overriding the -90 wrist rotation)
+                        wristUI.setAttribute('rotation', '0 0 0');
+                        camera.appendChild(wristUI);
+                    } else {
+                        scene.appendChild(wristUI); // Last resort
+                    }
+                }
+            }
             scene.enterVR();
         }
     }
