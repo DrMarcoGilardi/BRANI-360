@@ -3,6 +3,9 @@
  * @description Client-side logic for the ABBA-360 .env Variables Editor. Handles auto-expanding inputs, variable block movement, collapsing, protecting core config elements, and saving state.
  */
 
+const LOCK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
+const UNLOCK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
+
 /**
  * @type {Array<Object>}
  * @description Stores the ordered sequence of document blocks (sections and variables) fetched from the server.
@@ -26,6 +29,8 @@ const PROTECTED_SECTIONS = [
     'AUDIO PARAMETERS'
 ];
 
+
+
 /**
  * @constant {Array<string>}
  * @description A strict list of environment variable keys that represent core application state. The UI prevents these specific keys from being deleted or renamed (though their values can still be edited).
@@ -47,11 +52,45 @@ const PROTECTED_VARIABLES = [
 async function loadEnv() {
     const res = await fetch('/api/admin/env');
     if (res.ok) {
-        envItems = await res.json();
+        const fetchedItems = await res.json();
+
+        // Initialize lock state based on core protections if not already set by backend
+        envItems = fetchedItems.map(item => {
+            if (item.locked === undefined) {
+                if (item.type === 'section') {
+                    item.locked = PROTECTED_SECTIONS.includes(getSectionTitle(item.content).toUpperCase());
+                } else if (item.type === 'variable') {
+                    item.locked = PROTECTED_VARIABLES.includes(item.key.toUpperCase());
+                }
+            }
+            return item;
+        });
         render();
     } else {
         alert("Access Denied. Are you on localhost?");
     }
+}
+
+/**
+ * @function toggleLock
+ * @description Flips the lock status. Enforces a deliberate warning if a user tries to unlock a core framework item.
+ */
+function toggleLock(index) {
+    syncStateFromDOM();
+    const item = envItems[index];
+
+    // Deliberate action check: Ensure users know they are touching core parameters
+    const isCore = (item.type === 'section' && PROTECTED_SECTIONS.includes(getSectionTitle(item.content).toUpperCase())) ||
+        (item.type === 'variable' && PROTECTED_VARIABLES.includes(item.key.toUpperCase()));
+
+    if (item.locked && isCore) {
+        if (!confirm("WARNING: This is a core framework component. Deliberate modification may break the application. Are you sure you want to unlock it?")) {
+            return;
+        }
+    }
+
+    item.locked = !item.locked;
+    render();
 }
 
 /**
@@ -123,7 +162,6 @@ function syncStateFromDOM() {
 /**
  * @function render
  * @description Flushes the container and iterates over the `envItems` array to draw the UI. Respects the 'collapsed' state of sections and enforces read-only UI rules for protected variables/sections.
- * @returns {void}
  */
 function render() {
     const container = document.getElementById('env-container');
@@ -132,18 +170,18 @@ function render() {
     const deleteButton = `<svg xmlns="http://w3.org" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="bin-icon"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>`;
 
     envItems.forEach((item, index) => {
+        const isLocked = !!item.locked;
+        const readonlyAttr = isLocked ? 'readonly' : '';
+        const lockIcon = isLocked ? LOCK_ICON : UNLOCK_ICON;
+
         if (item.type === 'section') {
             isCollapsed = !!item.collapsed;
             const toggleIcon = isCollapsed ? '➕' : '➖';
 
-            // Check protection status
-            const sectionTitle = getSectionTitle(item.content).toUpperCase();
-            const isProtected = PROTECTED_SECTIONS.includes(sectionTitle);
-
-            const readonlyAttr = isProtected ? 'readonly' : '';
-            const deleteBtnHtml = isProtected
-                ? `<button class="btn-secondary btn-icon" style="opacity: 0.3; cursor: not-allowed;" title="Core Section - Cannot Delete" disabled>${deleteButton}</button>`
+            const deleteBtnHtml = isLocked
+                ? `<button class="btn-secondary btn-icon" style="opacity: 0.3; cursor: not-allowed;" title="Locked - Cannot Delete" disabled>${deleteButton}</button>`
                 : `<button class="btn-danger btn-icon" onclick="removeItem(${index})" title="Delete Section">${deleteButton}</button>`;
+            const lockBtnHtml = `<button class="btn-secondary btn-icon" onclick="toggleLock(${index})" title="${isLocked ? 'Unlock Section' : 'Lock Section'}">${lockIcon}</button>`;
 
             htmlBuffer += `
                 <div class="env-item section-item" id="item-${index}">
@@ -152,30 +190,31 @@ function render() {
                         <button class="btn-secondary btn-icon" onclick="moveBlock(${index}, -1)" title="Move Section Up">▲</button>
                         <button class="btn-secondary btn-icon" onclick="moveBlock(${index}, 1)" title="Move Section Down">▼</button>
                         <button class="btn-secondary" onclick="toggleCollapse(${index})" title="Toggle Visibility">${toggleIcon}</button>
+                        ${lockBtnHtml}
                         ${deleteBtnHtml}
                     </div>
                 </div>`;
         } else if (item.type === 'variable') {
             const displayStyle = isCollapsed ? 'display: none;' : '';
 
-            // Check protection status
-            const isProtected = PROTECTED_VARIABLES.includes(item.key.toUpperCase());
-            const readonlyAttr = isProtected ? 'readonly' : '';
-            const deleteBtnHtml = isProtected
-                ? `<button class="btn-secondary btn-icon" style="opacity: 0.3; cursor: not-allowed;" title="Core Variable - Cannot Delete" disabled>${deleteButton}</button>`
+            const deleteBtnHtml = isLocked
+                ? `<button class="btn-secondary btn-icon" style="opacity: 0.3; cursor: not-allowed;" title="Locked - Cannot Delete" disabled>${deleteButton}</button>`
                 : `<button class="btn-danger btn-icon" onclick="removeItem(${index})" title="Delete Variable">${deleteButton}</button>`;
+            const lockBtnHtml = `<button class="btn-secondary btn-icon" onclick="toggleLock(${index})" title="${isLocked ? 'Unlock Variable' : 'Lock Variable'}">${lockIcon}</button>`;
 
             htmlBuffer += `
                 <div class="env-item var-item" id="item-${index}" style="${displayStyle}">
                     <textarea class="comment-input auto-expand" id="comment-${index}" placeholder="# Optional specific note for this variable..." oninput="autoExpand(this)">${escapeHTML(item.comment)}</textarea>
                     <div class="row">
-                        <input type="text" class="key-input" id="key-${index}" value="${escapeHTML(item.key)}" ${readonlyAttr} title="${isProtected ? 'Core Key - Cannot Edit' : 'Edit Variable Key'}">
+                        <input type="text" class="key-input" id="key-${index}" value="${escapeHTML(item.key)}" ${readonlyAttr} title="${isLocked ? 'Locked - Cannot Edit Key Name' : 'Edit Variable Key'}">
+                        
                         <textarea class="val-input auto-expand" id="val-${index}" title="Edit Variable Value" placeholder="Value..." oninput="autoExpand(this)">${escapeHTML(item.value)}</textarea>
                         
                         <button class="btn-secondary btn-icon" onclick="moveBlock(${index}, -1)" title="Move Up">▲</button>
                         <button class="btn-secondary btn-icon" onclick="moveBlock(${index}, 1)" title="Move Down">▼</button>
                         <button class="btn-secondary btn-icon" onclick="openMoveModal(${index})" title="Move to Section">↹</button>
                         
+                        ${lockBtnHtml}
                         ${deleteBtnHtml}
                     </div>
                 </div>`;
@@ -184,7 +223,6 @@ function render() {
 
     container.innerHTML = htmlBuffer;
 
-    // Trigger auto-expand on all newly rendered textareas after the DOM paints
     setTimeout(() => {
         document.querySelectorAll('.auto-expand').forEach(el => autoExpand(el));
     }, 0);
@@ -297,6 +335,7 @@ function confirmAddVariable() {
     const val = document.getElementById('new-var-val').value;
     let comment = document.getElementById('new-var-comment').value;
     const targetIndex = parseInt(document.getElementById('new-var-section').value, 10);
+    const isLocked = document.getElementById('new-var-locked').checked; // Read locked state
 
     if (!key) { alert("A Key Name is required!"); return; }
 
@@ -310,7 +349,7 @@ function confirmAddVariable() {
         comment = '';
     }
 
-    const newItem = { type: 'variable', key, value: val, comment };
+    const newItem = { type: 'variable', key, value: val, comment, locked: isLocked }; // Append locked state
 
     if (targetIndex === -1) {
         let insertAt = 0;
@@ -323,6 +362,7 @@ function confirmAddVariable() {
         envItems.splice(insertAt, 0, newItem);
     }
 
+    document.getElementById('new-var-locked').checked = false; // Reset checkbox
     closeAddModal();
     render();
 }
@@ -428,12 +468,9 @@ function removeItem(index) {
 
     const item = envItems[index];
 
-    // Final security check in case UI was bypassed
-    if (item.type === 'section' && PROTECTED_SECTIONS.includes(getSectionTitle(item.content).toUpperCase())) {
-        alert("This is a core section and cannot be deleted.");
-        return;
-    } else if (item.type === 'variable' && PROTECTED_VARIABLES.includes(item.key.toUpperCase())) {
-        alert("This is a core variable and cannot be deleted.");
+    // Dynamic security check based on the new lock state
+    if (item.locked) {
+        alert("This item is actively locked. Please unlock it first if you deliberately wish to delete it.");
         return;
     }
 

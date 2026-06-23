@@ -40,6 +40,12 @@
             <textarea id="new-var-comment" class="comment-input auto-expand"
                 placeholder="# Describe what this variable does..." oninput="autoExpand(this)"></textarea>
 
+            <label
+                style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px; cursor: pointer; color: #9cdcfe;">
+                <input type="checkbox" id="new-var-locked" style="width: auto; margin: 0; transform: scale(1.2);">
+                Lock Variable (Protect against accidental modification/deletion)
+            </label>
+
             <div class="modal-actions">
                 <button class="btn-danger" onclick="closeAddModal()">Cancel</button>
                 <button onclick="confirmAddVariable()" style="background: #28a745;">Add Variable</button>

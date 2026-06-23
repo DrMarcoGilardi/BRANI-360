@@ -222,8 +222,8 @@ function requireLocalhost(req, res, next) {
 
 /**
  * @function getEnvData
- * @description Parses the .env file into an ordered array of blocks. Separates standalone section headers from variable-specific comments.
- * @returns {Array<Object>} An array of objects representing the document flow. [{ type: 'section', content: '...' }, { type: 'variable', key: '...', value: '...', comment: '...' }]
+ * @description Parses the .env file into an ordered array of blocks. Separates standalone section headers from variable-specific comments and parses lock metadata.
+ * @returns {Array<Object>} An array of objects representing the document flow.
  */
 function getEnvData() {
     if (!fs.existsSync(envPath)) {
@@ -251,21 +251,26 @@ function getEnvData() {
                     val = val.slice(1, -1);
                 }
 
-                // Split accumulated comments: scan backwards to separate variable docs from section headers
                 let varComments = [];
                 let sectionLines = [];
                 let hitBoundary = false;
+                let isLocked = undefined;
 
+                // Scan backwards through the accumulated text block
                 for (let j = currentBlock.length - 1; j >= 0; j--) {
                     const cLine = currentBlock[j];
-                    const cTrimmed = cLine.trim();
+                    const noSpace = cLine.replace(/\s/g, ''); // Obliterate all spaces for safe matching
 
                     if (hitBoundary) {
                         sectionLines.unshift(cLine);
                     } else {
-                        if (cTrimmed === '' || cTrimmed.includes('===') || cTrimmed.includes('---')) {
+                        if (noSpace === '' || cLine.includes('===') || cLine.includes('---')) {
                             hitBoundary = true;
                             sectionLines.unshift(cLine);
+                        } else if (noSpace.includes('#@locked')) {
+                            if (isLocked === undefined) isLocked = true; // Grab the closest one
+                        } else if (noSpace.includes('#@unlocked')) {
+                            if (isLocked === undefined) isLocked = false;
                         } else {
                             varComments.unshift(cLine);
                         }
@@ -273,19 +278,30 @@ function getEnvData() {
                 }
 
                 if (sectionLines.length > 0) {
-                    items.push({ type: 'section', content: sectionLines.join('\n') });
+                    let secContent = sectionLines.join('\n');
+                    let secLocked = undefined;
+
+                    if (secContent.replace(/\s/g, '').includes('#@locked')) secLocked = true;
+                    else if (secContent.replace(/\s/g, '').includes('#@unlocked')) secLocked = false;
+
+                    // Purge ALL tags from the visual content
+                    secContent = secContent.split(/\r?\n/)
+                        .filter(l => !l.replace(/\s/g, '').includes('#@locked') && !l.replace(/\s/g, '').includes('#@unlocked'))
+                        .join('\n');
+
+                    items.push({ type: 'section', content: secContent, locked: secLocked });
                 }
 
                 items.push({
                     type: 'variable',
                     key: key,
                     value: val,
-                    comment: varComments.join('\n')
+                    comment: varComments.join('\n'),
+                    locked: isLocked
                 });
 
                 currentBlock = [];
             } else {
-                // If malformed, treat as a text block
                 currentBlock.push(line);
             }
         }
@@ -293,7 +309,17 @@ function getEnvData() {
 
     // Push any trailing comments at the end of the file as a section
     if (currentBlock.length > 0) {
-        items.push({ type: 'section', content: currentBlock.join('\n') });
+        let secContent = currentBlock.join('\n');
+        let secLocked = undefined;
+
+        if (secContent.replace(/\s/g, '').includes('#@locked')) secLocked = true;
+        else if (secContent.replace(/\s/g, '').includes('#@unlocked')) secLocked = false;
+
+        secContent = secContent.split(/\r?\n/)
+            .filter(l => !l.replace(/\s/g, '').includes('#@locked') && !l.replace(/\s/g, '').includes('#@unlocked'))
+            .join('\n');
+
+        items.push({ type: 'section', content: secContent, locked: secLocked });
     }
 
     return items;
@@ -301,7 +327,7 @@ function getEnvData() {
 
 /**
  * @function updateEnvFile
- * @description Reconstructs and writes the .env file sequentially from an array of blocks, maintaining exact order and updating the live `process.env`.
+ * @description Reconstructs and writes the .env file sequentially from an array of blocks, maintaining exact order, generating metadata tags, and updating the live `process.env`.
  * @param {Array<Object>} items - The ordered array of section and variable blocks from the UI.
  */
 function updateEnvFile(items) {
@@ -309,7 +335,6 @@ function updateEnvFile(items) {
         logger.warn(`[Admin API] Creating new .env file at: ${envPath}`);
     }
 
-    // Track old keys to detect deletions for process.env cleanup
     const oldData = getEnvData();
     const oldKeys = oldData.filter(i => i.type === 'variable').map(i => i.key);
 
@@ -317,11 +342,48 @@ function updateEnvFile(items) {
     const newKeys = new Set();
 
     for (const item of items) {
+        // String casting prevents network JSON parsing bugs
+        const isLocked = String(item.locked) === 'true';
+        const isUnlocked = String(item.locked) === 'false';
+
         if (item.type === 'section') {
-            newLines.push(item.content);
+            let secContent = item.content.split(/\r?\n/)
+                .filter(l => !l.replace(/\s/g, '').includes('#@locked') && !l.replace(/\s/g, '').includes('#@unlocked'))
+                .join('\n');
+
+            let lockTag = '';
+            if (isLocked) lockTag = '# @locked';
+            else if (isUnlocked) lockTag = '# @unlocked';
+
+            if (lockTag) {
+                // FIX: Pin to the TOP of the section block so the variable below doesn't steal it
+                secContent = lockTag + '\n' + secContent;
+            }
+
+            newLines.push(secContent);
+
         } else if (item.type === 'variable') {
-            if (item.comment && item.comment.trim() !== '') {
-                const commentLines = item.comment.split(/\r?\n/).map(l => {
+            let finalComment = item.comment ? item.comment : '';
+
+            // 1. Ruthlessly scrub ALL old, stacked, or malformed lock tags
+            finalComment = finalComment.split(/\r?\n/)
+                .filter(l => !l.replace(/\s/g, '').includes('#@locked') && !l.replace(/\s/g, '').includes('#@unlocked'))
+                .join('\n');
+
+            // 2. Determine the single correct tag
+            let lockTag = '';
+            if (isLocked) lockTag = '# @locked';
+            else if (isUnlocked) lockTag = '# @unlocked';
+
+            // 3. Pin the correct tag cleanly to the TOP of the comment block
+            if (lockTag) {
+                if (finalComment.trim() !== '') finalComment = lockTag + '\n' + finalComment.trim();
+                else finalComment = lockTag;
+            }
+
+            // 4. Format and push to the file
+            if (finalComment.trim() !== '') {
+                const commentLines = finalComment.split(/\r?\n/).map(l => {
                     const t = l.trim();
                     return (t === '' || t.startsWith('#')) ? l : `# ${l}`;
                 });
@@ -329,17 +391,13 @@ function updateEnvFile(items) {
             }
             newLines.push(`${item.key}="${item.value}"`);
 
-            // Update active memory
             process.env[item.key] = item.value;
             newKeys.add(item.key);
         }
     }
 
-    // Scrub deleted keys from live memory
     for (const key of oldKeys) {
-        if (!newKeys.has(key)) {
-            delete process.env[key];
-        }
+        if (!newKeys.has(key)) delete process.env[key];
     }
 
     fs.writeFileSync(envPath, newLines.join('\n'));
