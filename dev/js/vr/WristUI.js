@@ -1,34 +1,30 @@
 /*
 * ABBA-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio Generation on Networks of 360° Images
 * Copyright (C) 2026 Dr Marco Gilardi, University of the West of Scotland.
-* 
-* This program is free software: you can redistribute it and/or modify
+* * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as published
 * by the Free Software Foundation, either version 3 of the License, or
 * (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
+* * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-* 
-* You should have received a copy of the GNU Affero General Public License
+* * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-* 
-* -------------------------------------------------------------------------
+* * -------------------------------------------------------------------------
 * COMMERCIAL LICENSING
 * ABBA-360 is dual-licensed. The above AGPLv3 license applies to open-source 
 * and academic research use. If you wish to integrate this software into a 
 * closed-source or commercial application, you must obtain a proprietary 
 * commercial license. 
-* 
-* Please contact Marco.Gilardi@uws.ac.uk for commercial licensing details.
+* * Please contact Marco.Gilardi@uws.ac.uk for commercial licensing details.
 * -------------------------------------------------------------------------
 */
 
 /**
  * Manages a wrist-mounted 3D UI panel for WebXR.  
- * Registers the 'wrist-ui' A-Frame component, rendering an interactive raycastable menu for exiting VR and toggling floating maps.
+ * Registers the 'wrist-ui' A-Frame component, rendering an interactive raycastable menu.
+ * Supports extensibility via drop-in 'custom-wrist-ui.html' files.
  *
  * ### Architecture
  * ```mermaid
@@ -37,14 +33,13 @@
  * +register() void
  * }
  * ```
- * 
- * @class
+ * * @class
  */
 export class WristUI {
     /**
-     * @method syncPOV
+     * @method register
      * @memberof WristUI
-     * @description Registers the 'wrist-ui' component with the global A-Frame registry. Should be called once before the scene initializes.
+     * @description Registers the 'wrist-ui' component with the global A-Frame registry.
      * @static
      */
     static register() {
@@ -55,6 +50,63 @@ export class WristUI {
 
         AFRAME.registerComponent('wrist-ui', {
             init: function () {
+                fetch('./vr-ui-plugin.html')
+                    .then(response => {
+                        if (!response.ok) throw new Error('No custom UI found');
+                        return response.text();
+                    })
+                    .then(htmlString => {
+                        this.el.innerHTML = htmlString;
+                        this.attachInteractiveLogic();
+                    })
+                    .catch(() => {
+                        this.buildDefaultUI();
+                    });
+            },
+
+            attachInteractiveLogic: function () {
+                this.el.addEventListener('click', (evt) => {
+                    const intersectedElement = evt.detail.intersection?.object?.el || evt.target;
+
+                    const action = intersectedElement.getAttribute('data-action');
+
+                    if (!action) return;
+
+                    if (action === 'exit') {
+                        if (this.el.sceneEl) this.el.sceneEl.exitVR();
+                        return;
+                    }
+
+                    if (action === 'toggle-map') {
+                        const mapWindow = document.getElementById('vr-floating-map');
+                        if (mapWindow) {
+                            const isVisible = mapWindow.getAttribute('visible');
+                            mapWindow.setAttribute('visible', isVisible === false || isVisible === 'false' ? true : false);
+                        }
+                        return;
+                    }
+
+                    document.dispatchEvent(new CustomEvent('vr:custom_ui_action', {
+                        detail: { actionName: action, element: intersectedElement }
+                    }));
+                });
+
+                this.el.addEventListener('mouseenter', (evt) => {
+                    const el = evt.detail.intersection?.object?.el;
+                    if (el && el.classList.contains('raycastable')) {
+                        el.setAttribute('scale', '1.1 1.1 1.1');
+                    }
+                }, true);
+
+                this.el.addEventListener('mouseleave', (evt) => {
+                    const el = evt.target;
+                    if (el && el.classList.contains('raycastable')) {
+                        el.setAttribute('scale', '1 1 1');
+                    }
+                }, true);
+            },
+
+            buildDefaultUI: function () {
                 this.menuContainer = document.createElement('a-entity');
                 this.menuContainer.setAttribute('position', '0 0.05 0.1');
                 this.menuContainer.setAttribute('rotation', '-90 0 0');
@@ -66,12 +118,21 @@ export class WristUI {
                 panel.setAttribute('position', '0 -0.03 0');
                 this.menuContainer.appendChild(panel);
 
-                const createButton = (label, color, yOffset, callback) => {
+                const radarPanel = document.createElement('a-entity');
+                radarPanel.setAttribute('geometry', 'primitive: plane; width: 0.14; height: 0.14');
+                radarPanel.setAttribute('position', '0 0.11 0.005');
+                radarPanel.setAttribute('material', 'shader: flat; transparent: true');
+                radarPanel.setAttribute('interactive-map', 'canvasId: radar-canvas');
+                this.menuContainer.appendChild(radarPanel);
+
+                const createButton = (label, color, yOffset, actionName) => {
                     const btn = document.createElement('a-entity');
                     btn.setAttribute('geometry', 'primitive: plane; width: 0.15; height: 0.04');
                     btn.setAttribute('material', `color: ${color}; shader: flat`);
                     btn.setAttribute('position', `0 ${yOffset} 0.005`);
+
                     btn.classList.add('raycastable');
+                    btn.setAttribute('data-action', actionName);
 
                     const text = document.createElement('a-text');
                     text.setAttribute('value', label);
@@ -83,30 +144,19 @@ export class WristUI {
                     btn.addEventListener('click', () => {
                         btn.setAttribute('scale', '0.9 0.9 0.9');
                         setTimeout(() => btn.setAttribute('scale', '1 1 1'), 150);
-                        callback();
                     });
-
-                    btn.addEventListener('mouseenter', () => btn.setAttribute('material', 'opacity', '0.8'));
-                    btn.addEventListener('mouseleave', () => btn.setAttribute('material', 'opacity', '1.0'));
 
                     return btn;
                 };
 
-                const exitBtn = createButton('EXIT VR', '#ff0055', 0, () => {
-                    if (this.el.sceneEl) this.el.sceneEl.exitVR();
-                });
-
-                const mapBtn = createButton('TOGGLE MAP', '#00f0ff', -0.06, () => {
-                    const mapWindow = document.getElementById('vr-floating-map');
-                    if (mapWindow) {
-                        const isVisible = mapWindow.getAttribute('visible');
-                        mapWindow.setAttribute('visible', isVisible === false || isVisible === 'false' ? true : false);
-                    }
-                });
+                const exitBtn = createButton('EXIT VR', '#ff0055', 0, 'exit');
+                const mapBtn = createButton('TOGGLE MAP', '#00f0ff', -0.06, 'toggle-map');
 
                 this.menuContainer.appendChild(exitBtn);
                 this.menuContainer.appendChild(mapBtn);
                 this.el.appendChild(this.menuContainer);
+
+                this.attachInteractiveLogic();
             }
         });
     }

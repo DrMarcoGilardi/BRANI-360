@@ -72,6 +72,17 @@ export class VRSceneController {
         if (typeof WristUI !== 'undefined') WristUI.register();
         if (typeof InteractiveMap !== 'undefined') InteractiveMap.register();
         this.setupListeners();
+
+        this.loadUserPlugin();
+    }
+
+    loadUserPlugin() {
+        import('./vrplugin/vr-behaviours-plugin.js')
+            .then(() => {
+                console.log("[ABBA-360] Custom user VR logic loaded successfully.");
+            })
+            .catch(() => {
+            });
     }
 
     /**
