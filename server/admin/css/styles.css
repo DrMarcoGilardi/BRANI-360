@@ -125,6 +125,10 @@ textarea.val-input {
     word-wrap: break-word;
 }
 
+#new-var-val {
+    min-height: 38px;
+}
+
 button {
     padding: 10px 16px;
     cursor: pointer;
