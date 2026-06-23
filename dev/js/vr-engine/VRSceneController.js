@@ -77,7 +77,7 @@ export class VRSceneController {
     }
 
     loadUserPlugin() {
-        import('./vrplugin/vr-behaviours-plugin.js')
+        import('./vr-plugin/vr-behaviours-plugin.js')
             .then(() => {
                 console.log("[ABBA-360] Custom user VR logic loaded successfully.");
             })
