@@ -5,13 +5,14 @@
 ## What is the `.env` Editor Dashboard?
 The **ABBA-360 `.env` Variables Editor** is a secure, graphical web interface designed to help developers visually manage, organize, and document server environment variables. 
 
-Directly editing raw `.env` files can often lead to syntax errors, accidental deletions, or disorganized configurations. This dashboard solves those issues by providing a structured layout where you can group variables, add live documentation, safely edit complex multi-line strings, and instantly sync changes back to the live server.
+Directly editing raw `.env` files can often lead to syntax errors, accidental deletions, or disorganized configurations. This dashboard solves those issues by providing a structured layout where you can group variables, add live documentation, safely edit complex multi-line strings, lock critical architecture, and instantly sync changes back to the live server.
 
 ### Key Features
 * **Visual Grouping:** Organize variables into logical, collapsible sections (e.g., Database configs, API keys, SMTP settings).
 * **Safe Formatting:** Automatically sanitizes keys (forcing uppercase and restricting special characters) and safely escapes HTML characters to prevent layout breakage.
 * **Smart UI Elements:** Text areas dynamically auto-expand to fit their content exactly, removing internal scrollbars for massive multi-line keys (like RSA certificates).
 * **Drag-and-Drop Structure:** Move individual variables or entire clustered sections up and down your `.env` architecture effortlessly.
+* **Dynamic Locking System:** Protect individual keys or entire sections from accidental deletion or renaming while keeping their values easily editable.
 ---
 ## Accessing the Editor Dashboard
 
@@ -22,18 +23,20 @@ Example: <span style="color: #3a96dd;"> [09:24:31] [Server] For the .env admin d
 
 ---
 
-## Core Configuration Protection
-To prevent accidental damage to the server architecture, certain fundamental parameters have been permanently locked by the system. 
+## Variable Locking & Core Protection
+To prevent accidental damage to the server architecture, a dynamic locking system is in place. Certain fundamental parameters (Core Variables) are **locked by default**. 
 
-While **you can freely change the values** of these core variables, you **cannot rename their keys or delete them**, nor can you delete their containing section headers. Protected elements will appear slightly dimmed in the dashboard, and their trash bin icons will be disabled.
+While **you can always freely change the values** of locked variables, you **cannot rename their keys or delete them**, nor can you delete their containing section headers. Locked elements will have their key inputs slightly dimmed, and their red trash bin icons will be disabled.
 
-**Protected Sections:**
+You can toggle the lock state of any variable or section by clicking its **Padlock** icon. If you attempt to unlock a core framework component, the system will prompt you with a warning to ensure the modification is deliberate. 
+
+**Protected Sections (Locked by Default):**
 * `CORE CONFIG`
 * `SERVER STRATEGIES`
 * `CLIENT STRATEGIES`
 * `AUDIO PARAMS`
 
-**Protected Variables:**
+**Protected Variables (Locked by Default):**
 * `PORT`, `DB_PATH`, `AUDIO_FORMAT`, `LOCAL_MODE`, `ALLOWED_ORIGIN`
 * `IMAGE_PROVIDER`, `CONTEXT_PROVIDER`, `VISION_PROVIDER`, `AUDIO_PROVIDER`
 * `CLIENT_VIEWER_PROVIDER`, `CLIENT_TOPOLOGY_PROVIDER`, `CLIENT_VR_LOADER_PROVIDER`, `CLIENT_NODE_SELECTION_STRATEGY`, `CLIENT_SEMANTIC_PROVIDER`, `CLIENT_SEMANTIC_LAYERS`
@@ -50,7 +53,8 @@ While **you can freely change the values** of these core variables, you **cannot
 4. **Key Name:** Enter your variable name (e.g., `STRIPE_SECRET_KEY`). The dashboard will automatically format this into uppercase alphanumeric text.
 5. **Initial Value:** Type or paste your variable's value here.
 6. **Documentation (Comment):** *(Optional)* Add a description of what this variable does. The system will automatically prepend a `#` symbol to save it as a valid `.env` comment.
-7. Click the green **`Add Variable`** button to append it to your selected section.
+7. **Lock Variable (Optional Checkbox):** Check this box if you would like to protect your new variable from accidental key modification or deletion once it is created.
+8. Click the green **`Add Variable`** button to append it to your selected section.
 
 ### Adding a New Section Header
 1. Click the green **`+ Add Section Header`** button.
@@ -62,7 +66,7 @@ While **you can freely change the values** of these core variables, you **cannot
 ## How to Remove Elements
 
 ### Deleting a Variable or Section
-1. Locate the specific variable or section header you want to remove. *(Note: Protected elements cannot be deleted).*
+1. Locate the specific variable or section header you want to remove. *(Note: Locked elements must be unlocked via the Padlock icon before they can be deleted).*
 2. Click the **Red Trash Bin Icon** on the far right of that row.
 3. A confirmation popup will ask: *"Are you sure you want to delete [Item Name]?"*
 4. Click **OK** to permanently remove the item from the dashboard layout.
@@ -84,15 +88,17 @@ Instead of clicking "Up" repeatedly to move a variable across a massive configur
 3. Select your desired target section from the dropdown menu and click **`Move Variable`**. The item will be instantly relocated to the bottom of the target group.
 
 ### Collapsing Sections
-If your file is getting too long, you can click the **`➖` / `➕` (Toggle Visibility)** button on any section header to hide or reveal all the variables contained within it, keeping your active workspace clean. *(Protected sections can be collapsed without issue).*
+If your file is getting too long, you can click the **`➖` / `➕` (Toggle Visibility)** button on any section header to hide or reveal all the variables contained within it, keeping your active workspace clean. *(Locked sections can be collapsed without issue).*
 
 ---
 
 ## Saving Your Changes
 > **Important**: Changes made visually in the dashboard are **NOT** automatically saved to your server! To make your configurations live:
-1. Click the green **`Save & Sync Server`** button in the top right corner.
+1. Click the green **`Save & Sync Server`** button in the top right corner of the Editor.
 2. The dashboard will scrape all current inputs and push a structured JSON payload to the backend.
 3. Upon success, you will receive an alert stating: *"Environment synced! The file structure was preserved and clients are refreshing."*
+
+*Note: The system securely preserves your locking choices directly within the `.env` file using hidden `# @locked` and `# @unlocked` metadata tags. These are safely ignored by standard system parsers but ensure your custom protections survive server restarts.*
 
 ---
 
@@ -100,11 +106,11 @@ If your file is getting too long, you can click the **`➖` / `➕` (Toggle Visi
 
 This section provides a detailed explanation of every configuration variable available in the `.env` editor. 
 
-> **Note on Core Variables:** Sections marked as **[CORE]** are essential to the architecture of the application. While you can change their values and add new variables to suit your environment, the admin editor system prevents you from renaming or deleting the **[CORE]** variables listed below, and you cannot delete the section header itself.
+> **Note on Core Variables:** Sections marked as **[CORE]** are essential to the architecture of the application. While you can change their values and add new variables to suit your environment, the admin editor system locks them by default, and unlocking them to delete or rename them will trigger a deliberate warning prompt.
 
 ---
 ### Core variables
-The variables below are core and are used by the core infrastructure classes to initialise the system
+The variables below are core and are used by the core infrastructure classes to initialise the system.
 
 ### CORE CONFIG [CORE]
 *These variables dictate the fundamental network and file system behavior of the server.*
@@ -127,7 +133,7 @@ The variables below are core and are used by the core infrastructure classes to 
 ### CLIENT STRATEGIES [CORE]
 *These variables control the frontend behavior, dictating how the client renders the tour and interprets topological data.*
 
-* **`CLIENT_VIEWER_PROVIDER`**: The provider handling the frontend landing page and the rendering of 360° images (e.g., `MarzipanoViewerProvider`or `MarzipanoViewerProvider`).
+* **`CLIENT_VIEWER_PROVIDER`**: The provider handling the frontend landing page and the rendering of 360° images (e.g., `MarzipanoViewerProvider`or `MapillaryViewerProvider`).
 * **`CLIENT_TOPOLOGY_PROVIDER`**: The provider responsible for mapping and discovering how different 360° image nodes connect to one another.
 * **`CLIENT_VR_LOADER_PROVIDER`**: The provider responsible for loading the 360° images specifically for WebVR environments.
 * **`CLIENT_NODE_SELECTION_STRATEGY`**: The logic used to determine which nodes trigger background sound generation (e.g., `AcousticHorizonStrategy`).
@@ -135,15 +141,15 @@ The variables below are core and are used by the core infrastructure classes to 
 * **`CLIENT_SEMANTIC_LAYERS`**: A comma-separated list of the semantic layers utilized by the semantic provider (e.g., `spatial, horizon`).
 
 ### AUDIO PARAMETERS  [CORE] 
-*Variables for AcousticTreadmil, SpatialAudioPlayer, and strategies. These variables set the default volume levels within the client's Spatial Audio Player and the spatial coninuity of the 360 images.*  
+*Variables for AcousticTreadmil, SpatialAudioPlayer, and strategies. These variables set the default volume levels within the client's Spatial Audio Player and the spatial continuity of the 360 images.*  
 
 * **`SPATIALLY_CONTINUOUS`**: (`true`/`false`) Determines if the nodes represent a contiguous physical walkthrough, or disconnected jumps between different locations. Used by the Acoustic Treadmill and Horizon strategies.
 * **`NEIGHBOR_GAIN`**: The volume level for ambient, background soundscapes.
 * **`LOCAL_GAIN`**: The volume level for immediate, foreground sounds.
 * **`OBJECT_GAIN`**: The volume level for 3D mapped, point-source spatial audio objects.
 ---
-### **Non [CORE] variables**
-The variables below are non-core and are used by the concrete strategies implementations, these can be renamed and/or deleted based on your own implementation needs
+### **Non-[CORE] variables**
+The variables below are non-core and are used by the concrete strategies implementations. These can be renamed and/or deleted based on your own implementation needs without triggering core system warnings.
 
 ### KEYS AND TOKENS
 *Authentication credentials and local file paths.*
