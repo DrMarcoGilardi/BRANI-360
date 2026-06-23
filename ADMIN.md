@@ -138,9 +138,9 @@ The variables below are core and are used by the core infrastructure classes to 
 *Variables for AcousticTreadmil, SpatialAudioPlayer, and strategies. These variables set the default volume levels within the client's Spatial Audio Player and the spatial coninuity of the 360 images.*  
 
 * **`SPATIALLY_CONTINUOUS`**: (`true`/`false`) Determines if the nodes represent a contiguous physical walkthrough, or disconnected jumps between different locations. Used by the Acoustic Treadmill and Horizon strategies.
-* **`BACKGROUND_GAIN`**: The volume level for ambient, background soundscapes.
-* **`FOREGROUND_GAIN`**: The volume level for immediate, foreground sounds.
-* **`SPATIAL_GAIN`**: The volume level for 3D mapped, point-source spatial audio objects.
+* **`NEIGHBOR_GAIN`**: The volume level for ambient, background soundscapes.
+* **`LOCAL_GAIN`**: The volume level for immediate, foreground sounds.
+* **`OBJECT_GAIN`**: The volume level for 3D mapped, point-source spatial audio objects.
 ---
 ### **Non [CORE] variables**
 The variables below are non-core and are used by the concrete strategies implementations, these can be renamed and/or deleted based on your own implementation needs
