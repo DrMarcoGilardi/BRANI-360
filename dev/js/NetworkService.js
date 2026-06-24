@@ -411,9 +411,6 @@ export class NetworkService {
             const label = this.getHUDLabel(nodeId, behavior, null, nodeId);
 
             if (nodeId === currentNodeId) {
-                if (this.sceneController.setAmbientWash) {
-                    this.sceneController.setAmbientWash(`${this.tunnelUrl}${payload.url}`);
-                }
                 this.ui.updatePipelineProgress(nodeId, 'complete', 1.0, behavior, this.navManager.currentIsAnchor, label, taskPayload);
             } else {
                 this.treadmill.updateAggregateProgress(nodeId, this.navManager.currentIsAnchor);

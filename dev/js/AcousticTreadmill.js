@@ -56,7 +56,7 @@ export class AcousticTreadmill {
         this.player = player;
         this.ui = ui;
         this.clientConfig = clientConfig;
-        this.spatiallyContinuous = (this.clientConfig?.audioParams?.spatiallyContinuous === 'true');
+        this.spatiallyContinuous = (String(this.clientConfig?.audioParams?.spatiallyContinuous) === 'true');
         this.anchorTracker = {
             expectedIds: [],
             completedIds: new Set(),
@@ -125,6 +125,7 @@ export class AcousticTreadmill {
      */
     refreshMix(currentNodeId, currentIsAnchor, currentNearbyAnchors, radar) {
         const manifest = this.semanticProvider.getLayerManifest();
+        console.log(this.spatiallyContinuous);
 
         if (!this.spatiallyContinuous) {
             const localLayers = Object.entries(manifest).filter(([_, conf]) => conf.behavior === 'local');
@@ -136,10 +137,13 @@ export class AcousticTreadmill {
             if (currentIsAnchor) {
                 const neighborLayers = Object.entries(manifest).filter(([_, conf]) => conf.behavior === 'neighbor');
                 neighborLayers.forEach(([layerId]) => {
-                    fallbackVolumes.push({ id: String(currentNodeId), layerId: layerId, weight: 1.0 });
+                    (currentNearbyAnchors || []).forEach(a => {
+                        if (a.nodeId && String(a.nodeId) !== String(currentNodeId)) {
+                            fallbackVolumes.push({ id: String(a.nodeId), layerId: layerId, weight: 1.0 });
+                        }
+                    });
                 });
             }
-
             this.player.updatePersistentVolumes(fallbackVolumes);
             return;
         }
@@ -173,6 +177,7 @@ export class AcousticTreadmill {
             });
         });
 
+
         if (mixTargets.length > 0) {
             let totalInvHops = 0;
             const SMOOTHING_FACTOR = 1.0;
@@ -181,7 +186,6 @@ export class AcousticTreadmill {
                 const safeHops = (typeof a.hops === 'number' && !isNaN(a.hops)) ? a.hops : 1;
                 totalInvHops += 1 / (SMOOTHING_FACTOR + safeHops);
             });
-
             neighborLayers.forEach(([layerId, conf]) => {
                 const layerBudget = conf.baseWeight / totalWeightBudget;
 
@@ -196,12 +200,14 @@ export class AcousticTreadmill {
                         layerId: layerId,
                         weight: nodeFraction * layerBudget // Combine fractions for final mix
                     });
+
+                    console.log(`Volume ${volumes[0].weight}`);
                 });
             });
         }
 
-        if (volumes.length > 0) {
-            this.player.updatePersistentVolumes(volumes);
-        }
+        // if (volumes.length > 0) {
+        this.player.updatePersistentVolumes(volumes);
+        // }
     }
 }

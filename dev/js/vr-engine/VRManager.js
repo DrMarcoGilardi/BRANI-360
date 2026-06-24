@@ -154,7 +154,7 @@ export class VRManager {
 
             arrow.setAttribute('geometry', { primitive: 'plane', width: 1.5, height: 1.5 });
             arrow.setAttribute('material', {
-                src: './js/vr/assets/svg/chevron.svg',
+                src: './js/vr-engine/assets/svg/chevron.svg',
                 color: '#ffffff',
                 shader: 'flat',
                 transparent: true,

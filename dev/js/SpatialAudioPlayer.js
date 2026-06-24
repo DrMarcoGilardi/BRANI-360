@@ -79,9 +79,9 @@ export class SpatialAudioPlayer {
             masterObjectGain: objectGain
         } = config.audioParams
 
-        this.masterNeighborGain = parseFloat(neighborGain);
-        this.masterLocalGain = parseFloat(localGain);
-        this.masterObjectGain = parseFloat(objectGain);
+        this.masterNeighborGain = !isNaN(parseFloat(neighborGain)) ? parseFloat(neighborGain) : console.error("\x1b[31m [SpatialAusioPlayer][ERROR] neighborGain is NaN \x1b[0m");
+        this.masterLocalGain = !isNaN(parseFloat(localGain)) ? parseFloat(localGain) : console.error("\x1b[31m [SpatialAusioPlayer][ERROR] localGain is NaN \x1b[0m");
+        this.masterObjectGain = !isNaN(parseFloat(objectGain)) ? parseFloat(objectGain) : console.error("\x1b[31m [SpatialAusioPlayer][ERROR] objectGain is NaN \x1b[0m");
     }
 
     /**
@@ -205,6 +205,7 @@ export class SpatialAudioPlayer {
                     continue;
                 }
 
+                console.log(`Target Volume ${targetVolume}`);
                 this.fadeEntityVolume(anchorData.entity, targetVolume, 750);
             }
         }
@@ -285,7 +286,7 @@ export class SpatialAudioPlayer {
 
         const safeDist = isNaN(rawDist) ? 10 : Math.max(0.1, rawDist);
 
-        const cartesian = SpatialUtils.sphericalToCartesian(safeH || 0, safeP || 90, safeDist || 10);
+        const cartesian = SpatialUtils.sphericalToCartesian(safeH, safeP, safeDist);
         el.setAttribute('position', `${cartesian.x} ${cartesian.y} ${cartesian.z}`);
 
         const initialGain = this.mutedSpatial.has(uniqueId) ? 0 : (data.isPlaceholder ? 0.2 : this.masterObjectGain);
@@ -298,7 +299,8 @@ export class SpatialAudioPlayer {
             distanceModel: 'inverse',
             refDistance: 2,
             maxDistance: 50,
-            rolloffFactor: 1
+            rolloffFactor: 1,
+            positional: true
         });
 
         const scene = document.querySelector('a-scene');
