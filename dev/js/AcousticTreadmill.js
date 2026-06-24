@@ -128,8 +128,8 @@ export class AcousticTreadmill {
         console.log(this.spatiallyContinuous);
 
         if (!this.spatiallyContinuous) {
-            const localLayers = Object.entries(manifest).filter(([_, conf]) => conf.behavior === 'local');
             let fallbackVolumes = [];
+            const localLayers = Object.entries(manifest).filter(([_, conf]) => conf.behavior === 'local');
             localLayers.forEach(([layerId]) => {
                 fallbackVolumes.push({ id: String(currentNodeId), layerId: layerId, weight: 1.0 });
             });
@@ -137,11 +137,7 @@ export class AcousticTreadmill {
             if (currentIsAnchor) {
                 const neighborLayers = Object.entries(manifest).filter(([_, conf]) => conf.behavior === 'neighbor');
                 neighborLayers.forEach(([layerId]) => {
-                    (currentNearbyAnchors || []).forEach(a => {
-                        if (a.nodeId && String(a.nodeId) !== String(currentNodeId)) {
-                            fallbackVolumes.push({ id: String(a.nodeId), layerId: layerId, weight: 1.0 });
-                        }
-                    });
+                    fallbackVolumes.push({ id: String(currentNodeId), layerId: layerId, weight: 1.0 });
                 });
             }
             this.player.updatePersistentVolumes(fallbackVolumes);
