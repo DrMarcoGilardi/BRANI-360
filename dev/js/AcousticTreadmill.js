@@ -194,7 +194,7 @@ export class AcousticTreadmill {
                     volumes.push({
                         id: String(a.nodeId),
                         layerId: layerId,
-                        weight: nodeFraction * layerBudget // Combine fractions for final mix
+                        weight: nodeFraction * layerBudget
                     });
 
                     console.log(`Volume ${volumes[0].weight}`);
@@ -202,8 +202,6 @@ export class AcousticTreadmill {
             });
         }
 
-        // if (volumes.length > 0) {
         this.player.updatePersistentVolumes(volumes);
-        // }
     }
 }
