@@ -754,7 +754,9 @@ export class UIManager {
      */
     clearRadarGraph() {
         const container = document.getElementById('radar-container');
-        if (container) container.remove();
+        // if (container) container.remove();
+        container.innerHTML = '';
+        container.style.display = 'none';
     }
 
     /**
