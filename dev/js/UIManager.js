@@ -750,7 +750,7 @@ export class UIManager {
     /**
      * @method clearRadarGraph
      * @memberof UIManager
-     * @description Removes the radar graph container from the DOM entirely.
+     * @description Clear the radar graph innerHTML container.
      */
     clearRadarGraph() {
         const container = document.getElementById('radar-container');
