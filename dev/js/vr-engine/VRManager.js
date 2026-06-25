@@ -166,12 +166,12 @@ export class VRManager {
             arrow.classList.add('raycastable');
 
             arrow.addEventListener('mouseenter', () => {
-                arrow.setAttribute('material', 'color', '#ffffff');
+                arrow.setAttribute('material', 'color', '#ffffffcc');
                 arrow.setAttribute('material', 'opacity', '0.9');
             })
 
             arrow.addEventListener('mouseleave', () => {
-                arrow.setAttribute('material', 'color', '#000000');
+                arrow.setAttribute('material', 'color', '#ffffff');
                 arrow.setAttribute('material', 'opacity', '0.5');
             });
 
