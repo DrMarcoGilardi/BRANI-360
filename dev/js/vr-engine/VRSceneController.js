@@ -350,9 +350,7 @@ export class VRSceneController {
                     // Fallback: If no hand controllers are present, attach it to the camera as a HUD
                     const camera = document.querySelector('[camera]') || document.querySelector('a-camera');
                     if (camera) {
-                        // Position it slightly down and to the left of the view
-                        wristUI.setAttribute('position', '-0.3 -0.3 -0.6');
-                        // Re-adjust rotation so it faces the camera (overriding the -90 wrist rotation)
+                        wristUI.setAttribute('position', '-0.3 -0.3 -1.6');
                         wristUI.setAttribute('rotation', '0 0 0');
                         camera.appendChild(wristUI);
                     } else {
@@ -360,19 +358,18 @@ export class VRSceneController {
                     }
                 }
             }
-            if (this.ui && typeof this.ui.triggerHudSync === 'function') {
-                this.ui.triggerHudSync();
-                setTimeout(() => this.ui.triggerHudSync(), 500);
-                setTimeout(() => this.ui.triggerHudSync(), 1500);
+            if (this.ui) {
+                this.ui.triggerVRHudSync();
+                // setTimeout(() => this.ui.triggerVRHudSync(), 500);
+                // setTimeout(() => this.ui.triggerVRHudSync(), 1500);
 
                 this.hudUpdateInterval = setInterval(() => {
-                    this.ui.triggerHudSync();
+                    this.ui.triggerVRHudSync();
                 }, 500);
             }
 
             const hudEl = document.getElementById('hud');
             if (hudEl) {
-                // You can calculate the current 45vh in pixels, or just use a safe fixed number for VR
                 hudEl.style.height = '350px';
                 hudEl.style.maxHeight = '350px';
             }

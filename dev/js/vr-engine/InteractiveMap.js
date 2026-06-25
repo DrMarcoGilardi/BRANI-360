@@ -178,8 +178,6 @@ export class InteractiveMap {
             },
 
             tick: function () {
-                // GUARD 2: The "Dead Canvas" SDK Swap Check
-                // If Mapillary/MapLibre destroyed the canvas, flush the memory and wait for the new one.
                 if (this.canvas && !document.body.contains(this.canvas)) {
                     if (this.texture) {
                         this.texture.dispose();
@@ -193,11 +191,8 @@ export class InteractiveMap {
                     return;
                 }
 
-                // Prevent tick updates if Mapillary temporally collapses the canvas size
                 if (this.canvas.width === 0 || this.canvas.height === 0) return;
 
-                // GUARD 3: Texture Resizing
-                // Three.js CanvasTextures corrupt if the source canvas changes dimensions.
                 if (this.canvas.width !== this.lastWidth || this.canvas.height !== this.lastHeight) {
                     if (this.texture) this.texture.dispose();
 
@@ -214,7 +209,6 @@ export class InteractiveMap {
                     this.lastWidth = this.canvas.width;
                     this.lastHeight = this.canvas.height;
                 } else {
-                    // Safe to stream pixels
                     this.texture.needsUpdate = true;
                 }
             }

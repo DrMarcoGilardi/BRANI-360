@@ -120,14 +120,6 @@ export class WristUI {
                 panel.setAttribute('position', '0 -0.03 0');
                 this.menuContainer.appendChild(panel);
 
-                // const radarPanel = document.createElement('a-entity');
-                // radarPanel.setAttribute('geometry', 'primitive: plane; width: 0.14; height: 0.14');
-                // radarPanel.setAttribute('position', '0.16 -0.03 0.05');
-                // radarPanel.setAttribute('material', 'shader: flat; transparent: true');
-                // radarPanel.setAttribute('interactive-map', 'canvasId: radar-canvas');
-                // this.menuContainer.appendChild(radarPanel);
-
-
                 const createButton = (label, color, yOffset, actionName) => {
                     const btn = document.createElement('a-entity');
                     btn.setAttribute('geometry', 'primitive: plane; width: 0.15; height: 0.04');

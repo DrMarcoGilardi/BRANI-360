@@ -92,12 +92,12 @@ export class UIManager {
         this.isXRRadarVisible = true;
         document.addEventListener('vr:custom_ui_action', (event) => {
             if (event.detail.actionName === 'toggle-ui') {
-                this.toggleXRHud();
+                this.toggleVRHud();
             }
         });
     }
 
-    toggleXRHud() {
+    toggleVRHud() {
         this.isXRHudVisible = !this.isXRHudVisible;
         const vrHud = document.getElementById('vr-camera-hud');
         if (vrHud) {
@@ -105,7 +105,7 @@ export class UIManager {
         }
     }
 
-    triggerHudSync() {
+    triggerVRHudSync() {
         const hud = document.getElementById('hud');
         if (hud) {
             let ticker = document.getElementById('htmlmesh-ticker');
