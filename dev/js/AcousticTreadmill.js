@@ -125,7 +125,6 @@ export class AcousticTreadmill {
      */
     refreshMix(currentNodeId, currentIsAnchor, currentNearbyAnchors, radar) {
         const manifest = this.semanticProvider.getLayerManifest();
-        console.log(this.spatiallyContinuous);
 
         if (!this.spatiallyContinuous) {
             let fallbackVolumes = [];
@@ -197,7 +196,6 @@ export class AcousticTreadmill {
                         weight: nodeFraction * layerBudget
                     });
 
-                    console.log(`Volume ${volumes[0].weight}`);
                 });
             });
         }

@@ -205,7 +205,6 @@ export class SpatialAudioPlayer {
                     continue;
                 }
 
-                console.log(`Target Volume ${targetVolume}`);
                 this.fadeEntityVolume(anchorData.entity, targetVolume, 750);
             }
         }
