@@ -541,7 +541,7 @@ export class UIManager {
             if (muteBtn) muteBtn.style.display = 'none';
         }
 
-        this.triggerHudSync();
+        this.triggerVRHudSync();
     }
 
     /**
