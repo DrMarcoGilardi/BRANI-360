@@ -123,7 +123,6 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
 
         parentContainer.style.position = 'relative';
 
-        // 1. Clean DOM Injection
         this.mapContainer = document.createElement('div');
         this.mapContainer.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;';
 
@@ -145,20 +144,17 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
         parentContainer.appendChild(this.closeBtn);
         parentContainer.appendChild(this.satBtn);
 
-        // 2. Initialize 2D MapLibre
         this.map = new window.maplibregl.Map({
             container: this.mapContainer,
+            preserveDrawingBuffer: true, //<<--- Ensures the map renders in VR mode correctly
             style: {
                 version: 8,
                 sources: {
                     'osm': { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 19 },
-                    // Free ESRI World Imagery Tile Server
                     'satellite': { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, maxzoom: 19 }
                 },
                 layers: [
-                    // Satellite sits on the bottom, hidden by default
                     { id: 'satellite', type: 'raster', source: 'satellite', layout: { visibility: 'none' } },
-                    // OSM sits on top, visible by default
                     { id: 'osm', type: 'raster', source: 'osm', layout: { visibility: 'visible' } }
                 ]
             },
@@ -213,7 +209,6 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
                 paint: { 'circle-color': '#05CB63', 'circle-radius': 6, 'circle-stroke-width': 1, 'circle-stroke-color': '#ffffff' }
             });
 
-            // Click Handler
             const handleMapillaryClick = async (e) => {
                 if (!e.features || e.features.length === 0) return;
 
@@ -222,23 +217,19 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
                 let lat, lng;
 
                 if (feature.sourceLayer === 'image' || feature.sourceLayer === 'overview') {
-                    // We clicked a specific dot, so we have the exact Image ID
                     clickedId = feature.properties.id?.toString();
                     lng = feature.geometry.coordinates[0];
                     lat = feature.geometry.coordinates[1];
                 } else if (feature.sourceLayer === 'sequence') {
-                    // Grab the exact mouse coordinates where the user clicked on the map.
                     lng = e.lngLat.lng;
                     lat = e.lngLat.lat;
 
                     try {
-                        // Create a strict 20-meter search box around the user's mouse click
                         const radiusMeters = 20;
                         const latOffset = radiusMeters / 111320;
                         const lngOffset = radiusMeters / (111320 * Math.cos(lat * Math.PI / 180));
                         const bbox = `${lng - lngOffset},${lat - latOffset},${lng + lngOffset},${lat + latOffset}`;
 
-                        // Ask Mapillary for the nearest 360 image strictly inside that box
                         const radiusRes = await fetch(`https://graph.mapillary.com/images?fields=id,geometry&bbox=${bbox}&is_pano=true&limit=1&access_token=${this.token}`);
                         if (!radiusRes.ok) return;
 
@@ -255,7 +246,6 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
 
                 if (!clickedId) return;
 
-                // Final safety check
                 try {
                     const checkRes = await fetch(`https://graph.mapillary.com/${clickedId}?fields=id&access_token=${this.token}`);
                     if (!checkRes.ok) return;
@@ -269,7 +259,6 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
                 this.trigger('visible_changed', true);
             };
 
-            // Bind to all layers
             const interactiveLayers = ['mapillary-images', 'mapillary-sequence', 'mapillary-overview'];
 
             interactiveLayers.forEach(layer => {
@@ -318,14 +307,10 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
 
             this.mlyViewer.setFilter(['==', 'cameraType', 'spherical']);
 
-            // THE SETTLEMENT FIX: Debounced trigger to block event flooding
             this.mlyViewer.on('image', (event) => {
                 const img = event.image;
                 if (!img) return;
 
-                // if (this.nodeChangeTimer) clearTimeout(this.nodeChangeTimer);
-
-                // this.nodeChangeTimer = setTimeout(() => {
                 const newId = img.id?.toString();
                 if (this.lastReportedNodeId === newId) return;
 
@@ -346,7 +331,6 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
                         this.trigger('pov_changed', { heading, pitch });
                     }
                 }).catch(() => { });
-                // }, 600);
             });
 
             this.mlyViewer.on('pov', async () => {

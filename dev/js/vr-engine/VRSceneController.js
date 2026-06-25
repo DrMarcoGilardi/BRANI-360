@@ -74,6 +74,8 @@ export class VRSceneController {
         this.setupListeners();
 
         this.loadUserPlugin();
+
+        this.hudUpdateInterval = null;
     }
 
     loadUserPlugin() {
@@ -109,6 +111,17 @@ export class VRSceneController {
             });
 
             scene.addEventListener('exit-vr', () => {
+                if (this.hudUpdateInterval) {
+                    clearInterval(this.hudUpdateInterval);
+                    this.hudUpdateInterval = null;
+                }
+
+                const hudEl = document.getElementById('hud');
+                if (hudEl) {
+                    hudEl.style.height = '';
+                    hudEl.style.maxHeight = '';
+                }
+
                 const cameraEl = document.querySelector('[camera]') || document.querySelector('a-camera');
                 if (cameraEl) cameraEl.setAttribute('look-controls', 'enabled', false);
 
@@ -124,11 +137,10 @@ export class VRSceneController {
 
                 if (this.ui && this.ui.showXrButton) this.ui.showXrButton();
 
-                // AGNOSTIC FIX: Broadcast the camera sync intent globally
-                const pov = this.vrManager.getPOV();
-                if (pov) {
-                    document.dispatchEvent(new CustomEvent('app:sync_camera_intent', { detail: pov }));
-                }
+                // const pov = this.vrManager.getPOV();
+                // if (pov) {
+                //     document.dispatchEvent(new CustomEvent('app:sync_camera_intent', { detail: pov }));
+                // }
             });
         }
     }
@@ -318,7 +330,7 @@ export class VRSceneController {
 
                 mapWindow.setAttribute('visible', false);
 
-                mapWindow.setAttribute('interactive-map', 'canvasId: radar-canvas');
+                mapWindow.setAttribute('interactive-map', 'canvasId: map-layer');
 
                 scene.appendChild(mapWindow);
             }
@@ -347,6 +359,30 @@ export class VRSceneController {
                         scene.appendChild(wristUI); // Last resort
                     }
                 }
+            }
+            if (this.ui && typeof this.ui.triggerHudSync === 'function') {
+                this.ui.triggerHudSync();
+                setTimeout(() => this.ui.triggerHudSync(), 500);
+                setTimeout(() => this.ui.triggerHudSync(), 1500);
+
+                this.hudUpdateInterval = setInterval(() => {
+                    this.ui.triggerHudSync();
+                }, 500);
+            }
+
+            const hudEl = document.getElementById('hud');
+            if (hudEl) {
+                // You can calculate the current 45vh in pixels, or just use a safe fixed number for VR
+                hudEl.style.height = '350px';
+                hudEl.style.maxHeight = '350px';
+            }
+            const vrHudPanel = document.getElementById('vr-hud-panel');
+            if (vrHudPanel && !vrHudPanel.hasAttribute('html')) {
+                vrHudPanel.setAttribute('html', 'html: #hud');
+            }
+            const vrRadarPanel = document.getElementById('vr-hud-radar');
+            if (vrRadarPanel && !vrRadarPanel.hasAttribute('html')) {
+                vrRadarPanel.setAttribute('html', 'html: #radar-container');
             }
             scene.enterVR();
         }

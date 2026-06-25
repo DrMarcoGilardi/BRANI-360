@@ -50,7 +50,9 @@ export class WristUI {
 
         AFRAME.registerComponent('wrist-ui', {
             init: function () {
-                fetch('./vr-ui-plugin.html')
+                const pluginPath = new URL('./vr-plugin/vr-ui-plugin.html', import.meta.url).href;
+
+                fetch(pluginPath)
                     .then(response => {
                         if (!response.ok) throw new Error('No custom UI found');
                         return response.text();
@@ -108,22 +110,23 @@ export class WristUI {
 
             buildDefaultUI: function () {
                 this.menuContainer = document.createElement('a-entity');
-                this.menuContainer.setAttribute('position', '0 0.05 0.1');
-                this.menuContainer.setAttribute('rotation', '-90 0 0');
+                this.menuContainer.setAttribute('position', '-0.04 -0.05 -0.03');
+                this.menuContainer.setAttribute('rotation', '0 -90 -90');
                 this.menuContainer.setAttribute('scale', '1 1 1');
 
                 const panel = document.createElement('a-entity');
-                panel.setAttribute('geometry', 'primitive: plane; width: 0.18; height: 0.14');
+                panel.setAttribute('geometry', 'primitive: plane; width: 0.18; height: 0.2');
                 panel.setAttribute('material', 'color: #1a1a1a; shader: flat; transparent: true; opacity: 0.9');
                 panel.setAttribute('position', '0 -0.03 0');
                 this.menuContainer.appendChild(panel);
 
-                const radarPanel = document.createElement('a-entity');
-                radarPanel.setAttribute('geometry', 'primitive: plane; width: 0.14; height: 0.14');
-                radarPanel.setAttribute('position', '0 0.11 0.005');
-                radarPanel.setAttribute('material', 'shader: flat; transparent: true');
-                radarPanel.setAttribute('interactive-map', 'canvasId: radar-canvas');
-                this.menuContainer.appendChild(radarPanel);
+                // const radarPanel = document.createElement('a-entity');
+                // radarPanel.setAttribute('geometry', 'primitive: plane; width: 0.14; height: 0.14');
+                // radarPanel.setAttribute('position', '0.16 -0.03 0.05');
+                // radarPanel.setAttribute('material', 'shader: flat; transparent: true');
+                // radarPanel.setAttribute('interactive-map', 'canvasId: radar-canvas');
+                // this.menuContainer.appendChild(radarPanel);
+
 
                 const createButton = (label, color, yOffset, actionName) => {
                     const btn = document.createElement('a-entity');
@@ -149,11 +152,13 @@ export class WristUI {
                     return btn;
                 };
 
-                const exitBtn = createButton('EXIT VR', '#ff0055', 0, 'exit');
-                const mapBtn = createButton('TOGGLE MAP', '#00f0ff', -0.06, 'toggle-map');
+                const exitBtn = createButton('EXIT VR', '#ff0055', 0.03, 'exit');
+                const mapBtn = createButton('TOGGLE MAP', '#00f0ff', -0.03, 'toggle-map');
+                const uiBtn = createButton('TOGGLE UI', '#00ffaa', -0.09, 'toggle-ui');
 
                 this.menuContainer.appendChild(exitBtn);
                 this.menuContainer.appendChild(mapBtn);
+                this.menuContainer.appendChild(uiBtn);
                 this.el.appendChild(this.menuContainer);
 
                 this.attachInteractiveLogic();
