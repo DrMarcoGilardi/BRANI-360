@@ -178,7 +178,7 @@ export class UIManager {
         const radarContainer = document.getElementById('radar-container');
         if (radarContainer) {
             radarContainer.style.display = 'block';
-            radarContainer.style.left = this.isRadarVisible ? '20px' : '-9999px';
+            // radarContainer.style.left = this.isRadarVisible ? '20px' : '-9999px';
         }
         this.updateToggleButton(this.radarToggleBtn, 'RADAR', this.isRadarVisible);
     }
