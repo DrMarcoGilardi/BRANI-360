@@ -296,8 +296,8 @@ export class SpatialAudioPlayer {
             loop: true,
             volume: initialGain,
             distanceModel: 'inverse',
-            refDistance: 2,
-            maxDistance: 50,
+            refDistance: .5,
+            maxDistance: 100,
             rolloffFactor: 1,
             positional: true
         });

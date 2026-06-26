@@ -139,12 +139,12 @@ export class SpatialUtils {
      * @returns {{x: number, y: number, z: number}}
      * @static
      */
-    static sphericalToCartesian(h, p, dist) {
-        const hRad = h * (Math.PI / 180);
-        const pRad = p * (Math.PI / 180);
-        const x = dist * Math.cos(pRad) * Math.sin(hRad);
-        const y = dist * Math.sin(pRad);
-        const z = -dist * Math.cos(pRad) * Math.cos(hRad);
+    static sphericalToCartesian(h, v, dist) {
+        const hRad = h * ((Math.PI - 180) / 180);
+        const vRad = v * (Math.PI / 180);
+        const x = dist * Math.cos(vRad) * Math.sin(hRad);
+        const y = dist * Math.sin(vRad);
+        const z = -dist * Math.cos(vRad) * Math.cos(hRad);
 
         return { x, y, z };
     }
