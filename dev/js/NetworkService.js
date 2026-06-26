@@ -82,14 +82,12 @@ export class NetworkService {
      * @description Binds internal managers to incoming socket events.
      * @param {UIManager} ui - The UI Manager.
      * @param {SpatialAudioPlayer} player - The Audio Player.
-     * @param {SceneController} sceneController - The VR Manager.
      * @param {AcousticTreadmill} treadmill - The Audio Mixing Engine.
      * @param {NavigationManager} navManager - The primary Nav Orchestrator.
      */
-    init(ui, player, sceneController, treadmill, navManager, semanticProvider) {
+    init(ui, player, treadmill, navManager, semanticProvider) {
         this.ui = ui;
         this.player = player;
-        this.sceneController = sceneController;
         this.treadmill = treadmill;
         this.navManager = navManager;
         this.semanticProvider = semanticProvider;
@@ -334,7 +332,7 @@ export class NetworkService {
         if (!this._isEpochValid(payload.navEpoch, `Object ${payload.label}`)) return;
         if (nodeId !== currentNodeId) return;
 
-        this.sceneController.ensureAudioContext();
+        document.dispatchEvent(new CustomEvent('app:audio_context_resume'));
 
         const taskPayload = payload.taskData ? { ...payload.taskData } : { ...payload };
         delete taskPayload.audioBuffer;
@@ -353,9 +351,9 @@ export class NetworkService {
             payload.nodeId = nodeId;
 
             this.player.playObjectSound(payload);
-            if (this.sceneController.addSpatialSource) {
-                this.sceneController.addSpatialSource(payload, this.tunnelUrl);
-            }
+            document.dispatchEvent(new CustomEvent('audio:spatial_source_added', {
+                detail: { payload: payload, tunnelUrl: this.tunnelUrl }
+            }))
 
             this.ui.updatePipelineProgress(
                 targetId, 'complete', 1.0, 'object', false, payload.displayName || payload.label, taskPayload
@@ -389,7 +387,7 @@ export class NetworkService {
         const isCurrentlyRelevant = nodeId === currentNodeId || this.treadmill.anchorTracker.expectedIds.includes(nodeId);
         if (!isCurrentlyRelevant) return;
 
-        this.sceneController.ensureAudioContext();
+        document.dispatchEvent(new CustomEvent('app:audio_context_resume'));
 
         const taskPayload = payload.taskData ? { ...payload.taskData } : { ...payload };
         delete taskPayload.audioBuffer;

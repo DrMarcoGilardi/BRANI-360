@@ -117,13 +117,13 @@ async function bootstrap() {
         const nodeSelectionStrategy = new SelectionClass(config);
         const radar = new TopologyRadar(topologyProvider, nodeSelectionStrategy);
 
+        const navManager = new NavigationManager(viewerProvider, radar, networkService, ui, player, treadmill, semanticProvider);
+
+        networkService.init(ui, player, treadmill, navManager, semanticProvider);
+
         const vrLoaderProvider = new VRLoaderClass(config.key);
         const vrSceneController = new VRSceneController(ui, vrLoaderProvider);
 
-
-        const navManager = new NavigationManager(viewerProvider, radar, networkService, ui, player, treadmill, vrSceneController, semanticProvider);
-
-        networkService.init(ui, player, vrSceneController, treadmill, navManager, semanticProvider);
 
         const originalClear = player.clearSpatialObjects.bind(player);
         player.clearSpatialObjects = () => {

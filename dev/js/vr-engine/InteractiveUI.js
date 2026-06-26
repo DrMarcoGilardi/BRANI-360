@@ -40,65 +40,7 @@
 //  * 
 //  * @class
 //  */
-// export class InteractiveMap {
-//     static register() {
-//         if (typeof AFRAME === 'undefined' || AFRAME.components['interactive-map']) return;
-
-//         AFRAME.registerComponent('interactive-map', {
-//             schema: { canvasId: { type: 'string', default: 'map-layer' } },
-
-//             init: function () {
-//                 this.hasListener = false;
-
-//                 this.bindCanvas = () => {
-//                     let targetElement = document.getElementById(this.data.canvasId);
-//                     if (!targetElement) return false;
-
-//                     // RESTORED: Check if it's a DIV and find the canvas inside
-//                     if (targetElement.tagName !== 'CANVAS') {
-//                         this.canvas = targetElement.querySelector('canvas');
-//                     } else {
-//                         this.canvas = targetElement;
-//                     }
-
-//                     if (!this.canvas) return false;
-
-//                     this.texture = new AFRAME.THREE.CanvasTexture(this.canvas);
-//                     this.el.getObject3D('mesh').material.map = this.texture;
-
-//                     if (!this.hasListener) {
-//                         this.el.addEventListener('click', (evt) => {
-//                             const intersection = evt.detail.intersection;
-//                             if (!intersection) return;
-//                             const uv = intersection.uv;
-//                             const rect = this.canvas.getBoundingClientRect();
-//                             const clientX = rect.left + (uv.x * rect.width);
-//                             const clientY = rect.top + ((1 - uv.y) * rect.height);
-//                             this.canvas.dispatchEvent(new MouseEvent('click', {
-//                                 view: window, bubbles: true, cancelable: true,
-//                                 clientX: clientX, clientY: clientY
-//                             }));
-//                         });
-//                         this.hasListener = true;
-//                     }
-//                     return true;
-//                 };
-
-//                 this.bindCanvas();
-//             },
-
-//             tick: function () {
-//                 if (!this.texture) {
-//                     this.bindCanvas();
-//                 } else {
-//                     this.texture.needsUpdate = true;
-//                 }
-//             }
-//         });
-//     }
-// }
-
-export class InteractiveMap {
+export class InteractiveUI {
     static register() {
         if (typeof AFRAME === 'undefined' || AFRAME.components['interactive-map']) return;
 
@@ -142,6 +84,9 @@ export class InteractiveMap {
 
                     if (!this.hasListener) {
                         this.el.addEventListener('click', (evt) => {
+                            const isVisible = this.el.getAttribute('visible');
+                            if (isVisible === false || isVisible === 'false') return;
+
                             if (!this.canvas) return;
                             const intersection = evt.detail.intersection;
                             if (!intersection) return;

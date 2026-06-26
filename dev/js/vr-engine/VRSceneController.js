@@ -29,7 +29,7 @@
 import { VRManager } from './VRManager.js';
 import { VRRPGAudioManager } from './VRRPGAudioManager.js';
 import { WristUI } from './WristUI.js';
-import { InteractiveMap } from './InteractiveMap.js';
+import { InteractiveUI } from './InteractiveUI.js';
 
 /**
  * Manages the A-Frame Lifecycle and WebXR spatial audio syncing.  
@@ -70,7 +70,7 @@ export class VRSceneController {
         this.vrAudio = new VRRPGAudioManager();
         this.currentEpoch = 0;
         if (typeof WristUI !== 'undefined') WristUI.register();
-        if (typeof InteractiveMap !== 'undefined') InteractiveMap.register();
+        if (typeof InteractiveUI !== 'undefined') InteractiveUI.register();
         this.setupListeners();
 
         this.loadUserPlugin();
@@ -79,12 +79,16 @@ export class VRSceneController {
     }
 
     loadUserPlugin() {
-        import('./vr-plugin/vr-behaviours-plugin.js')
-            .then(() => {
-                console.log("[ABBA-360] Custom user VR logic loaded successfully.");
-            })
-            .catch(() => {
-            });
+        try {
+            import('./vr-plugin/vr-behaviours-plugin.js')
+                .then(() => {
+                    console.log("[ABBA-360] Custom behaviour VR logic loaded successfully.");
+                })
+                .catch(() => {
+                });
+        } catch {
+            console.log("[VR Scene Controller] No behaviours plugin found. Continuing...")
+        }
     }
 
     /**
@@ -103,6 +107,10 @@ export class VRSceneController {
      * @description Initializes A-Frame enter/exit VR event listeners.
      */
     setupListeners() {
+        document.addEventListener('app:request_vr_entry', () => {
+            this.enterVR();
+        });
+
         const scene = document.querySelector('a-scene');
         if (scene) {
             scene.addEventListener('enter-vr', () => {
@@ -143,6 +151,38 @@ export class VRSceneController {
                 // }
             });
         }
+
+        document.addEventListener('app:pov_changed', (e) => {
+            this.sync2DRotation(e.detail);
+        });
+
+        document.addEventListener('app:engine_visible', (e) => {
+            if (e.detail.isVisible) this.ensureAudioContext();
+        });
+
+        document.addEventListener('nav:epoch_updated', (e) => {
+            this.setEpoch(e.detail.epoch);
+        });
+
+        document.addEventListener('nav:node_applied', (e) => {
+            const { nodeId, links } = e.detail;
+            this.updateSkybox(nodeId);
+            this.updateVRNavigation(links);
+        });
+
+        document.addEventListener('app:audio_context_resume', () => {
+            this.ensureAudioContext();
+        });
+        document.addEventListener('audio:spatial_source_added', (e) => {
+            const { payload, tunnelUrl } = e.detail;
+            this.addSpatialSource(payload, tunnelUrl);
+        });
+
+        document.addEventListener('vr:custom_ui_action', (event) => {
+            if (event.detail.actionName === 'toggle-ui') {
+                this._toggleVRHud();
+            }
+        });
     }
 
     /**
@@ -326,7 +366,7 @@ export class VRSceneController {
 
                 mapWindow.setAttribute('geometry', 'primitive: plane; width: 1.6; height: 0.9');
                 mapWindow.setAttribute('material', 'shader: flat; side: double');
-                mapWindow.classList.add('raycastable');
+                // mapWindow.classList.add('raycastable');
 
                 mapWindow.setAttribute('visible', false);
 
@@ -358,15 +398,14 @@ export class VRSceneController {
                     }
                 }
             }
-            if (this.ui) {
-                this.ui.triggerVRHudSync();
-                // setTimeout(() => this.ui.triggerVRHudSync(), 500);
-                // setTimeout(() => this.ui.triggerVRHudSync(), 1500);
 
-                this.hudUpdateInterval = setInterval(() => {
-                    this.ui.triggerVRHudSync();
-                }, 500);
-            }
+            this._triggerHudSync();
+
+            if (this.hudUpdateInterval) clearInterval(this.hudUpdateInterval);
+
+            this.hudUpdateInterval = setInterval(() => {
+                this._triggerHudSync();
+            }, 500);
 
             const hudEl = document.getElementById('hud');
             if (hudEl) {
@@ -382,6 +421,42 @@ export class VRSceneController {
                 vrRadarPanel.setAttribute('html', 'html: #radar-container');
             }
             scene.enterVR();
+        }
+    }
+
+    /**
+     * @method _triggerHudSync
+     * @memberof VRSceneController
+     * @description Injects a hidden timestamp into the 2D HUD to force A-Frame's HTML component to redraw the 3D texture.
+     * @private
+     */
+    _triggerHudSync() {
+        const hud = document.getElementById('hud');
+        if (!hud) return;
+
+        let ticker = document.getElementById('htmlmesh-ticker');
+        if (!ticker) {
+            ticker = document.createElement('div');
+            ticker.id = 'htmlmesh-ticker';
+            ticker.style.opacity = '0.01';
+            ticker.style.position = 'absolute';
+            ticker.style.pointerEvents = 'none';
+            hud.appendChild(ticker);
+        }
+        ticker.innerText = Date.now().toString();
+    }
+
+    /**
+     * @method _toggleVRHud
+     * @memberof VRSceneController
+     * @description Toggles the visibility of the 3D VR Camera HUD.
+     * @private
+     */
+    _toggleVRHud() {
+        const vrHud = document.getElementById('vr-camera-hud');
+        if (vrHud) {
+            const isVisible = vrHud.getAttribute('visible');
+            vrHud.setAttribute('visible', !isVisible);
         }
     }
 }

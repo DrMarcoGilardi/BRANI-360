@@ -84,6 +84,12 @@ export class WristUI {
                         if (mapWindow) {
                             const isVisible = mapWindow.getAttribute('visible');
                             mapWindow.setAttribute('visible', isVisible === false || isVisible === 'false' ? true : false);
+
+                            if (targetVisibility) {
+                                mapWindow.classList.add('raycastable');
+                            } else {
+                                mapWindow.classList.remove('raycastable');
+                            }
                         }
                         return;
                     }

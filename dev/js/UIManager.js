@@ -68,7 +68,6 @@ export class UIManager {
         this.statusEl = document.getElementById('status');
         this.progressContainer = document.getElementById('progress-container');
         this.xrBtn = document.getElementById('xr-btn');
-        this.vrEngine = document.getElementById('vr-engine');
         this.hudEl = document.getElementById('hud');
 
         this.taskElements = new Map();
@@ -87,38 +86,6 @@ export class UIManager {
         this._styleXrButton();
         this._bindPropagationGuards();
         this.initToggleControls();
-
-        this.isXRHudVisible = true;
-        this.isXRRadarVisible = true;
-        document.addEventListener('vr:custom_ui_action', (event) => {
-            if (event.detail.actionName === 'toggle-ui') {
-                this.toggleVRHud();
-            }
-        });
-    }
-
-    toggleVRHud() {
-        this.isXRHudVisible = !this.isXRHudVisible;
-        const vrHud = document.getElementById('vr-camera-hud');
-        if (vrHud) {
-            vrHud.setAttribute('visible', this.isXRHudVisible);
-        }
-    }
-
-    triggerVRHudSync() {
-        const hud = document.getElementById('hud');
-        if (hud) {
-            let ticker = document.getElementById('htmlmesh-ticker');
-            if (!ticker) {
-                ticker = document.createElement('div');
-                ticker.id = 'htmlmesh-ticker';
-                ticker.style.opacity = '0.01';
-                ticker.style.position = 'absolute';
-                ticker.style.pointerEvents = 'none';
-                hud.appendChild(ticker);
-            }
-            ticker.innerText = Date.now().toString();
-        }
     }
 
     /** 
@@ -163,7 +130,6 @@ export class UIManager {
         if (this.hudEl) {
             this.hudEl.style.opacity = this.isHudVisible ? '1' : '0';
             this.hudEl.style.pointerEvents = this.isHudVisible ? 'auto' : 'none';
-            // this.hudEl.style.display = this.isHudVisible ? '' : 'none';
         }
         this.updateToggleButton(this.hudToggleBtn, 'HUD', this.isHudVisible);
     }
@@ -178,7 +144,6 @@ export class UIManager {
         const radarContainer = document.getElementById('radar-container');
         if (radarContainer) {
             radarContainer.style.display = 'block';
-            // radarContainer.style.left = this.isRadarVisible ? '20px' : '-9999px';
         }
         this.updateToggleButton(this.radarToggleBtn, 'RADAR', this.isRadarVisible);
     }
@@ -195,7 +160,6 @@ export class UIManager {
         btn.style.color = this.isMasterMuted ? '#ff0055' : '#00ffaa';
         btn.style.borderColor = this.isMasterMuted ? '#ff0055' : '#00ffaa';
 
-        // Loop through all currently rendered tasks and click their mute buttons if needed
         this.taskElements.forEach((el) => {
             const muteBtn = el.querySelector('.mute-btn');
             if (muteBtn && muteBtn.style.display !== 'none') {
@@ -335,7 +299,6 @@ export class UIManager {
             } else if (behavior === 'object') {
                 Object.assign(el.style, { borderLeft: '2px solid #00bfff', paddingLeft: '8px', marginBottom: '6px' });
             } else {
-                // Local Main Node formatting
                 Object.assign(el.style, { borderLeft: '2px solid #ffdd00', paddingLeft: '8px', marginBottom: '8px' });
             }
 
@@ -540,8 +503,6 @@ export class UIManager {
             if (regenForm) regenForm.style.display = 'none';
             if (muteBtn) muteBtn.style.display = 'none';
         }
-
-        this.triggerVRHudSync();
     }
 
     /**
@@ -754,7 +715,6 @@ export class UIManager {
      */
     clearRadarGraph() {
         const container = document.getElementById('radar-container');
-        // if (container) container.remove();
         container.innerHTML = '';
         container.style.display = 'none';
     }
@@ -785,10 +745,8 @@ export class UIManager {
             this.isEnteringVR = true;
 
             this.xrBtn.style.display = 'none';
-            if (this.vrEngine) {
-                this.vrEngine.style.opacity = '1';
-                this.vrEngine.style.pointerEvents = 'auto';
-            }
+            document.dispatchEvent(new CustomEvent('app:request_vr_entry'));
+
             if (onClickCallback) onClickCallback();
             setTimeout(() => { this.isEnteringVR = false; }, 2000);
         };

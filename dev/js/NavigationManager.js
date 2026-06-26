@@ -58,17 +58,15 @@ export class NavigationManager {
      * @param {UIManager} ui - HUD interface.
      * @param {SpatialAudioPlayer} player - Web Audio lifecycle manager.
      * @param {AcousticTreadmill} treadmill - Background audio mixer.
-     * @param {VRSceneController} vrSceneController - 3D/VR Environment manager.
      * @param {BaseSemanticProvider} semanticProvider - Strategy defining active semantic media layers.
      */
-    constructor(viewer, radar, networkService, ui, player, treadmill, vrSceneController, semanticProvider) {
+    constructor(viewer, radar, networkService, ui, player, treadmill, semanticProvider) {
         this.viewer = viewer;
         this.radar = radar;
         this.networkService = networkService;
         this.ui = ui;
         this.player = player;
         this.treadmill = treadmill;
-        this.vrSceneController = vrSceneController;
 
         this.currentNodeId = null;
         this.navEpoch = 0;
@@ -111,7 +109,7 @@ export class NavigationManager {
     setupListeners() {
         // Standardized POV sync
         this.viewer.on('pov_changed', (pov) => {
-            this.vrSceneController.sync2DRotation(pov);
+            document.dispatchEvent(new CustomEvent('app:pov_changed', { detail: pov }));
         });
 
         // Listen for VR headset removal to sync VR -> Map
@@ -138,12 +136,13 @@ export class NavigationManager {
             if (isVisible) {
                 if (this.ui.setEngineVisibility) this.ui.setEngineVisibility(true);
 
-                this.vrSceneController.ensureAudioContext();
+                document.dispatchEvent(new CustomEvent('app:engine_visible', { detail: { isVisible: true } }));
 
                 const nodeId = this.viewer.getCurrentNodeId();
                 const epoch = this.networkService.incrementEpoch();
 
-                this.vrSceneController.setEpoch(epoch);
+                document.dispatchEvent(new CustomEvent('nav:epoch_updated', { detail: { epoch } }));
+
                 if (nodeId) this.player.setSyncState(epoch, nodeId);
 
                 this.networkService.abortObjectFetches();
@@ -190,7 +189,7 @@ export class NavigationManager {
             this.currentNodeId = newNodeId;
 
             this.player.setSyncState(epoch, newNodeId);
-            this.vrSceneController.setEpoch(epoch);
+            document.dispatchEvent(new CustomEvent('nav:epoch_updated', { detail: { epoch } }));
 
             this.player.clearSpatialObjects();
 
@@ -336,9 +335,10 @@ export class NavigationManager {
 
         this.treadmill.refreshMix(nodeId, isAnchor, this.currentNearbyAnchors, this.radar);
 
-        if (this.currentNodeId === nodeId && this.vrSceneController) {
-            this.vrSceneController.updateSkybox(nodeId);
-            this.vrSceneController.updateVRNavigation(data.links);
+        if (this.currentNodeId === nodeId) {
+            document.dispatchEvent(new CustomEvent('nav:node_applied', {
+                detail: { nodeId: nodeId, links: data.links }
+            }));
         }
 
         this.networkService.emitSync({
