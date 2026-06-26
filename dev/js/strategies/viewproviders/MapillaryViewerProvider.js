@@ -49,8 +49,11 @@ import { BaseViewerProvider } from './BaseViewerProvider.js';
  * @class
  */
 export class MapillaryViewerProvider extends BaseViewerProvider {
+
     /**
      * @constructor
+     * @memberof MapillaryViewerProvider
+     * @description Initializes the MapillaryViewerProvider with necessary DOM bindings and credentials.
      * @param {string} containerId - The HTML element ID to mount the viewer inside.
      * @param {string} accessToken - Mapillary Client Access Token.
      */
@@ -75,8 +78,8 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
      * @method _loadLibrary
      * @memberof MapillaryViewerProvider
      * @description Asynchronously loads MapLibre and MapillaryJS scripts and styles into the document.
-     * @returns {Promise<void>}
      * @private
+     * @returns {Promise<void>}
      */
     async _loadLibrary() {
         const loadStyle = (id, href) => {
@@ -112,7 +115,7 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
      * @async
      * @method init
      * @memberof MapillaryViewerProvider
-     * @description Initializes the underlying map SDK, constructs DOM elements, and binds event listeners.
+     * @description Initializes the underlying map SDK, constructs DOM elements, and binds core event listeners.
      * @returns {Promise<void>}
      */
     async init() {
@@ -129,6 +132,11 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
         this.viewerContainer = document.createElement('div');
         this.viewerContainer.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; z-index: 50;';
 
+        this.loadingCover = document.createElement('div');
+        this.loadingCover.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 51; display: none; background-color: #1a1a1a; background-size: cover; background-position: center; transition: opacity 0.3s ease-in-out;';
+
+        this.loadingCover.innerHTML = `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); border: 3px solid rgba(255,255,255,0.1); border-left-color: #00f0ff; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite;"></div><style>@keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }</style>`;
+
         this.closeBtn = document.createElement('button');
         this.closeBtn.innerText = 'BACK TO MAP';
         this.closeBtn.style.cssText = 'position: absolute; top: 20px; left: 20px; z-index: 53; display: none; padding: 10px; background: rgba(0,0,0,0.8); color: #00f0ff; border: 1px solid #00f0ff; cursor: pointer; border-radius: 4px; font-weight: bold; font-family: sans-serif;';
@@ -141,12 +149,13 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
 
         parentContainer.appendChild(this.mapContainer);
         parentContainer.appendChild(this.viewerContainer);
+        parentContainer.appendChild(this.loadingCover);
         parentContainer.appendChild(this.closeBtn);
         parentContainer.appendChild(this.satBtn);
 
         this.map = new window.maplibregl.Map({
             container: this.mapContainer,
-            preserveDrawingBuffer: true, //<<--- Ensures the map renders in VR mode correctly
+            preserveDrawingBuffer: true,
             style: {
                 version: 8,
                 sources: {
@@ -214,53 +223,35 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
 
                 const feature = e.features[0];
                 let clickedId = null;
-                let lat, lng;
 
                 if (feature.sourceLayer === 'image' || feature.sourceLayer === 'overview') {
                     clickedId = feature.properties.id?.toString();
-                    lng = feature.geometry.coordinates[0];
-                    lat = feature.geometry.coordinates[1];
                 } else if (feature.sourceLayer === 'sequence') {
-                    lng = e.lngLat.lng;
-                    lat = e.lngLat.lat;
-
+                    const lat = e.lngLat.lat;
+                    const lng = e.lngLat.lng;
                     try {
                         const radiusMeters = 20;
                         const latOffset = radiusMeters / 111320;
                         const lngOffset = radiusMeters / (111320 * Math.cos(lat * Math.PI / 180));
                         const bbox = `${lng - lngOffset},${lat - latOffset},${lng + lngOffset},${lat + latOffset}`;
 
-                        const radiusRes = await fetch(`https://graph.mapillary.com/images?fields=id,geometry&bbox=${bbox}&is_pano=true&limit=1&access_token=${this.token}`);
+                        const radiusRes = await fetch(`https://graph.mapillary.com/images?fields=id&bbox=${bbox}&is_pano=true&limit=1&access_token=${this.token}`);
                         if (!radiusRes.ok) return;
 
                         const radiusData = await radiusRes.json();
                         if (radiusData.data && radiusData.data.length > 0) {
                             clickedId = radiusData.data[0].id.toString();
-                            lng = radiusData.data[0].geometry.coordinates[0];
-                            lat = radiusData.data[0].geometry.coordinates[1];
-                        } else {
-                            return;
                         }
                     } catch (err) { return; }
                 }
 
                 if (!clickedId) return;
 
-                try {
-                    const checkRes = await fetch(`https://graph.mapillary.com/${clickedId}?fields=id&access_token=${this.token}`);
-                    if (!checkRes.ok) return;
-                } catch (err) { return; }
-
-                this.activeNodeId = clickedId;
-                this.activeLocation = `${lat},${lng}`;
-                this.lastReportedNodeId = clickedId;
-
-                this.show360Viewer(this.activeNodeId);
+                this.show360Viewer(clickedId);
                 this.trigger('visible_changed', true);
             };
 
             const interactiveLayers = ['mapillary-images', 'mapillary-sequence', 'mapillary-overview'];
-
             interactiveLayers.forEach(layer => {
                 this.map.on('click', layer, handleMapillaryClick);
                 this.map.on('mouseenter', layer, () => this.map.getCanvas().style.cursor = 'pointer');
@@ -270,13 +261,12 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
 
         this.closeBtn.addEventListener('click', () => {
             this.viewerContainer.style.display = 'none';
+            this.loadingCover.style.display = 'none';
             this.closeBtn.style.display = 'none';
-
             if (this.satBtn) this.satBtn.style.display = 'block';
 
             if (this.map) this.map.resize();
 
-            if (this.nodeChangeTimer) clearTimeout(this.nodeChangeTimer);
             this.activeNodeId = null;
             this.activeLocation = "0,0";
             this.lastReportedNodeId = null;
@@ -289,19 +279,33 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
     /**
      * @method show360Viewer
      * @memberof MapillaryViewerProvider
-     * @description Displays the Mapillary 360 viewer for a specific image node and settles event flooding.
+     * @description Displays the Mapillary 360 viewer, utilizing native covers for clean, internal WebGL transitions.
      * @param {string|number} imageId - The Mapillary image ID to render.
      */
     show360Viewer(imageId) {
+        const targetId = imageId?.toString();
+
         this.viewerContainer.style.display = 'block';
         this.closeBtn.style.display = 'block';
         if (this.satBtn) this.satBtn.style.display = 'none';
+
+        this.loadingCover.style.backgroundImage = 'none';
+        this.loadingCover.style.display = 'block';
+        this.loadingCover.style.opacity = '1';
+
+        fetch(`https://graph.mapillary.com/${targetId}?fields=thumb_2048_url&access_token=${this.token}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.thumb_2048_url && this.loadingCover.style.opacity === '1') {
+                    this.loadingCover.style.backgroundImage = `url(${data.thumb_2048_url})`;
+                }
+            }).catch(() => { });
 
         if (!this.mlyViewer) {
             this.mlyViewer = new window.mapillary.Viewer({
                 accessToken: this.token,
                 container: this.viewerContainer,
-                imageId: imageId?.toString(),
+                imageId: targetId,
                 component: { cover: false, direction: true, sequence: true }
             });
 
@@ -310,15 +314,17 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
             this.mlyViewer.on('image', (event) => {
                 const img = event.image;
                 if (!img) return;
-
                 const newId = img.id?.toString();
+                if (this.loadingCover.style.opacity === '1') {
+                    this.loadingCover.style.opacity = '0';
+                    setTimeout(() => { this.loadingCover.style.display = 'none'; }, 300);
+                }
+
                 if (this.lastReportedNodeId === newId) return;
 
                 this.activeNodeId = newId;
-
                 const lat = img.lngLat ? parseFloat(img.lngLat.lat || 0) : 0;
                 const lng = img.lngLat ? parseFloat(img.lngLat.lng || 0) : 0;
-
                 this.activeLocation = `${lat},${lng}`;
                 this.lastReportedNodeId = newId;
 
@@ -343,14 +349,13 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
                     }
                 } catch (err) { }
             });
-
         } else {
-            this.mlyViewer.moveTo(imageId.toString()).catch(() => { });
+            this.mlyViewer.resize();
+            this.mlyViewer.moveTo(targetId).catch(() => {
+                this.loadingCover.style.opacity = '0';
+                setTimeout(() => { this.loadingCover.style.display = 'none'; }, 300);
+            });
         }
-
-        setTimeout(() => {
-            if (this.mlyViewer) this.mlyViewer.resize();
-        }, 50);
     }
 
     /**
@@ -359,7 +364,9 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
      * @description Retrieves the currently active node's ID.
      * @returns {string|null} Current agnostic node ID.
      */
-    getCurrentNodeId() { return this.activeNodeId; }
+    getCurrentNodeId() {
+        return this.activeNodeId;
+    }
 
     /**
      * @method getLocation
@@ -367,7 +374,9 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
      * @description Retrieves the current geographical coordinates.
      * @returns {string} Unified location coordinate string formatted as "lat,lng".
      */
-    getLocation() { return this.activeLocation; }
+    getLocation() {
+        return this.activeLocation;
+    }
 
     /**
      * @method isVisible
@@ -375,7 +384,9 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
      * @description Checks if the 360 viewer is currently mounted and displayed.
      * @returns {boolean} True if the viewer is visible.
      */
-    isVisible() { return this.viewerContainer?.style.display === 'block'; }
+    isVisible() {
+        return this.viewerContainer?.style.display === 'block';
+    }
 
     /**
      * @method getNativeViewer
@@ -383,12 +394,14 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
      * @description Exposes the underlying Mapillary JS Viewer instance.
      * @returns {Object|null} Native Mapillary viewer instance.
      */
-    getNativeViewer() { return this.mlyViewer; }
+    getNativeViewer() {
+        return this.mlyViewer;
+    }
 
     /**
      * @method supportsCameraSync
      * @memberof MapillaryViewerProvider
-     * @description  CAPABILITY FLAG: Mapillary natively supports external camera syncing.
+     * @description CAPABILITY FLAG: Indiciates Mapillary natively supports external camera syncing.
      * @returns {boolean}
      */
     get supportsCameraSync() {
@@ -398,16 +411,16 @@ export class MapillaryViewerProvider extends BaseViewerProvider {
     /**
      * @method syncCamera
      * @memberof MapillaryViewerProvider
-     * @description  Executes the camera sync using Mapillary's proprietary SDK methods.
-     * @param {Object} pov - Standardized { heading, pitch } object
+     * @description Executes the camera sync using Mapillary's proprietary SDK methods.
+     * @param {Object} pov - Standardized object containing the target viewing angles.
+     * @param {number} pov.heading - The horizontal bearing.
+     * @param {number} pov.pitch - The vertical tilt.
      */
     syncCamera(pov) {
         if (!this.mlyViewer) return;
-
         if (typeof this.mlyViewer.setCenter === 'function') {
             this.mlyViewer.setCenter([pov.heading, pov.pitch]);
-        }
-        else if (typeof this.mlyViewer.setBearing === 'function') {
+        } else if (typeof this.mlyViewer.setBearing === 'function') {
             this.mlyViewer.setBearing(pov.heading);
             if (typeof this.mlyViewer.setPitch === 'function') {
                 this.mlyViewer.setPitch(pov.pitch);

@@ -83,7 +83,9 @@ export class WristUI {
                         const mapWindow = document.getElementById('vr-floating-map');
                         if (mapWindow) {
                             const isVisible = mapWindow.getAttribute('visible');
-                            mapWindow.setAttribute('visible', isVisible === false || isVisible === 'false' ? true : false);
+
+                            const targetVisibility = (isVisible === false || isVisible === 'false') ? true : false;
+                            mapWindow.setAttribute('visible', targetVisibility);
 
                             if (targetVisibility) {
                                 mapWindow.classList.add('raycastable');

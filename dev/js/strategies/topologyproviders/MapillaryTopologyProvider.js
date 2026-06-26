@@ -59,14 +59,18 @@ export class MapillaryTopologyProvider extends BaseTopologyProvider {
         this.spatialCache = new Map();
         this.pendingRequests = new Map();
 
-        // Strict Memory Caps
-        this.MAX_NODES = 500;      // Holds nodes in RAM
-        this.MAX_SEQUENCES = 100;   // Holds roughly 100 distinct driving routes
+        this.batchQueue = new Set();
+        this.batchTimeout = null;
+        this.batchPromises = new Map();
+        this.pendingSequences = new Map();
+
+        this.MAX_NODES = 500;
+        this.MAX_SEQUENCES = 100;
         this.MAX_SPATIAL_CACHES = 200;
 
         this.fetchQueue = [];
-        this.isFetchingQueue = false;
-        this.FETCH_DELAY_MS = 50;
+        this.activeFetches = 0;
+        this.MAX_CONCURRENT_FETCHES = 15;
     }
 
     /**
@@ -81,9 +85,9 @@ export class MapillaryTopologyProvider extends BaseTopologyProvider {
      */
     _lruSet(cacheMap, key, value, limit) {
         if (cacheMap.has(key)) {
-            cacheMap.delete(key); // Remove to refresh insertion order
+            cacheMap.delete(key);
         } else if (cacheMap.size >= limit) {
-            cacheMap.delete(cacheMap.keys().next().value); // Evict oldest
+            cacheMap.delete(cacheMap.keys().next().value);
         }
         cacheMap.set(key, value);
     }
@@ -98,8 +102,8 @@ export class MapillaryTopologyProvider extends BaseTopologyProvider {
      */
     _fetchWithThrottle(url) {
         return new Promise((resolve, reject) => {
-            this.fetchQueue.push({ url, resolve, reject, retries: 2 });
-            if (!this.isFetchingQueue) this._processFetchQueue();
+            this.fetchQueue.push({ url, resolve, reject, retries: 3 });
+            this._processFetchQueue();
         });
     }
 
@@ -112,30 +116,57 @@ export class MapillaryTopologyProvider extends BaseTopologyProvider {
      * @private
      */
     async _processFetchQueue() {
-        this.isFetchingQueue = true;
-        while (this.fetchQueue.length > 0) {
-            const task = this.fetchQueue.shift();
-            try {
-                const response = await fetch(task.url);
-
-                if (response.status === 429) {
-                    if (task.retries > 0) {
-                        console.warn(`[MAPILLARY] 429 Rate Limit Hit. Sleeping 2 seconds...`);
-                        await new Promise(r => setTimeout(r, 2000));
-                        task.retries--;
-                        this.fetchQueue.unshift(task); // Put back at the front of the line
-                        continue;
-                    }
-                }
-                task.resolve(response);
-            } catch (e) {
-                task.reject(e);
-            }
-
-            // The magic bullet: Force a strict delay before the loop can grab the next request
-            await new Promise(r => setTimeout(r, this.FETCH_DELAY_MS));
+        if (this.activeFetches >= this.MAX_CONCURRENT_FETCHES || this.fetchQueue.length === 0) {
+            return;
         }
-        this.isFetchingQueue = false;
+        this.activeFetches++;
+        const task = this.fetchQueue.shift();
+        try {
+            const response = await fetch(task.url);
+            if (response.status === 429) {
+                if (task.retries > 0) {
+                    console.warn(`[MAPILLARY] 429 Rate Limit Hit. Backing off...`);
+                    task.retries--;
+                    setTimeout(() => {
+                        this.fetchQueue.unshift(task);
+                        this.activeFetches--;
+                        this._processFetchQueue();
+                    }, 2000);
+                    return;
+                }
+            }
+            task.resolve(response);
+        } catch (e) {
+            task.reject(e);
+        }
+        this.activeFetches--;
+        this._processFetchQueue();
+    }
+
+    /**
+     * @async
+     * @method _executeFetchTask
+     * @memberof MapillaryTopologyProvider
+     * @description Handles the individual fetch lifecycle and rate-limit retries.
+     * @private
+     */
+    async _executeFetchTask(task) {
+        try {
+            const response = await fetch(task.url);
+
+            if (response.status === 429 && task.retries > 0) {
+                console.warn(`[MAPILLARY] 429 Rate Limit Hit. Re-queuing...`);
+                setTimeout(() => {
+                    task.retries--;
+                    this.fetchQueue.unshift(task);
+                    if (!this.isFetchingQueue) this._processFetchQueue();
+                }, 2000);
+                return;
+            }
+            task.resolve(response);
+        } catch (e) {
+            task.reject(e);
+        }
     }
 
     /**
@@ -165,103 +196,179 @@ export class MapillaryTopologyProvider extends BaseTopologyProvider {
 
     /**
      * @async
-     * @method _resolveNode
+     * @method _fetchNodeGeometry
      * @memberof MapillaryTopologyProvider
-     * @description Internal core logic for resolving geometry and sequence links for a Mapillary node.
+     * @description Fetches core node data. Deduplicates concurrent requests for the exact same node geometry.
      * @param {string} nodeId - The target Image ID.
-     * @returns {Promise<Object|null>} Node data with formatted adjacent links.
-     * @private
+     */
+    async _fetchNodeGeometry(nodeId) {
+        if (this.nodeCache.has(nodeId)) return Promise.resolve(this.nodeCache.get(nodeId));
+        if (this.batchPromises.has(nodeId)) return this.batchPromises.get(nodeId).promise;
+
+        let res, rej;
+        const promise = new Promise((resolve, reject) => {
+            res = resolve;
+            rej = reject;
+        });
+
+        this.batchPromises.set(nodeId, { promise, resolve: res, reject: rej });
+        this.batchQueue.add(nodeId);
+
+        if (!this.batchTimeout) {
+            this.batchTimeout = setTimeout(() => this._flushGeometryBatch(), 15);
+        }
+
+        return promise;
+    }
+
+    /**
+     * @async
+     * @method _flushGeometryBatch
+     * @description Flushes the gathered IDs and dispatches chunked batch requests.
+     */
+    async _flushGeometryBatch() {
+        this.batchTimeout = null;
+        const idsToFetch = Array.from(this.batchQueue);
+        this.batchQueue.clear();
+
+        const CHUNK_SIZE = 50;
+        for (let i = 0; i < idsToFetch.length; i += CHUNK_SIZE) {
+            const chunk = idsToFetch.slice(i, i + CHUNK_SIZE);
+            this._executeBatchChunk(chunk);
+        }
+    }
+
+    /**
+     * @async
+     * @method _executeBatchChunk
+     * @description Executes a single batch HTTP request and distributes the results back to the individual promises.
+     */
+    async _executeBatchChunk(chunk) {
+        const idString = chunk.join(',');
+        try {
+            const res = await this._fetchWithThrottle(`https://graph.mapillary.com?ids=${idString}&fields=id,geometry,sequence&access_token=${this.token}`);
+            if (!res.ok) throw new Error('Batch fetch failed');
+
+            const data = await res.json();
+            const results = Array.isArray(data.data) ? data.data : Object.values(data);
+            const processedIds = new Set();
+
+            for (const item of results) {
+                const id = item.id;
+                processedIds.add(id);
+
+                if (item.geometry?.coordinates?.length >= 2) {
+                    const lat = parseFloat(item.geometry.coordinates[1]);
+                    const lng = parseFloat(item.geometry.coordinates[0]);
+                    const cachedData = { id, lat, lng, sequence: item.sequence };
+
+                    this._lruSet(this.nodeCache, id, cachedData, this.MAX_NODES);
+                    if (this.batchPromises.has(id)) {
+                        this.batchPromises.get(id).resolve(cachedData);
+                    }
+                } else {
+                    if (this.batchPromises.has(id)) {
+                        this.batchPromises.get(id).resolve(null);
+                    }
+                }
+            }
+            for (const id of chunk) {
+                if (!processedIds.has(id) && this.batchPromises.has(id)) {
+                    this.batchPromises.get(id).resolve(null);
+                }
+                this.batchPromises.delete(id);
+            }
+
+        } catch (e) {
+            for (const id of chunk) {
+                if (this.batchPromises.has(id)) {
+                    this.batchPromises.get(id).resolve(null);
+                    this.batchPromises.delete(id);
+                }
+            }
+        }
+    }
+
+    /**
+     * @async
+     * @method _fetchSequence
+     * @description Fetches a Mapillary sequence array. Deduplicates concurrent requests to prevent Cache Stampedes during radar spidering.
+     */
+    async _fetchSequence(sequenceId) {
+        if (!sequenceId) return [];
+        if (this.sequenceCache.has(sequenceId)) return this.sequenceCache.get(sequenceId);
+        if (this.pendingSequences.has(sequenceId)) return this.pendingSequences.get(sequenceId);
+        const seqPromise = (async () => {
+            try {
+                const seqRes = await this._fetchWithThrottle(`https://graph.mapillary.com/image_ids?sequence_id=${sequenceId}&access_token=${this.token}`);
+                if (seqRes.ok) {
+                    const seqData = await seqRes.json();
+                    const imageIds = (seqData.data || []).map(img => (img.id || img)?.toString());
+                    this._lruSet(this.sequenceCache, sequenceId, imageIds, this.MAX_SEQUENCES);
+                    return imageIds;
+                }
+                return [];
+            } catch (e) {
+                return [];
+            } finally {
+                this.pendingSequences.delete(sequenceId);
+            }
+        })();
+
+        this.pendingSequences.set(sequenceId, seqPromise);
+        return seqPromise;
+    }
+
+    /**
+     * @async
+     * @method _resolveNode
+     * @description Internal core logic for resolving geometry and sequence links for a Mapillary node.
      */
     async _resolveNode(nodeId) {
         if (this.nodeCache.has(nodeId) && this.nodeCache.get(nodeId).links) {
-            // Refresh LRU status on read
             const cached = this.nodeCache.get(nodeId);
             this._lruSet(this.nodeCache, nodeId, cached, this.MAX_NODES);
             return cached;
         }
 
-        let lat, lng, sequenceId;
+        const primaryData = await this._fetchNodeGeometry(nodeId);
+        if (!primaryData) return null;
 
-        if (this.nodeCache.has(nodeId)) {
-            const cached = this.nodeCache.get(nodeId);
-            lat = cached.lat;
-            lng = cached.lng;
-            sequenceId = cached.sequence;
-        } else {
-            try {
-                const res = await this._fetchWithThrottle(`https://graph.mapillary.com/${nodeId}?fields=id,geometry,sequence&access_token=${this.token}`);
-                if (!res.ok) return null;
-                const data = await res.json();
-                if (!data.geometry || !data.geometry.coordinates || data.geometry.coordinates.length < 2) {
-                    console.warn(`[MAPILLARY TOPOLOGY PROVIDER] Node ${nodeId} missing geometry. Dropped from graph.`);
-                    return null;
-                }
-
-                lng = parseFloat(data.geometry.coordinates[0]);
-                lat = parseFloat(data.geometry.coordinates[1]);
-                sequenceId = data.sequence;
-
-                this._lruSet(this.nodeCache, nodeId, { id: nodeId, lat, lng, sequence: sequenceId }, this.MAX_NODES);
-            } catch (e) {
-                return null;
-            }
-        }
-
+        const { lat, lng, sequence: sequenceId } = primaryData;
         const links = [];
 
         const sequencePromise = (async () => {
-            if (!sequenceId) return;
-            let imageIds = this.sequenceCache.get(sequenceId);
-            if (!imageIds) {
-                try {
-                    const seqRes = await fetch(`https://graph.mapillary.com/image_ids?sequence_id=${sequenceId}&access_token=${this.token}`);
-                    if (seqRes.ok) {
-                        const seqData = await seqRes.json();
-                        imageIds = (seqData.data || []).map(img => (img.id || img)?.toString());
-                        this._lruSet(this.sequenceCache, sequenceId, imageIds, this.MAX_SEQUENCES);
-                    } else {
-                        imageIds = [];
-                    }
-                } catch (e) {
-                    imageIds = [];
-                }
-            } else {
-                this._lruSet(this.sequenceCache, sequenceId, imageIds, this.MAX_SEQUENCES);
-            }
+            const imageIds = await this._fetchSequence(sequenceId);
 
             const currentIndex = imageIds.indexOf(nodeId);
             if (currentIndex !== -1) {
+
+                // --- THE MAGIC TRICK: NEIGHBORHOOD PREFETCHING ---
+                // The radar spiders out ~8 hops. Let's pre-load the next 10 nodes in both directions 
+                // into the DataLoader so the radar BFS hits 100% RAM cache instead of the network!
+                const searchRadius = 10;
+                const startIndex = Math.max(0, currentIndex - searchRadius);
+                const endIndex = Math.min(imageIds.length - 1, currentIndex + searchRadius);
+
+                for (let i = startIndex; i <= endIndex; i++) {
+                    // We DO NOT await these here. We just fire them into the 15ms batch queue.
+                    this._fetchNodeGeometry(imageIds[i]);
+                }
+                // ------------------------------------------------
+
                 const adjacentIds = [];
                 if (currentIndex > 0) adjacentIds.push(imageIds[currentIndex - 1]);
                 if (currentIndex < imageIds.length - 1) adjacentIds.push(imageIds[currentIndex + 1]);
 
                 await Promise.all(adjacentIds.map(async (adjId) => {
-                    let nLat, nLng;
+                    // Because we pre-fetched above, the batcher will group these adjacent nodes 
+                    // WITH the rest of the neighborhood into ONE single HTTP call!
+                    const adjData = await this._fetchNodeGeometry(adjId);
 
-                    if (this.nodeCache.has(adjId)) {
-                        const nCached = this.nodeCache.get(adjId);
-                        nLat = nCached.lat;
-                        nLng = nCached.lng;
-                    } else {
-                        try {
-                            const adjRes = await fetch(`https://graph.mapillary.com/${adjId}?fields=id,geometry,sequence&access_token=${this.token}`);
-                            if (adjRes.ok) {
-                                const adjData = await adjRes.json();
-                                if (adjData.geometry?.coordinates?.length >= 2) {
-                                    nLng = adjData.geometry.coordinates[0];
-                                    nLat = adjData.geometry.coordinates[1];
-                                    this._lruSet(this.nodeCache, adjId, {
-                                        id: adjId, lat: nLat, lng: nLng, sequence: adjData.sequence
-                                    }, this.MAX_NODES);
-                                }
-                            }
-                        } catch (e) { return; }
-                    }
-
-                    if (nLat !== undefined && nLng !== undefined) {
+                    if (adjData && adjData.lat !== undefined && adjData.lng !== undefined) {
                         links.push({
                             id: adjId,
-                            heading: SpatialUtils.getBearing(lat, lng, nLat, nLng)
+                            heading: SpatialUtils.getBearing(lat, lng, adjData.lat, adjData.lng)
                         });
                     }
                 }));
@@ -271,7 +378,7 @@ export class MapillaryTopologyProvider extends BaseTopologyProvider {
         await Promise.all([sequencePromise]);
 
         const finalResult = { id: nodeId, lat, lng, links };
-        this._lruSet(this.nodeCache, nodeId, { ...this.nodeCache.get(nodeId), links: finalResult.links }, this.MAX_NODES);
+        this._lruSet(this.nodeCache, nodeId, { ...primaryData, links: finalResult.links }, this.MAX_NODES);
 
         return finalResult;
     }

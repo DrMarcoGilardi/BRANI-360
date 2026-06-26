@@ -74,7 +74,6 @@ async function bootstrap() {
     }
 
     try {
-        // --- DYNAMIC STRATEGY INJECTION --
         const {
             viewerProvider: vName,
             topologyProvider: tName,
@@ -86,7 +85,6 @@ async function bootstrap() {
 
         ui.statusEl.innerHTML = '<span class="pulse"></span>HW: LOADING CLIENT STRATEGIES...';
 
-        // Dynamically fetch the requested JS modules over the network
         const [ViewerMod, TopologyMod, SelectionMod, SemanticMod, VRLoaderMod] = await Promise.all([
             import(`./strategies/viewproviders/${vName}.js`),
             import(`./strategies/topologyproviders/${tName}.js`),
@@ -95,7 +93,6 @@ async function bootstrap() {
             import(`./strategies/vrproviders/${vrName}.js`)
         ]);
 
-        // Extract the classes blindly
         const ViewerClass = ViewerMod[vName];
         const TopologyClass = TopologyMod[tName];
         const SelectionClass = SelectionMod[nName];
@@ -106,7 +103,6 @@ async function bootstrap() {
             throw new Error("Failed to extract client strategy classes. Ensure export names match .env names.");
         }
 
-        // Instantiate based on the base contracts
         const viewerProvider = new ViewerClass("map-layer", config.key);
         const semanticProvider = new SemanticClass(semanticLayers);
 
@@ -128,7 +124,6 @@ async function bootstrap() {
         const originalClear = player.clearSpatialObjects.bind(player);
         player.clearSpatialObjects = () => {
             originalClear();
-            vrSceneController.clearSpatialSources();
         };
 
         const originalPlay = player.playObjectSound.bind(player);
@@ -142,7 +137,6 @@ async function bootstrap() {
 
         ui.onMuteToggle((id, isObject) => {
             if (isObject) return player.toggleMuteObject(id);
-            // Renamed to target persistent layers agnostically
             const isMuted = player.toggleMutePersistent(id);
             treadmill.refreshMix(navManager.currentNodeId, navManager.currentIsAnchor, navManager.currentNearbyAnchors, radar);
             return isMuted;
@@ -150,7 +144,6 @@ async function bootstrap() {
 
         ui.onRegenToggle((taskData, feedbackData) => {
             networkService.emitRegen(taskData, feedbackData);
-            // Rely on the server's 'persistent' boolean, not the word 'ambient'
             if (!taskData.persistent) player.stopObjectSound(taskData.label || taskData.id);
         });
 

@@ -27,7 +27,6 @@
  */
 
 import { VRManager } from './VRManager.js';
-import { VRRPGAudioManager } from './VRRPGAudioManager.js';
 import { WristUI } from './WristUI.js';
 import { InteractiveUI } from './InteractiveUI.js';
 
@@ -39,18 +38,13 @@ import { InteractiveUI } from './InteractiveUI.js';
  * ```mermaid
  * classDiagram
  * VRSceneController --> VRManager : Updates Visuals
- * VRSceneController --> VRRPGAudioManager : Syncs Audio
  * class VRSceneController{
  * +setEpoch(epoch)
  * +setupListeners()
  * +ensureAudioContext()
  * +sync2DRotation(pov)
- * +syncVRHeadtracking(nativeViewer)
  * +updateSkybox(nodeId)
  * +updateVRNavigation(links, nativeViewer)
- * +addSpatialSource(data, tunnelUrl)
- * +setAmbientWash(url)
- * +clearSpatialSources()
  * +enterVR(nodeId, links, nativeViewer)
  * }
  * ```
@@ -67,7 +61,6 @@ export class VRSceneController {
     constructor(ui, vrLoaderStrategy) {
         this.ui = ui;
         this.vrManager = new VRManager(ui, vrLoaderStrategy);
-        this.vrAudio = new VRRPGAudioManager();
         this.currentEpoch = 0;
         if (typeof WristUI !== 'undefined') WristUI.register();
         if (typeof InteractiveUI !== 'undefined') InteractiveUI.register();
@@ -173,10 +166,6 @@ export class VRSceneController {
         document.addEventListener('app:audio_context_resume', () => {
             this.ensureAudioContext();
         });
-        document.addEventListener('audio:spatial_source_added', (e) => {
-            const { payload, tunnelUrl } = e.detail;
-            this.addSpatialSource(payload, tunnelUrl);
-        });
 
         document.addEventListener('vr:custom_ui_action', (event) => {
             if (event.detail.actionName === 'toggle-ui') {
@@ -225,7 +214,6 @@ export class VRSceneController {
             const sceneEl = document.querySelector('a-scene');
             if (sceneEl && !sceneEl.is('vr-mode')) {
                 cameraEl.setAttribute('look-controls', 'enabled', false);
-                // POV now uses generic { heading, pitch } standardized by ViewerProvider
                 cameraEl.setAttribute('rotation', `${pov.pitch} ${-pov.heading} 0`);
             }
         }
@@ -269,61 +257,6 @@ export class VRSceneController {
         const scene = document.querySelector('a-scene');
         if (scene) {
             this.vrManager.createNavArrows(links);
-        }
-    }
-
-    /**
-     * @method addSpatialSource
-     * @memberof SceneController
-     * @description Pipes a localized sound object to the VR audio manager.
-     * @param {Object} data - Spatial audio configuration data.
-     * @param {string} tunnelUrl - The base URL of the remote backend.
-     */
-    addSpatialSource(data, tunnelUrl) {
-        if (data.navEpoch !== undefined && data.navEpoch < this.currentEpoch) {
-            return;
-        }
-        const scene = document.querySelector('a-scene');
-        if (scene && scene.is('vr-mode')) {
-            this.vrAudio.addSpatialSource(
-                data.label,
-                data.displayName || data.label,
-                `${tunnelUrl}${data.url}`,
-                { h: data.h, p: data.p, dist: data.dist }
-            );
-        }
-    }
-
-    /**
-     * @method setAmbientWash
-     * @memberof SceneController
-     * @description Sets the persistent ambient wash for the VR scene.
-     * @param {string} url - Audio URL.
-     */
-    setAmbientWash(url) {
-        const scene = document.querySelector('a-scene');
-        if (scene && scene.is('vr-mode')) {
-            this.vrAudio.setAmbientWash(url);
-        }
-    }
-
-    /**
-     * @method clearSpatialSources
-     * @memberof SceneController
-     * @description Wipes all existing spatial sources from the VR scene.
-     */
-    clearSpatialSources() {
-        this.vrAudio.clearSpatialSources();
-
-        const scene = document.querySelector('a-scene');
-        if (scene) {
-            const entities = scene.querySelectorAll('a-entity[id^="spatial-"]');
-            entities.forEach(e => {
-                if (e.components && e.components.sound) {
-                    e.components.sound.stopSound();
-                }
-                e.remove();
-            });
         }
     }
 
@@ -437,9 +370,9 @@ export class VRSceneController {
         let ticker = document.getElementById('htmlmesh-ticker');
         if (!ticker) {
             ticker = document.createElement('div');
-            ticker.id = 'htmlmesh-ticker';
-            ticker.style.opacity = '0.01';
             ticker.style.position = 'absolute';
+            ticker.style.left = '-9999px';
+            ticker.style.color = 'transparent';
             ticker.style.pointerEvents = 'none';
             hud.appendChild(ticker);
         }
