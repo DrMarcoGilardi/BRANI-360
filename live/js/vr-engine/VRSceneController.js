@@ -396,6 +396,23 @@ export class VRSceneController {
     enterVR(nodeId, links) {
         this.ensureAudioContext();
         const scene = document.querySelector('a-scene');
+
+        if (scene && scene.is('vr-mode')) {
+            console.warn("[VR] Already in immersive mode. Ignoring request.");
+            return;
+        }
+
+        if (this._isRequestingVR) {
+            console.warn("[VR] Session request already pending. Ignoring duplicate click.");
+            return;
+        }
+
+        this._isRequestingVR = true;
+
+        setTimeout(() => { this._isRequestingVR = false; }, 2000);
+
+        this.ensureAudioContext();
+
         const vrContainer = document.getElementById('vr-engine');
         const mapLayer = document.getElementById('map-layer');
 
