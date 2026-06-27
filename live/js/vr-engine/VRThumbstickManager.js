@@ -2,8 +2,6 @@ export class VRThumbstickManager {
     static register() {
         if (typeof AFRAME === 'undefined' || AFRAME.components['contextual-thumbsticks']) return;
 
-        console.log("🛠️ [VR Thumbstick Manager] Registering component with A-Frame...");
-
         AFRAME.registerComponent('contextual-thumbsticks', {
             init: function () {
                 this.currentFocus = '360';
@@ -24,10 +22,8 @@ export class VRThumbstickManager {
                     const id = evt.target.id;
                     if (id === 'vr-floating-map') {
                         this.currentFocus = 'MAP';
-                        console.log(`👁️ [Focus Changed] Now looking at: MAP`);
                     } else if (id === 'vr-hud-panel') {
                         this.currentFocus = 'HUD';
-                        console.log(`👁️ [Focus Changed] Now looking at: HUD`);
                     }
                 });
 
@@ -55,14 +51,12 @@ export class VRThumbstickManager {
 
                 this.el.addEventListener('thumbstickmoved', (evt) => {
                     const hand = evt.target.id.includes('left') ? 'left' : 'right';
-                    console.log(`🕹️ [Oculus Thumbstick] ${hand} moved: X:${evt.detail.x.toFixed(2)} Y:${evt.detail.y.toFixed(2)}`);
                     this.handAxes[hand] = { x: evt.detail.x, y: evt.detail.y };
                 });
             },
 
             tick: function (time, timeDelta) {
                 if (Math.floor(time) % 5000 < 20 && this.lastHeartbeat !== Math.floor(time / 5000)) {
-                    console.log(`❤️ [Thumbstick Tick Heartbeat] Scene is ticking. Current Focus: ${this.currentFocus}`);
                     this.lastHeartbeat = Math.floor(time / 5000);
                 }
 
@@ -94,6 +88,54 @@ export class VRThumbstickManager {
                 }
             },
 
+            // handleMapControls: function (hand, x, y, timeDelta) {
+            //     const mapEntity = document.getElementById('vr-floating-map');
+            //     if (!mapEntity || !mapEntity.components['interactive-map']) return;
+
+            //     const interactiveMap = mapEntity.components['interactive-map'];
+            //     const mapTarget = interactiveMap.isDomMap ? interactiveMap.referenceElement : interactiveMap.canvas;
+            //     if (!mapTarget) return;
+
+            //     if (hand === 'right' && Math.abs(y) > 0.25) {
+            //         const scrollDelta = y * (timeDelta * 0.5);
+            //         const rect = mapTarget.getBoundingClientRect();
+            //         const targetX = interactiveMap.lastX || (rect.left + rect.width / 2);
+            //         const targetY = interactiveMap.lastY || (rect.top + rect.height / 2);
+            //         interactiveMap.dispatchDOMEvent('wheel', targetX, targetY, { deltaY: scrollDelta });
+            //     }
+            //     else if (hand === 'left') {
+            //         if (performance.now() - this.lastPanTime < 50) return;
+
+            //         let key = null;
+            //         let keyCode = 0;
+            //         if (Math.abs(x) > 0.3 || Math.abs(y) > 0.3) {
+            //             if (Math.abs(x) > Math.abs(y)) {
+            //                 key = x > 0 ? 'ArrowRight' : 'ArrowLeft';
+            //                 keyCode = x > 0 ? 39 : 37;
+            //             } else {
+            //                 key = y > 0 ? 'ArrowDown' : 'ArrowUp';
+            //                 keyCode = y > 0 ? 40 : 38;
+            //             }
+            //         }
+
+            //         if (key) {
+            //             if (!mapTarget.hasAttribute('tabindex')) {
+            //                 mapTarget.setAttribute('tabindex', '0');
+            //             }
+            //             mapTarget.focus();
+            //             mapTarget.dispatchEvent(new KeyboardEvent('keydown', {
+            //                 key: key,
+            //                 code: key,
+            //                 keyCode: keyCode,
+            //                 bubbles: true,
+            //                 cancelable: true
+            //             }));
+
+            //             this.lastPanTime = performance.now();
+            //         }
+            //     }
+            // },
+
             handleMapControls: function (hand, x, y, timeDelta) {
                 const mapEntity = document.getElementById('vr-floating-map');
                 if (!mapEntity || !mapEntity.components['interactive-map']) return;
@@ -102,42 +144,51 @@ export class VRThumbstickManager {
                 const mapTarget = interactiveMap.isDomMap ? interactiveMap.referenceElement : interactiveMap.canvas;
                 if (!mapTarget) return;
 
-                if (hand === 'right' && Math.abs(y) > 0.25) {
-                    const scrollDelta = y * (timeDelta * 0.5);
-                    const rect = mapTarget.getBoundingClientRect();
-                    const targetX = interactiveMap.lastX || (rect.left + rect.width / 2);
-                    const targetY = interactiveMap.lastY || (rect.top + rect.height / 2);
+                const rect = mapTarget.getBoundingClientRect();
+
+                const targetX = interactiveMap.lastX || (rect.left + rect.width / 2);
+                const targetY = interactiveMap.lastY || (rect.top + rect.height / 2);
+
+                if (hand === 'right' && Math.abs(y) > 0.5) {
+                    this.lastZoomTime = this.lastZoomTime || 0;
+                    if (performance.now() - this.lastZoomTime < 150) return;
+
+                    const scrollDelta = y > 0 ? 120 : -120;
                     interactiveMap.dispatchDOMEvent('wheel', targetX, targetY, { deltaY: scrollDelta });
+
+                    this.lastZoomTime = performance.now();
                 }
+
                 else if (hand === 'left') {
-                    if (performance.now() - this.lastPanTime < 50) return;
+                    const isOutsideDeadzone = Math.abs(x) > 0.2 || Math.abs(y) > 0.2;
 
-                    let key = null;
-                    let keyCode = 0;
-                    if (Math.abs(x) > 0.3 || Math.abs(y) > 0.3) {
-                        if (Math.abs(x) > Math.abs(y)) {
-                            key = x > 0 ? 'ArrowRight' : 'ArrowLeft';
-                            keyCode = x > 0 ? 39 : 37;
-                        } else {
-                            key = y > 0 ? 'ArrowDown' : 'ArrowUp';
-                            keyCode = y > 0 ? 40 : 38;
+                    if (isOutsideDeadzone) {
+                        if (!this.isThumbstickPanning) {
+                            this.currentPanX = targetX;
+                            this.currentPanY = targetY;
+
+                            interactiveMap.isDragging = true;
+                            interactiveMap.dragTarget = interactiveMap.getActualTarget(this.currentPanX, this.currentPanY);
+
+                            interactiveMap.dispatchDOMEvent('pointerdown', this.currentPanX, this.currentPanY);
+                            this.isThumbstickPanning = true;
                         }
-                    }
+                        const moveX = x * timeDelta * 0.4;
+                        const moveY = y * timeDelta * 0.4;
 
-                    if (key) {
-                        if (!mapTarget.hasAttribute('tabindex')) {
-                            mapTarget.setAttribute('tabindex', '0');
-                        }
-                        mapTarget.focus();
-                        mapTarget.dispatchEvent(new KeyboardEvent('keydown', {
-                            key: key,
-                            code: key,
-                            keyCode: keyCode,
-                            bubbles: true,
-                            cancelable: true
-                        }));
+                        this.currentPanX += moveX;
+                        this.currentPanY += moveY;
 
-                        this.lastPanTime = performance.now();
+                        interactiveMap.dispatchDOMEvent('pointermove', this.currentPanX, this.currentPanY, {
+                            movementX: moveX,
+                            movementY: moveY
+                        });
+
+                    } else if (this.isThumbstickPanning) {
+                        interactiveMap.dispatchDOMEvent('pointerup', this.currentPanX, this.currentPanY);
+                        interactiveMap.isDragging = false;
+                        interactiveMap.dragTarget = null;
+                        this.isThumbstickPanning = false;
                     }
                 }
             },
@@ -165,7 +216,6 @@ export class VRThumbstickManager {
 
                 if (Math.abs(y) > 0.7 && now - this.navCooldown > 1000) {
                     const intent = y < 0 ? 'next' : 'prev';
-                    console.log(`🚀 [Navigate] Dispatching intent: ${intent}`);
 
                     document.dispatchEvent(new CustomEvent('vr:thumbstick_navigate', {
                         detail: { direction: intent }
@@ -179,7 +229,6 @@ export class VRThumbstickManager {
             const scene = document.querySelector('a-scene');
             if (scene && !scene.hasAttribute('contextual-thumbsticks')) {
                 scene.setAttribute('contextual-thumbsticks', '');
-                console.log("🔌 [VR Thumbstick Manager] Dynamically attached attribute to <a-scene>!");
             }
         };
 
