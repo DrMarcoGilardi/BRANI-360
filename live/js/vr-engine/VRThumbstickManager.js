@@ -11,12 +11,11 @@ export class VRThumbstickManager {
 
                 this.setupFocusTracking();
 
-                // Wait for the scene to load before attaching to the hands
-                if (this.el.sceneEl.hasLoaded) {
-                    this.setupControllers();
-                } else {
-                    this.el.sceneEl.addEventListener('loaded', () => this.setupControllers());
-                }
+                // Catch the dedicated thumbstick event bubbling up from ANY controller
+                this.el.addEventListener('thumbstickmoved', this.onThumbstick.bind(this));
+
+                // Fallback for older headsets that only fire axismove
+                this.el.addEventListener('axismove', this.onAxisMove.bind(this));
             },
 
             setupFocusTracking: function () {
@@ -32,31 +31,31 @@ export class VRThumbstickManager {
                 trackEntity('vr-hud-panel', 'HUD');
             },
 
-            setupControllers: function () {
-                const leftHand = document.querySelector('#leftHand');
-                const rightHand = document.querySelector('#rightHand');
-
-                // Bind DIRECTLY to the controller entities
-                if (leftHand) {
-                    leftHand.addEventListener('axismove', (e) => this.onAxisMove(e, 'left'));
-                }
-                if (rightHand) {
-                    rightHand.addEventListener('axismove', (e) => this.onAxisMove(e, 'right'));
-                }
+            getHand: function (targetEl) {
+                const id = targetEl.id || '';
+                const handComponent = targetEl.components['hand-controls'] || targetEl.components['laser-controls'] || targetEl.components['oculus-touch-controls'];
+                if (id.toLowerCase().includes('left') || (handComponent && handComponent.data === 'left')) return 'left';
+                return 'right';
             },
 
-            onAxisMove: function (e, hand) {
+            onThumbstick: function (e) {
+                console.log(`[Thumbstick] THUMBSTICKMOVED fired on ${e.target.id}`, e.detail);
+                const hand = this.getHand(e.target);
+
+                // e.detail gives us pure x and y coordinates (-1 to 1)
+                this.routeInput(hand, e.detail.x, e.detail.y);
+            },
+
+            onAxisMove: function (e) {
+                // We only use this if thumbstickmoved fails to fire
+                if (e.type === 'axismove' && e.detail.axis.length < 2) return;
+
+                const hand = this.getHand(e.target);
                 const axis = e.detail.axis;
-                if (!axis || axis.length === 0) return;
-
-                // --- DIAGNOSTIC LOG ---
-                // Open your browser console (or remote debugger) to see if this fires!
-                console.log(`[Thumbstick] ${hand} hand moved. Axis data:${axis}`);
-
-                // Meta Quest standard: Thumbstick is 2,3. Older WebVR: 0,1.
                 const x = axis.length >= 4 ? axis[2] : axis[0];
                 const y = axis.length >= 4 ? axis[3] : axis[1];
 
+                console.log(`[Thumbstick] AXISMOVE fallback on ${hand}`, axis);
                 this.routeInput(hand, x, y);
             },
 
@@ -113,7 +112,7 @@ export class VRThumbstickManager {
             handle360Controls: function (x, y) {
                 const now = performance.now();
 
-                // Rotate
+                // Snap Rotation
                 if (Math.abs(x) > 0.7 && now - this.rotateCooldown > 500) {
                     const rig = document.getElementById('camera-rig');
                     if (rig) {
@@ -124,7 +123,7 @@ export class VRThumbstickManager {
                     }
                 }
 
-                // Navigate
+                // Node Navigation
                 if (Math.abs(y) > 0.7 && now - this.navCooldown > 1000) {
                     const intent = y < 0 ? 'next' : 'prev';
                     document.dispatchEvent(new CustomEvent('vr:thumbstick_navigate', {
