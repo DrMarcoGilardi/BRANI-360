@@ -317,7 +317,6 @@ export class InteractiveUI {
                 this.isDomMap = false;
                 this.wasSuccessfullyBound = false;
 
-                // State Machine for Dragging & Raycasting
                 this.isDragging = false;
                 this.currentRaycaster = null;
                 this.lastX = 0;
@@ -328,7 +327,6 @@ export class InteractiveUI {
 
                 this.el.setAttribute('visible', 'false');
 
-                // Bind to Controller Thumbstick for Zooming
                 this.setupZoomControls();
 
                 this.bindCanvas = () => {
@@ -472,6 +470,8 @@ export class InteractiveUI {
                 };
                 if (type === 'wheel') {
                     actualTarget.dispatchEvent(new WheelEvent('wheel', options));
+                } else if (type === 'click') {
+                    actualTarget.dispatchEvent(new MouseEvent('click', options));
                 } else {
                     actualTarget.dispatchEvent(new PointerEvent(type, options));
                     actualTarget.dispatchEvent(new MouseEvent(type.replace('pointer', 'mouse'), options));
@@ -484,13 +484,11 @@ export class InteractiveUI {
                     return;
                 }
 
-                // 1. Handle Continuous Dragging (Panning)
                 if (this.currentRaycaster && this.isDragging) {
                     const intersection = this.currentRaycaster.components.raycaster.getIntersection(this.el);
                     if (intersection && intersection.uv) {
                         const coords = this.getCanvasCoords(intersection.uv);
 
-                        // Reduced threshold to 0.5 for smoother 1:1 dragging response
                         if (coords && (Math.abs(coords.x - this.lastX) > 0.5 || Math.abs(coords.y - this.lastY) > 0.5)) {
                             const movementX = coords.x - this.lastX;
                             const movementY = coords.y - this.lastY;
@@ -498,7 +496,6 @@ export class InteractiveUI {
                             this.lastX = coords.x;
                             this.lastY = coords.y;
 
-                            // Pass movementX and movementY explicitly to the Map SDK
                             this.dispatchDOMEvent('pointermove', coords.x, coords.y, {
                                 movementX: movementX,
                                 movementY: movementY
@@ -507,7 +504,6 @@ export class InteractiveUI {
                     }
                 }
 
-                // 2. Handle Texture Updates (if Canvas mode)
                 if (this.isDomMap) return;
 
                 if (this.canvas) {

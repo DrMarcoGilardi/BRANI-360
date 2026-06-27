@@ -173,10 +173,6 @@ export class VRSceneController {
 
             this.currentLinks = links || [];
             this.currentLinks = links || [];
-            if (this.vrManager.vrLoaderStrategy && typeof VRRPGAudioManager !== 'undefined') {
-                const audioManager = new VRRPGAudioManager();
-                audioManager.clearSpatialSources();
-            }
             this.updateSkybox(nodeId);
             this.updateVRNavigation(links);
         });
@@ -195,7 +191,6 @@ export class VRSceneController {
             const direction = e.detail.direction;
 
             if (!this.currentLinks || this.currentLinks.length === 0) {
-                console.warn("[VR Scene Controller] No links available for navigation.");
                 return;
             }
 
@@ -211,8 +206,6 @@ export class VRSceneController {
 
                 vrHeading = (vrHeading % 360 + 360) % 360;
 
-                console.log(`[VR Scene Controller] 🕹️ Thumbstick Next pressed. VR Heading: ${vrHeading.toFixed(1)}°`);
-
                 const getAngleDiff = (a, b) => {
                     let diff = Math.abs((a - b) % 360);
                     return diff > 180 ? 360 - diff : diff;
@@ -224,9 +217,6 @@ export class VRSceneController {
                 this.currentLinks.forEach(link => {
                     const linkHeading = (link.heading % 360 + 360) % 360;
                     const diff = getAngleDiff(linkHeading, vrHeading);
-
-                    console.log(`  -> Evaluating Link [${link.id}] | Heading: ${linkHeading.toFixed(1)}° | Diff: ${diff.toFixed(1)}°`);
-
                     if (diff < minDiff) {
                         minDiff = diff;
                         closestLink = link;
@@ -234,14 +224,12 @@ export class VRSceneController {
                 });
 
                 if (closestLink) {
-                    console.log(`[VR Scene Controller] ✅ Chose Node: ${closestLink.id} (Closest to center)`);
                     document.dispatchEvent(new CustomEvent('app:navigation_intent', {
                         detail: { nodeId: closestLink.id }
                     }));
                 }
             }
             else if (direction === 'prev') {
-                console.log("[VR Scene Controller] 'Prev' intent captured, waiting for history stack implementation.");
             }
         });
     }
@@ -408,27 +396,58 @@ export class VRSceneController {
                 }
             }
 
-            this._triggerHudSync();
+            // this._triggerHudSync();
 
-            if (this.hudUpdateInterval) clearInterval(this.hudUpdateInterval);
+            // if (this.hudUpdateInterval) clearInterval(this.hudUpdateInterval);
 
-            this.hudUpdateInterval = setInterval(() => {
-                this._triggerHudSync();
-            }, 500);
+            // this.hudUpdateInterval = setInterval(() => {
+            //     this._triggerHudSync();
+            // }, 500);
 
+            // const hudEl = document.getElementById('hud');
+            // if (hudEl) {
+            //     hudEl.style.height = '350px';
+            //     hudEl.style.maxHeight = '350px';
+            // }
+            // const vrHudPanel = document.getElementById('vr-hud-panel');
+            // if (vrHudPanel && !vrHudPanel.hasAttribute('html')) {
+            //     vrHudPanel.setAttribute('html', 'html: #hud');
+            // }
             const hudEl = document.getElementById('hud');
             if (hudEl) {
                 hudEl.style.height = '350px';
                 hudEl.style.maxHeight = '350px';
             }
+
+            let vrHudClone = document.getElementById('vr-hud-clone');
+            if (!vrHudClone) {
+                vrHudClone = document.createElement('div');
+                vrHudClone.id = 'vr-hud-clone';
+                vrHudClone.style.position = 'absolute';
+                vrHudClone.style.top = '-9999px';
+                vrHudClone.style.width = hudEl ? window.getComputedStyle(hudEl).width : '400px';
+                vrHudClone.style.height = '350px';
+                vrHudClone.style.backgroundColor = '#1a1a1a'; // Prevents pixel burn-in
+                vrHudClone.style.color = '#ffffff';
+                vrHudClone.style.overflow = 'hidden';
+                document.body.appendChild(vrHudClone);
+            }
+
             const vrHudPanel = document.getElementById('vr-hud-panel');
             if (vrHudPanel && !vrHudPanel.hasAttribute('html')) {
-                vrHudPanel.setAttribute('html', 'html: #hud');
+                vrHudPanel.setAttribute('html', 'html: #vr-hud-clone');
             }
+
             const vrRadarPanel = document.getElementById('vr-hud-radar');
             if (vrRadarPanel && !vrRadarPanel.hasAttribute('html')) {
                 vrRadarPanel.setAttribute('html', 'html: #radar-container');
             }
+
+            if (this.hudUpdateInterval) clearInterval(this.hudUpdateInterval);
+            this.hudUpdateInterval = setInterval(() => {
+                this._triggerHudSync();
+            }, 500);
+
             scene.enterVR();
         }
     }
@@ -441,13 +460,25 @@ export class VRSceneController {
      */
     _triggerHudSync() {
         const hud = document.getElementById('hud');
-        if (hud) hud.setAttribute('data-vr-tick', Date.now().toString());
+        const clone = document.getElementById('vr-hud-clone');
+
+        if (hud && clone) {
+            if (clone.innerHTML !== hud.innerHTML) {
+                clone.innerHTML = hud.innerHTML;
+            }
+            clone.setAttribute('data-vr-tick', Date.now().toString());
+        }
+
         const radarContainer = document.getElementById('radar-container');
-        if (radarContainer) radarContainer.setAttribute('data-vr-tick', Date.now().toString());
+        if (radarContainer) {
+            radarContainer.setAttribute('data-vr-tick', Date.now().toString());
+        }
+
         const vrHudPanel = document.getElementById('vr-hud-panel');
         if (vrHudPanel && vrHudPanel.components.html && vrHudPanel.components.html.texture) {
             vrHudPanel.components.html.texture.needsUpdate = true;
         }
+
         const vrRadarPanel = document.getElementById('vr-hud-radar');
         if (vrRadarPanel && vrRadarPanel.components.html && vrRadarPanel.components.html.texture) {
             vrRadarPanel.components.html.texture.needsUpdate = true;
