@@ -9,6 +9,9 @@ export class VRThumbstickManager {
                 this.rotateCooldown = 0;
                 this.lastPanTime = 0;
 
+                // Debug timer to prevent console flooding
+                this.debugTimer = 0;
+
                 this.setupFocusTracking();
             },
 
@@ -25,32 +28,51 @@ export class VRThumbstickManager {
                 trackEntity('vr-hud-panel', 'HUD');
             },
 
-            // THE NUCLEAR OPTION: Talk directly to the browser's WebXR Hardware API
+            // Polling loop runs at your headset's framerate (72Hz - 120Hz)
             tick: function (time, timeDelta) {
-                // 1. Only run if we are actually in an immersive WebXR session
-                if (!this.el.sceneEl || !this.el.sceneEl.is('vr-mode')) return;
+                // Find controllers regardless of whether you used hyphens or camelCase in index.html
+                const leftHand = document.querySelector('#left-hand') || document.querySelector('#leftHand');
+                const rightHand = document.querySelector('#right-hand') || document.querySelector('#rightHand');
 
-                // 2. Grab the raw WebXR session from Three.js
-                const session = this.el.sceneEl.renderer.xr.getSession();
-                if (!session || !session.inputSources) return;
+                this.pollHand(leftHand, 'left', time, timeDelta);
+                this.pollHand(rightHand, 'right', time, timeDelta);
+            },
 
-                // 3. Loop through all active controllers (hands)
-                for (const source of session.inputSources) {
-                    if (!source.gamepad || !source.gamepad.axes) continue;
+            pollHand: function (handEl, handName, time, timeDelta) {
+                if (!handEl) return;
 
-                    const hand = source.handedness; // 'left' or 'right'
-                    const axes = source.gamepad.axes;
+                // A-Frame auto-injects 'tracked-controls' under the hood for all VR controllers.
+                // We directly hijack its internal axis array.
+                const tracked = handEl.components['tracked-controls'] || handEl.components['tracked-controls-webxr'];
+                if (!tracked || !tracked.axis || tracked.axis.length === 0) return;
 
-                    // WebXR API Standard:
-                    // Touchpad = axes[0], axes[1]
-                    // Thumbstick = axes[2], axes[3]
-                    const x = axes.length >= 4 ? axes[2] : axes[0];
-                    const y = axes.length >= 4 ? axes[3] : axes[1];
+                const axes = tracked.axis;
 
-                    // Check deadzone (filters out hardware drift and resting thumbs)
-                    if (Math.abs(x) > 0.25 || Math.abs(y) > 0.25) {
-                        this.routeInput(hand, x, y, timeDelta);
+                // --- HARDWARE RADAR ---
+                // Proves we have a pulse. If an axis moves past 10%, log it twice a second.
+                if (time - this.debugTimer > 500) {
+                    for (let i = 0; i < axes.length; i++) {
+                        if (Math.abs(axes[i]) > 0.1) {
+                            console.log(`[A-Frame Hardware] ${handName} axis[${i}] = ${axes[i].toFixed(2)}`);
+                            this.debugTimer = time;
+                        }
                     }
+                }
+
+                // Map standard WebXR axes (Meta Quest)
+                let x = axes.length >= 4 ? axes[2] : axes[0];
+                let y = axes.length >= 4 ? axes[3] : axes[1];
+
+                // Map Emulator / Google Cardboard fallback
+                if (axes.length >= 2 && Math.abs(axes[0]) > 0.25 && Math.abs(x) < 0.1) x = axes[0];
+                if (axes.length >= 2 && Math.abs(axes[1]) > 0.25 && Math.abs(y) < 0.1) y = axes[1];
+
+                if (x === undefined) x = 0;
+                if (y === undefined) y = 0;
+
+                // If thumbstick is pushed past 25% deadzone, process it
+                if (Math.abs(x) > 0.25 || Math.abs(y) > 0.25) {
+                    this.routeInput(handName, x, y, timeDelta);
                 }
             },
 
@@ -74,15 +96,13 @@ export class VRThumbstickManager {
                 if (!mapCanvas) return;
 
                 if (hand === 'right' && Math.abs(y) > 0.25) {
-                    // Because `tick` runs at 60-90 FPS, we multiply by timeDelta 
-                    // to ensure smooth zooming regardless of framerate
+                    // timeDelta ensures zoom speed is identical on a 72Hz Quest and a 120Hz Quest
                     const scrollDelta = y * (timeDelta * 0.1);
                     mapCanvas.dispatchEvent(new WheelEvent('wheel', {
                         deltaY: scrollDelta, bubbles: true, view: window
                     }));
                 }
                 else if (hand === 'left') {
-                    // Throttled panning to mimic keyboard repeat rates
                     if (performance.now() - this.lastPanTime < 50) return;
 
                     let key = null;
@@ -102,17 +122,15 @@ export class VRThumbstickManager {
             handleHudControls: function (y, timeDelta) {
                 const hudContainer = document.querySelector('#hud');
                 if (!hudContainer) return;
-
-                // Smooth frame-independent scrolling
                 hudContainer.scrollBy({ top: y * (timeDelta * 0.05), behavior: 'auto' });
             },
 
             handle360Controls: function (x, y) {
                 const now = performance.now();
 
-                // Snap Rotation
+                // Snap Rotation (Left/Right)
                 if (Math.abs(x) > 0.7 && now - this.rotateCooldown > 500) {
-                    const rig = document.getElementById('camera-rig');
+                    const rig = document.getElementById('camera-rig') || document.getElementById('rig');
                     if (rig) {
                         const rot = rig.getAttribute('rotation');
                         rot.y += (x > 0 ? -45 : 45);
@@ -121,7 +139,7 @@ export class VRThumbstickManager {
                     }
                 }
 
-                // Node Navigation
+                // Node Navigation (Forward/Back)
                 if (Math.abs(y) > 0.7 && now - this.navCooldown > 1000) {
                     const intent = y < 0 ? 'next' : 'prev';
                     document.dispatchEvent(new CustomEvent('vr:thumbstick_navigate', {
