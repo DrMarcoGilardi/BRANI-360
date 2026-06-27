@@ -2,6 +2,8 @@ export class VRThumbstickManager {
     static register() {
         if (typeof AFRAME === 'undefined' || AFRAME.components['contextual-thumbsticks']) return;
 
+        console.log("🛠️ [VR Thumbstick Manager] Registering component with A-Frame...");
+
         AFRAME.registerComponent('contextual-thumbsticks', {
             init: function () {
                 this.currentFocus = '360';
@@ -9,68 +11,69 @@ export class VRThumbstickManager {
                 this.rotateCooldown = 0;
                 this.lastPanTime = 0;
 
-                // Debug timer to prevent console flooding
-                this.debugTimer = 0;
+                this.handAxes = { left: { x: 0, y: 0 }, right: { x: 0, y: 0 } };
 
                 this.setupFocusTracking();
+                this.setupAxisListeners();
             },
 
             setupFocusTracking: function () {
-                const trackEntity = (id, stateName) => {
-                    const el = document.getElementById(id);
-                    if (el) {
-                        el.addEventListener('mouseenter', () => { this.currentFocus = stateName; });
-                        el.addEventListener('mouseleave', () => { this.currentFocus = '360'; });
-                    }
-                };
+                this.el.addEventListener('mouseenter', (evt) => {
+                    if (!evt.target) return;
 
-                trackEntity('vr-floating-map', 'MAP');
-                trackEntity('vr-hud-panel', 'HUD');
+                    const id = evt.target.id;
+                    if (id === 'vr-floating-map') {
+                        this.currentFocus = 'MAP';
+                        console.log(`👁️ [Focus Changed] Now looking at: MAP`);
+                    } else if (id === 'vr-hud-panel') {
+                        this.currentFocus = 'HUD';
+                        console.log(`👁️ [Focus Changed] Now looking at: HUD`);
+                    }
+                });
+
+                this.el.addEventListener('mouseleave', (evt) => {
+                    if (!evt.target) return;
+
+                    const id = evt.target.id;
+                    if (id === 'vr-floating-map' || id === 'vr-hud-panel') {
+                        this.currentFocus = '360';
+                    }
+                });
             },
 
-            // Polling loop runs at your headset's framerate (72Hz - 120Hz)
+            setupAxisListeners: function () {
+                this.el.addEventListener('axismove', (evt) => {
+                    const hand = evt.target.id.includes('left') ? 'left' : 'right';
+                    const axes = evt.detail.axis;
+                    if (!axes || axes.length === 0) return;
+
+                    let x = axes.length >= 4 ? axes[2] : axes[0];
+                    let y = axes.length >= 4 ? axes[3] : axes[1];
+
+                    this.handAxes[hand] = { x: x || 0, y: y || 0 };
+                });
+
+                this.el.addEventListener('thumbstickmoved', (evt) => {
+                    const hand = evt.target.id.includes('left') ? 'left' : 'right';
+                    console.log(`🕹️ [Oculus Thumbstick] ${hand} moved: X:${evt.detail.x.toFixed(2)} Y:${evt.detail.y.toFixed(2)}`);
+                    this.handAxes[hand] = { x: evt.detail.x, y: evt.detail.y };
+                });
+            },
+
             tick: function (time, timeDelta) {
-                // Find controllers regardless of whether you used hyphens or camelCase in index.html
-                const leftHand = document.querySelector('#left-hand') || document.querySelector('#leftHand');
-                const rightHand = document.querySelector('#right-hand') || document.querySelector('#rightHand');
-
-                this.pollHand(leftHand, 'left', time, timeDelta);
-                this.pollHand(rightHand, 'right', time, timeDelta);
-            },
-
-            pollHand: function (handEl, handName, time, timeDelta) {
-                if (!handEl) return;
-
-                // A-Frame auto-injects 'tracked-controls' under the hood for all VR controllers.
-                // We directly hijack its internal axis array.
-                const tracked = handEl.components['tracked-controls'] || handEl.components['tracked-controls-webxr'];
-                if (!tracked || !tracked.axis || tracked.axis.length === 0) return;
-
-                const axes = tracked.axis;
-
-                // --- HARDWARE RADAR ---
-                // Proves we have a pulse. If an axis moves past 10%, log it twice a second.
-                if (time - this.debugTimer > 500) {
-                    for (let i = 0; i < axes.length; i++) {
-                        if (Math.abs(axes[i]) > 0.1) {
-                            console.log(`[A-Frame Hardware] ${handName} axis[${i}] = ${axes[i].toFixed(2)}`);
-                            this.debugTimer = time;
-                        }
-                    }
+                if (Math.floor(time) % 5000 < 20 && this.lastHeartbeat !== Math.floor(time / 5000)) {
+                    console.log(`❤️ [Thumbstick Tick Heartbeat] Scene is ticking. Current Focus: ${this.currentFocus}`);
+                    this.lastHeartbeat = Math.floor(time / 5000);
                 }
 
-                // Map standard WebXR axes (Meta Quest)
-                let x = axes.length >= 4 ? axes[2] : axes[0];
-                let y = axes.length >= 4 ? axes[3] : axes[1];
+                this.processHandInput('left', timeDelta);
+                this.processHandInput('right', timeDelta);
+            },
 
-                // Map Emulator / Google Cardboard fallback
-                if (axes.length >= 2 && Math.abs(axes[0]) > 0.25 && Math.abs(x) < 0.1) x = axes[0];
-                if (axes.length >= 2 && Math.abs(axes[1]) > 0.25 && Math.abs(y) < 0.1) y = axes[1];
+            processHandInput: function (handName, timeDelta) {
+                const x = this.handAxes[handName].x;
+                const y = this.handAxes[handName].y;
 
-                if (x === undefined) x = 0;
-                if (y === undefined) y = 0;
-
-                // If thumbstick is pushed past 25% deadzone, process it
                 if (Math.abs(x) > 0.25 || Math.abs(y) > 0.25) {
                     this.routeInput(handName, x, y, timeDelta);
                 }
@@ -92,28 +95,48 @@ export class VRThumbstickManager {
             },
 
             handleMapControls: function (hand, x, y, timeDelta) {
-                const mapCanvas = document.querySelector('#map-layer');
-                if (!mapCanvas) return;
+                const mapEntity = document.getElementById('vr-floating-map');
+                if (!mapEntity || !mapEntity.components['interactive-map']) return;
+
+                const interactiveMap = mapEntity.components['interactive-map'];
+                const mapTarget = interactiveMap.isDomMap ? interactiveMap.referenceElement : interactiveMap.canvas;
+                if (!mapTarget) return;
 
                 if (hand === 'right' && Math.abs(y) > 0.25) {
-                    // timeDelta ensures zoom speed is identical on a 72Hz Quest and a 120Hz Quest
-                    const scrollDelta = y * (timeDelta * 0.1);
-                    mapCanvas.dispatchEvent(new WheelEvent('wheel', {
-                        deltaY: scrollDelta, bubbles: true, view: window
-                    }));
+                    const scrollDelta = y * (timeDelta * 0.5);
+                    const rect = mapTarget.getBoundingClientRect();
+                    const targetX = interactiveMap.lastX || (rect.left + rect.width / 2);
+                    const targetY = interactiveMap.lastY || (rect.top + rect.height / 2);
+                    interactiveMap.dispatchDOMEvent('wheel', targetX, targetY, { deltaY: scrollDelta });
                 }
                 else if (hand === 'left') {
                     if (performance.now() - this.lastPanTime < 50) return;
 
                     let key = null;
-                    if (Math.abs(x) > Math.abs(y)) {
-                        key = x > 0 ? 'ArrowRight' : 'ArrowLeft';
-                    } else {
-                        key = y > 0 ? 'ArrowDown' : 'ArrowUp';
+                    let keyCode = 0;
+                    if (Math.abs(x) > 0.3 || Math.abs(y) > 0.3) {
+                        if (Math.abs(x) > Math.abs(y)) {
+                            key = x > 0 ? 'ArrowRight' : 'ArrowLeft';
+                            keyCode = x > 0 ? 39 : 37;
+                        } else {
+                            key = y > 0 ? 'ArrowDown' : 'ArrowUp';
+                            keyCode = y > 0 ? 40 : 38;
+                        }
                     }
 
                     if (key) {
-                        mapCanvas.dispatchEvent(new KeyboardEvent('keydown', { key: key, bubbles: true }));
+                        if (!mapTarget.hasAttribute('tabindex')) {
+                            mapTarget.setAttribute('tabindex', '0');
+                        }
+                        mapTarget.focus();
+                        mapTarget.dispatchEvent(new KeyboardEvent('keydown', {
+                            key: key,
+                            code: key,
+                            keyCode: keyCode,
+                            bubbles: true,
+                            cancelable: true
+                        }));
+
                         this.lastPanTime = performance.now();
                     }
                 }
@@ -122,26 +145,28 @@ export class VRThumbstickManager {
             handleHudControls: function (y, timeDelta) {
                 const hudContainer = document.querySelector('#hud');
                 if (!hudContainer) return;
+
                 hudContainer.scrollBy({ top: y * (timeDelta * 0.05), behavior: 'auto' });
             },
 
             handle360Controls: function (x, y) {
                 const now = performance.now();
 
-                // Snap Rotation (Left/Right)
                 if (Math.abs(x) > 0.7 && now - this.rotateCooldown > 500) {
-                    const rig = document.getElementById('camera-rig') || document.getElementById('rig');
+                    const rig = document.getElementById('camera-rig');
                     if (rig) {
-                        const rot = rig.getAttribute('rotation');
-                        rot.y += (x > 0 ? -45 : 45);
-                        rig.setAttribute('rotation', rot);
+                        const rot = rig.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
+                        const newY = rot.y + (x > 0 ? -30 : 30);
+
+                        rig.setAttribute('rotation', { x: rot.x, y: newY, z: rot.z });
                         this.rotateCooldown = now;
                     }
                 }
 
-                // Node Navigation (Forward/Back)
                 if (Math.abs(y) > 0.7 && now - this.navCooldown > 1000) {
                     const intent = y < 0 ? 'next' : 'prev';
+                    console.log(`🚀 [Navigate] Dispatching intent: ${intent}`);
+
                     document.dispatchEvent(new CustomEvent('vr:thumbstick_navigate', {
                         detail: { direction: intent }
                     }));
@@ -149,5 +174,19 @@ export class VRThumbstickManager {
                 }
             }
         });
+
+        const attachToScene = () => {
+            const scene = document.querySelector('a-scene');
+            if (scene && !scene.hasAttribute('contextual-thumbsticks')) {
+                scene.setAttribute('contextual-thumbsticks', '');
+                console.log("🔌 [VR Thumbstick Manager] Dynamically attached attribute to <a-scene>!");
+            }
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => setTimeout(attachToScene, 10));
+        } else {
+            setTimeout(attachToScene, 10);
+        }
     }
 }

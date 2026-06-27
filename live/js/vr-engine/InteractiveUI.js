@@ -382,7 +382,6 @@ export class InteractiveUI {
             attachEventTranslators: function () {
                 if (this.hasListener) return;
 
-                // Capture which raycaster is currently pointing at the map
                 this.el.addEventListener('raycaster-intersected', (evt) => {
                     this.currentRaycaster = evt.detail.el;
                 });
@@ -392,43 +391,40 @@ export class InteractiveUI {
                     if (this.isDragging) {
                         this.isDragging = false;
                         this.dispatchDOMEvent('pointerup', this.lastX, this.lastY);
+                        this.dragTarget = null;
                     }
                 });
 
-                // Trigger Pressed -> Start Drag
                 this.el.addEventListener('mousedown', (evt) => {
                     const coords = this.getCanvasCoords(evt.detail.intersection.uv);
                     if (!coords) return;
                     this.isDragging = true;
                     this.lastX = coords.x;
                     this.lastY = coords.y;
+                    this.dragTarget = this.getActualTarget(coords.x, coords.y); // Lock Target
                     this.dispatchDOMEvent('pointerdown', coords.x, coords.y);
                 });
 
-                // Trigger Released -> End Drag / Fire Click
                 this.el.addEventListener('mouseup', (evt) => {
                     const coords = this.getCanvasCoords(evt.detail.intersection.uv);
                     if (!coords) return;
-                    this.isDragging = false;
                     this.dispatchDOMEvent('pointerup', coords.x, coords.y);
-                    this.dispatchDOMEvent('click', coords.x, coords.y); // Fulfills marker selection
+                    this.dispatchDOMEvent('click', coords.x, coords.y);
+                    this.isDragging = false;
+                    this.dragTarget = null; // Release Target
                 });
 
                 this.hasListener = true;
             },
 
             setupZoomControls: function () {
-                // Listen to thumbstick movement globally. 
-                // If the raycaster is pointing at the map, translate the Y axis to a scroll wheel event.
                 window.addEventListener('axismove', (evt) => {
                     if (!this.currentRaycaster || !this.wasSuccessfullyBound) return;
 
-                    // Standard WebXR thumbstick Y axis
                     const thumbstickY = evt.detail.axis[1] || evt.detail.axis[3];
                     if (Math.abs(thumbstickY) > 0.1) {
-                        // Multiply to control zoom speed sensitivity
                         const scrollDelta = thumbstickY * 50;
-                        this.dispatchDOMEvent('wheel', this.lastX, this.lastY, scrollDelta);
+                        this.dispatchDOMEvent('wheel', this.lastX, this.lastY, { deltaY: scrollDelta });
                     }
                 });
             },
@@ -447,29 +443,37 @@ export class InteractiveUI {
                 };
             },
 
-            dispatchDOMEvent: function (type, x, y, deltaY = 0) {
+            getActualTarget: function (x, y) {
                 const target = this.isDomMap ? this.referenceElement : this.canvas;
-                if (!target) return;
-
-                // Find the exact DOM element under the raycaster to trigger Map markers
+                if (!target) return null;
                 let actualTarget = target;
+                const originalEvents = target.style.pointerEvents;
+                target.style.pointerEvents = 'auto';
                 const stack = document.elementsFromPoint(x, y);
                 for (const el of stack) {
                     if (target.contains(el)) { actualTarget = el; break; }
                 }
+                target.style.pointerEvents = originalEvents;
+                return actualTarget;
+            },
 
+            dispatchDOMEvent: function (type, x, y, extraProps = {}) {
+                const actualTarget = (this.isDragging && this.dragTarget)
+                    ? this.dragTarget
+                    : this.getActualTarget(x, y);
+                if (!actualTarget) return;
                 const options = {
                     view: window, bubbles: true, cancelable: true,
                     clientX: x, clientY: y,
+                    screenX: x, screenY: y,
                     button: 0, buttons: this.isDragging ? 1 : 0,
-                    pointerId: 1, pointerType: 'mouse'
+                    pointerId: 1, pointerType: 'mouse',
+                    ...extraProps
                 };
-
                 if (type === 'wheel') {
-                    actualTarget.dispatchEvent(new WheelEvent('wheel', { ...options, deltaY: deltaY }));
+                    actualTarget.dispatchEvent(new WheelEvent('wheel', options));
                 } else {
                     actualTarget.dispatchEvent(new PointerEvent(type, options));
-                    // Dispatch standard mouse events as a fallback for older SDK components
                     actualTarget.dispatchEvent(new MouseEvent(type.replace('pointer', 'mouse'), options));
                 }
             },
@@ -485,10 +489,20 @@ export class InteractiveUI {
                     const intersection = this.currentRaycaster.components.raycaster.getIntersection(this.el);
                     if (intersection && intersection.uv) {
                         const coords = this.getCanvasCoords(intersection.uv);
-                        if (coords && (Math.abs(coords.x - this.lastX) > 1 || Math.abs(coords.y - this.lastY) > 1)) {
+
+                        // Reduced threshold to 0.5 for smoother 1:1 dragging response
+                        if (coords && (Math.abs(coords.x - this.lastX) > 0.5 || Math.abs(coords.y - this.lastY) > 0.5)) {
+                            const movementX = coords.x - this.lastX;
+                            const movementY = coords.y - this.lastY;
+
                             this.lastX = coords.x;
                             this.lastY = coords.y;
-                            this.dispatchDOMEvent('pointermove', coords.x, coords.y);
+
+                            // Pass movementX and movementY explicitly to the Map SDK
+                            this.dispatchDOMEvent('pointermove', coords.x, coords.y, {
+                                movementX: movementX,
+                                movementY: movementY
+                            });
                         }
                     }
                 }

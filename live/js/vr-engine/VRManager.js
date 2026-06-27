@@ -149,9 +149,15 @@ export class VRManager {
         sceneEl.appendChild(this.navContainer);
 
         links.forEach(link => {
-            const arrow = document.createElement('a-entity');
-            const pos = SpatialUtils.sphericalToCartesian(link.heading, 0, 8);
+            // 1. Create an invisible pivot point exactly at the user's feet
+            const pivot = document.createElement('a-entity');
+            pivot.setAttribute('position', '0 0 0');
 
+            // 2. Rotate the pivot using the exact same logic your VR Camera uses
+            pivot.setAttribute('rotation', `0 ${-link.heading} 0`);
+
+            // 3. Create the chevron
+            const arrow = document.createElement('a-entity');
             arrow.setAttribute('geometry', { primitive: 'plane', width: 1.5, height: 1.5 });
             arrow.setAttribute('material', {
                 src: './js/vr-engine/assets/svg/chevron.svg',
@@ -161,14 +167,20 @@ export class VRManager {
                 opacity: 0.5,
                 side: 'double'
             });
-            arrow.setAttribute('position', `${pos.x} -1.0 ${pos.z}`);
-            arrow.setAttribute('rotation', `-80 ${- link.heading} 0`);
+
+            // 4. Place the arrow straight ahead (-8 on the Z axis) inside the Pivot.
+            // Because the Pivot is rotated, the arrow will automatically swing to the perfect heading!
+            arrow.setAttribute('position', '0 -1.0 -8');
+
+            // 5. Lay the chevron flat on the floor. 
+            // We no longer need to calculate Y rotation here because the Pivot handles it.
+            arrow.setAttribute('rotation', '-80 0 0');
             arrow.classList.add('raycastable');
 
             arrow.addEventListener('mouseenter', () => {
                 arrow.setAttribute('material', 'color', '#ffffffcc');
                 arrow.setAttribute('material', 'opacity', '0.9');
-            })
+            });
 
             arrow.addEventListener('mouseleave', () => {
                 arrow.setAttribute('material', 'color', '#ffffff');
@@ -182,7 +194,9 @@ export class VRManager {
                 }));
             });
 
-            this.navContainer.appendChild(arrow);
+            // Append arrow to pivot, and pivot to container
+            pivot.appendChild(arrow);
+            this.navContainer.appendChild(pivot);
         });
     }
 
