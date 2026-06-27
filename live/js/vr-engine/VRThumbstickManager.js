@@ -10,12 +10,6 @@ export class VRThumbstickManager {
                 this.lastPanTime = 0;
 
                 this.setupFocusTracking();
-
-                // Catch the dedicated thumbstick event bubbling up from ANY controller
-                this.el.addEventListener('thumbstickmoved', this.onThumbstick.bind(this));
-
-                // Fallback for older headsets that only fire axismove
-                this.el.addEventListener('axismove', this.onAxisMove.bind(this));
             },
 
             setupFocusTracking: function () {
@@ -31,43 +25,42 @@ export class VRThumbstickManager {
                 trackEntity('vr-hud-panel', 'HUD');
             },
 
-            getHand: function (targetEl) {
-                const id = targetEl.id || '';
-                const handComponent = targetEl.components['hand-controls'] || targetEl.components['laser-controls'] || targetEl.components['oculus-touch-controls'];
-                if (id.toLowerCase().includes('left') || (handComponent && handComponent.data === 'left')) return 'left';
-                return 'right';
+            // THE NUCLEAR OPTION: Talk directly to the browser's WebXR Hardware API
+            tick: function (time, timeDelta) {
+                // 1. Only run if we are actually in an immersive WebXR session
+                if (!this.el.sceneEl || !this.el.sceneEl.is('vr-mode')) return;
+
+                // 2. Grab the raw WebXR session from Three.js
+                const session = this.el.sceneEl.renderer.xr.getSession();
+                if (!session || !session.inputSources) return;
+
+                // 3. Loop through all active controllers (hands)
+                for (const source of session.inputSources) {
+                    if (!source.gamepad || !source.gamepad.axes) continue;
+
+                    const hand = source.handedness; // 'left' or 'right'
+                    const axes = source.gamepad.axes;
+
+                    // WebXR API Standard:
+                    // Touchpad = axes[0], axes[1]
+                    // Thumbstick = axes[2], axes[3]
+                    const x = axes.length >= 4 ? axes[2] : axes[0];
+                    const y = axes.length >= 4 ? axes[3] : axes[1];
+
+                    // Check deadzone (filters out hardware drift and resting thumbs)
+                    if (Math.abs(x) > 0.25 || Math.abs(y) > 0.25) {
+                        this.routeInput(hand, x, y, timeDelta);
+                    }
+                }
             },
 
-            onThumbstick: function (e) {
-                console.log(`[Thumbstick] THUMBSTICKMOVED fired on ${e.target.id}`, e.detail);
-                const hand = this.getHand(e.target);
-
-                // e.detail gives us pure x and y coordinates (-1 to 1)
-                this.routeInput(hand, e.detail.x, e.detail.y);
-            },
-
-            onAxisMove: function (e) {
-                // We only use this if thumbstickmoved fails to fire
-                if (e.type === 'axismove' && e.detail.axis.length < 2) return;
-
-                const hand = this.getHand(e.target);
-                const axis = e.detail.axis;
-                const x = axis.length >= 4 ? axis[2] : axis[0];
-                const y = axis.length >= 4 ? axis[3] : axis[1];
-
-                console.log(`[Thumbstick] AXISMOVE fallback on ${hand}`, axis);
-                this.routeInput(hand, x, y);
-            },
-
-            routeInput: function (hand, x, y) {
-                if (Math.abs(x) < 0.25 && Math.abs(y) < 0.25) return;
-
+            routeInput: function (hand, x, y, timeDelta) {
                 switch (this.currentFocus) {
                     case 'MAP':
-                        this.handleMapControls(hand, x, y);
+                        this.handleMapControls(hand, x, y, timeDelta);
                         break;
                     case 'HUD':
-                        this.handleHudControls(y);
+                        this.handleHudControls(y, timeDelta);
                         break;
                     case '360':
                     default:
@@ -76,17 +69,20 @@ export class VRThumbstickManager {
                 }
             },
 
-            handleMapControls: function (hand, x, y) {
+            handleMapControls: function (hand, x, y, timeDelta) {
                 const mapCanvas = document.querySelector('#map-layer');
                 if (!mapCanvas) return;
 
                 if (hand === 'right' && Math.abs(y) > 0.25) {
-                    const scrollDelta = y * 50;
+                    // Because `tick` runs at 60-90 FPS, we multiply by timeDelta 
+                    // to ensure smooth zooming regardless of framerate
+                    const scrollDelta = y * (timeDelta * 0.1);
                     mapCanvas.dispatchEvent(new WheelEvent('wheel', {
                         deltaY: scrollDelta, bubbles: true, view: window
                     }));
                 }
                 else if (hand === 'left') {
+                    // Throttled panning to mimic keyboard repeat rates
                     if (performance.now() - this.lastPanTime < 50) return;
 
                     let key = null;
@@ -103,10 +99,12 @@ export class VRThumbstickManager {
                 }
             },
 
-            handleHudControls: function (y) {
+            handleHudControls: function (y, timeDelta) {
                 const hudContainer = document.querySelector('#hud');
-                if (!hudContainer || Math.abs(y) < 0.25) return;
-                hudContainer.scrollBy({ top: y * 20, behavior: 'auto' });
+                if (!hudContainer) return;
+
+                // Smooth frame-independent scrolling
+                hudContainer.scrollBy({ top: y * (timeDelta * 0.05), behavior: 'auto' });
             },
 
             handle360Controls: function (x, y) {
