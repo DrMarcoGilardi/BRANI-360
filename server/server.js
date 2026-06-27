@@ -84,14 +84,18 @@ async function startServer() {
     await aiEngine.init();
 
     const app = express();
-    app.use(cors({ origin: allowedOrigin }));
+    app.use(cors({
+        origin: allowedOrigin,
+        credentials: true
+    }));
     app.use(express.json());
 
     const server = http.createServer(app);
     const io = new Server(server, {
         cors: {
             origin: allowedOrigin,
-            methods: ["GET", "POST"]
+            methods: ["GET", "POST"],
+            credentials: true
         }
     });
 

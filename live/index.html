@@ -40,12 +40,12 @@
                     </a-entity>
                 </a-entity>
 
-                <a-entity id="leftHand" hand-controls="hand: left" hand-tracking-controls="hand: left"
-                    raycaster="objects: .raycastable">
+                <a-entity id="leftHand" laser-controls="hand: left" oculus-touch-controls="hand: left"
+                    raycaster="objects: .raycastable; far: 20">
                     <a-entity wrist-ui></a-entity>
                 </a-entity>
 
-                <a-entity id="rightHand" laser-controls="hand: right" hand-tracking-controls="hand: right"
+                <a-entity id="rightHand" laser-controls="hand: right" oculus-touch-controls="hand: right"
                     raycaster="objects: .raycastable; far: 20">
                 </a-entity>
 
