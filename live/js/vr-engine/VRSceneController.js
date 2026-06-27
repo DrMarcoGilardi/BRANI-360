@@ -394,25 +394,18 @@ export class VRSceneController {
     //     }
     // }
     enterVR(nodeId, links) {
-        const scene = document.querySelector('a-scene');
-
-        if (scene && scene.is('vr-mode')) return;
-        if (this._isRequestingVR) return;
-
-        this._isRequestingVR = true;
-        setTimeout(() => { this._isRequestingVR = false; }, 2000);
-
         this.ensureAudioContext();
+        const scene = document.querySelector('a-scene');
 
         const vrContainer = document.getElementById('vr-engine');
         const mapLayer = document.getElementById('map-layer');
 
         if (scene && vrContainer) {
+
             vrContainer.style.display = 'block';
             vrContainer.style.zIndex = '100';
             vrContainer.style.opacity = '1';
             vrContainer.style.pointerEvents = 'auto';
-
             if (mapLayer) {
                 mapLayer.style.visibility = '';
                 mapLayer.style.zIndex = '1';
@@ -420,77 +413,72 @@ export class VRSceneController {
                 mapLayer.style.opacity = '1';
             }
 
-            setTimeout(() => {
+            if (nodeId) this.vrManager.updateSkybox(nodeId);
 
-                // Now that the canvas is awake, start injecting the HD textures
-                if (nodeId) this.vrManager.updateSkybox(nodeId);
-                if (links) this.updateVRNavigation(links);
+            if (links) this.updateVRNavigation(links);
 
-                let mapWindow = document.getElementById('vr-floating-map');
-                if (!mapWindow) {
-                    mapWindow = document.createElement('a-entity');
-                    mapWindow.setAttribute('id', 'vr-floating-map');
-                    mapWindow.setAttribute('position', '0 1.2 -1.5');
-                    mapWindow.setAttribute('rotation', '-15 0 0');
-                    mapWindow.setAttribute('geometry', 'primitive: plane; width: 1.6; height: 0.9');
-                    mapWindow.setAttribute('material', 'shader: flat; side: double');
-                    mapWindow.setAttribute('visible', false);
-                    mapWindow.setAttribute('interactive-map', 'canvasId: map-layer');
-                    scene.appendChild(mapWindow);
-                }
+            let mapWindow = document.getElementById('vr-floating-map');
+            if (!mapWindow) {
+                mapWindow = document.createElement('a-entity');
+                mapWindow.setAttribute('id', 'vr-floating-map');
 
-                let wristUI = document.getElementById('vr-wrist-menu');
-                if (!wristUI) {
-                    wristUI = document.createElement('a-entity');
-                    wristUI.setAttribute('id', 'vr-wrist-menu');
-                    wristUI.setAttribute('wrist-ui', '');
+                mapWindow.setAttribute('position', '0 1.2 -1.5');
+                mapWindow.setAttribute('rotation', '-15 0 0');
 
-                    let leftHand = document.querySelector('[hand-controls="hand: left"]') || document.querySelector('#leftHand');
+                mapWindow.setAttribute('geometry', 'primitive: plane; width: 1.6; height: 0.9');
+                mapWindow.setAttribute('material', 'shader: flat; side: double');
 
-                    if (leftHand) {
-                        leftHand.appendChild(wristUI);
+                mapWindow.setAttribute('visible', false);
+
+                mapWindow.setAttribute('interactive-map', 'canvasId: map-layer');
+
+                scene.appendChild(mapWindow);
+            }
+
+            let wristUI = document.getElementById('vr-wrist-menu');
+            if (!wristUI) {
+                wristUI = document.createElement('a-entity');
+                wristUI.setAttribute('id', 'vr-wrist-menu');
+                wristUI.setAttribute('wrist-ui', '');
+
+                let leftHand = document.querySelector('[hand-controls="hand: left"]') || document.querySelector('#leftHand');
+
+                if (leftHand) {
+                    leftHand.appendChild(wristUI);
+                } else {
+                    const camera = document.querySelector('[camera]') || document.querySelector('a-camera');
+                    if (camera) {
+                        wristUI.setAttribute('position', '-0.3 -0.3 -1.6');
+                        wristUI.setAttribute('rotation', '0 0 0');
+                        camera.appendChild(wristUI);
                     } else {
-                        const camera = document.querySelector('[camera]') || document.querySelector('a-camera');
-                        if (camera) {
-                            wristUI.setAttribute('position', '-0.3 -0.3 -1.6');
-                            wristUI.setAttribute('rotation', '0 0 0');
-                            camera.appendChild(wristUI);
-                        } else {
-                            scene.appendChild(wristUI);
-                        }
+                        scene.appendChild(wristUI);
                     }
                 }
+            }
 
+            this._triggerHudSync();
+
+            if (this.hudUpdateInterval) clearInterval(this.hudUpdateInterval);
+
+            this.hudUpdateInterval = setInterval(() => {
                 this._triggerHudSync();
+            }, 500);
 
-                if (this.hudUpdateInterval) clearInterval(this.hudUpdateInterval);
-
-                this.hudUpdateInterval = setInterval(() => {
-                    this._triggerHudSync();
-                }, 500);
-
-                const hudEl = document.getElementById('hud');
-                if (hudEl) {
-                    hudEl.style.height = '350px';
-                    hudEl.style.maxHeight = '350px';
-                }
-                const vrHudPanel = document.getElementById('vr-hud-panel');
-                if (vrHudPanel && !vrHudPanel.hasAttribute('html')) {
-                    vrHudPanel.setAttribute('html', 'html: #hud');
-                }
-                const vrRadarPanel = document.getElementById('vr-hud-radar');
-                if (vrRadarPanel && !vrRadarPanel.hasAttribute('html')) {
-                    vrRadarPanel.setAttribute('html', 'html: #radar-container');
-                }
-
-                try {
-                    scene.enterVR();
-                } catch (err) {
-                    console.error("[VR] Failed to enter VR:", err);
-                    this._isRequestingVR = false;
-                }
-
-            }, 50);
+            const hudEl = document.getElementById('hud');
+            if (hudEl) {
+                hudEl.style.height = '350px';
+                hudEl.style.maxHeight = '350px';
+            }
+            const vrHudPanel = document.getElementById('vr-hud-panel');
+            if (vrHudPanel && !vrHudPanel.hasAttribute('html')) {
+                vrHudPanel.setAttribute('html', 'html: #hud');
+            }
+            const vrRadarPanel = document.getElementById('vr-hud-radar');
+            if (vrRadarPanel && !vrRadarPanel.hasAttribute('html')) {
+                vrRadarPanel.setAttribute('html', 'html: #radar-container');
+            }
+            scene.enterVR();
         }
     }
 
