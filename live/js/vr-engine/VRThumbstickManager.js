@@ -51,7 +51,7 @@ export class VRThumbstickManager {
 
                 // --- DIAGNOSTIC LOG ---
                 // Open your browser console (or remote debugger) to see if this fires!
-                console.log(`[Thumbstick] ${hand} hand moved. Axis data:`, axis);
+                console.log(`[Thumbstick] ${hand} hand moved. Axis data:${axis}`);
 
                 // Meta Quest standard: Thumbstick is 2,3. Older WebVR: 0,1.
                 const x = axis.length >= 4 ? axis[2] : axis[0];
