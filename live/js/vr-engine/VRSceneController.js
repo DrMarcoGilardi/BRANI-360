@@ -29,6 +29,7 @@
 import { VRManager } from './VRManager.js';
 import { WristUI } from './WristUI.js';
 import { InteractiveUI } from './InteractiveUI.js';
+import { VRThumbstickManager } from './VRThumbstickManager.js';
 
 /**
  * Manages the A-Frame Lifecycle and WebXR spatial audio syncing.  
@@ -64,6 +65,7 @@ export class VRSceneController {
         this.currentEpoch = 0;
         if (typeof WristUI !== 'undefined') WristUI.register();
         if (typeof InteractiveUI !== 'undefined') InteractiveUI.register();
+        if (typeof VRThumbstickManager !== 'undefined') VRThumbstickManager.register();
         this.setupListeners();
 
         this.loadUserPlugin();
@@ -134,7 +136,11 @@ export class VRSceneController {
                     vrContainer.style.zIndex = '10';
                     setTimeout(() => { vrContainer.style.display = 'none'; }, 1000);
                 }
-                if (mapLayer) mapLayer.style.visibility = 'visible';
+                if (mapLayer) {
+                    mapLayer.style.visibility = 'visible';
+                    mapLayer.style.pointerEvents = 'auto';
+                    mapLayer.style.opacity = '1';
+                }
 
                 if (this.ui && this.ui.showXrButton) this.ui.showXrButton();
 
@@ -170,6 +176,34 @@ export class VRSceneController {
         document.addEventListener('vr:custom_ui_action', (event) => {
             if (event.detail.actionName === 'toggle-ui') {
                 this._toggleVRHud();
+            }
+        });
+
+        document.addEventListener('vr:thumbstick_navigate', (e) => {
+            const direction = e.detail.direction;
+            const currentNodeId = appState.getCurrentNodeId(); // Fetch from your provider
+            const links = appState.getCurrentLinks();          // Fetch topological neighbors
+
+            if (!links || links.length === 0) return;
+
+            if (direction === 'next') {
+                // Option 1: Just pick the first available connection
+                // Option 2: Pick the connection closest to the user's current camera heading
+                const vrHeading = sceneController.getVRHeadtracking().heading;
+
+                // Find the link whose heading matches where the user is currently looking
+                const closestLink = links.reduce((prev, curr) => {
+                    const prevDiff = Math.abs(prev.heading - vrHeading);
+                    const currDiff = Math.abs(curr.heading - vrHeading);
+                    return (currDiff < prevDiff) ? curr : prev;
+                });
+
+                triggerSceneSwitch(closestLink.id);
+            }
+            else if (direction === 'prev') {
+                // Pop the last visited node from your navigation history stack
+                const lastNode = historyStack.pop();
+                if (lastNode) triggerSceneSwitch(lastNode);
             }
         });
     }
@@ -268,6 +302,97 @@ export class VRSceneController {
      * @param {Array<Object>} links - Topological neighbors.
      * @param {Object} nativeViewer - The underlying map SDK object.
      */
+    // enterVR(nodeId, links) {
+    //     this.ensureAudioContext();
+    //     const scene = document.querySelector('a-scene');
+    //     const vrContainer = document.getElementById('vr-engine');
+    //     const mapLayer = document.getElementById('map-layer');
+
+    //     if (scene && vrContainer) {
+
+    //         vrContainer.style.display = 'block';
+    //         vrContainer.style.zIndex = '100';
+    //         vrContainer.style.opacity = '1';
+    //         vrContainer.style.pointerEvents = 'auto';
+    //         if (mapLayer) {
+    //             // mapLayer.style.visibility = 'hidden';
+    //             mapLayer.style.visibility = '';
+    //             mapLayer.style.zIndex = '1'; // Push map to the background
+    //             mapLayer.style.pointerEvents = 'none';
+    //             mapLayer.style.opacity = '0.01';
+    //         }
+
+    //         if (nodeId) this.vrManager.updateSkybox(nodeId);
+
+    //         if (links) this.updateVRNavigation(links);
+
+    //         let mapWindow = document.getElementById('vr-floating-map');
+    //         if (!mapWindow) {
+    //             mapWindow = document.createElement('a-entity');
+    //             mapWindow.setAttribute('id', 'vr-floating-map');
+
+    //             mapWindow.setAttribute('position', '0 1.2 -1.5');
+    //             mapWindow.setAttribute('rotation', '-15 0 0');
+
+    //             mapWindow.setAttribute('geometry', 'primitive: plane; width: 1.6; height: 0.9');
+    //             mapWindow.setAttribute('material', 'shader: flat; side: double');
+    //             // mapWindow.classList.add('raycastable');
+
+    //             mapWindow.setAttribute('visible', false);
+
+    //             mapWindow.setAttribute('interactive-map', 'canvasId: map-layer');
+
+    //             scene.appendChild(mapWindow);
+    //         }
+
+    //         let wristUI = document.getElementById('vr-wrist-menu');
+    //         if (!wristUI) {
+    //             wristUI = document.createElement('a-entity');
+    //             wristUI.setAttribute('id', 'vr-wrist-menu');
+    //             wristUI.setAttribute('wrist-ui', ''); // Apply your custom component
+
+    //             // Attempt to attach it to the Left Hand controller if it exists
+    //             let leftHand = document.querySelector('[hand-controls="hand: left"]') || document.querySelector('#leftHand');
+
+    //             if (leftHand) {
+    //                 leftHand.appendChild(wristUI);
+    //             } else {
+    //                 // Fallback: If no hand controllers are present, attach it to the camera as a HUD
+    //                 const camera = document.querySelector('[camera]') || document.querySelector('a-camera');
+    //                 if (camera) {
+    //                     wristUI.setAttribute('position', '-0.3 -0.3 -1.6');
+    //                     wristUI.setAttribute('rotation', '0 0 0');
+    //                     camera.appendChild(wristUI);
+    //                 } else {
+    //                     scene.appendChild(wristUI); // Last resort
+    //                 }
+    //             }
+    //         }
+
+    //         this._triggerHudSync();
+
+    //         if (this.hudUpdateInterval) clearInterval(this.hudUpdateInterval);
+
+    //         this.hudUpdateInterval = setInterval(() => {
+    //             this._triggerHudSync();
+    //         }, 500);
+
+    //         const hudEl = document.getElementById('hud');
+    //         if (hudEl) {
+    //             hudEl.style.height = '350px';
+    //             hudEl.style.maxHeight = '350px';
+    //         }
+    //         const vrHudPanel = document.getElementById('vr-hud-panel');
+    //         if (vrHudPanel && !vrHudPanel.hasAttribute('html')) {
+    //             vrHudPanel.setAttribute('html', 'html: #hud');
+    //         }
+    //         const vrRadarPanel = document.getElementById('vr-hud-radar');
+    //         if (vrRadarPanel && !vrRadarPanel.hasAttribute('html')) {
+    //             vrRadarPanel.setAttribute('html', 'html: #radar-container');
+    //         }
+    //         scene.enterVR();
+    //     }
+    // }
     enterVR(nodeId, links) {
         this.ensureAudioContext();
         const scene = document.querySelector('a-scene');
@@ -281,8 +406,10 @@ export class VRSceneController {
             vrContainer.style.opacity = '1';
             vrContainer.style.pointerEvents = 'auto';
             if (mapLayer) {
-                mapLayer.style.visibility = 'hidden';
-                mapLayer.style.zIndex = '1'; // Push map to the background
+                mapLayer.style.visibility = '';
+                mapLayer.style.zIndex = '1';
+                mapLayer.style.pointerEvents = 'none';
+                mapLayer.style.opacity = '1';
             }
 
             if (nodeId) this.vrManager.updateSkybox(nodeId);
@@ -299,7 +426,6 @@ export class VRSceneController {
 
                 mapWindow.setAttribute('geometry', 'primitive: plane; width: 1.6; height: 0.9');
                 mapWindow.setAttribute('material', 'shader: flat; side: double');
-                // mapWindow.classList.add('raycastable');
 
                 mapWindow.setAttribute('visible', false);
 
@@ -312,22 +438,20 @@ export class VRSceneController {
             if (!wristUI) {
                 wristUI = document.createElement('a-entity');
                 wristUI.setAttribute('id', 'vr-wrist-menu');
-                wristUI.setAttribute('wrist-ui', ''); // Apply your custom component
+                wristUI.setAttribute('wrist-ui', '');
 
-                // Attempt to attach it to the Left Hand controller if it exists
                 let leftHand = document.querySelector('[hand-controls="hand: left"]') || document.querySelector('#leftHand');
 
                 if (leftHand) {
                     leftHand.appendChild(wristUI);
                 } else {
-                    // Fallback: If no hand controllers are present, attach it to the camera as a HUD
                     const camera = document.querySelector('[camera]') || document.querySelector('a-camera');
                     if (camera) {
                         wristUI.setAttribute('position', '-0.3 -0.3 -1.6');
                         wristUI.setAttribute('rotation', '0 0 0');
                         camera.appendChild(wristUI);
                     } else {
-                        scene.appendChild(wristUI); // Last resort
+                        scene.appendChild(wristUI);
                     }
                 }
             }

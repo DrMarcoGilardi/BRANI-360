@@ -27,31 +27,28 @@
 
     <div id="vr-engine"
         style="display: none; opacity: 0; position: absolute; width: 100%; height: 100%; z-index: 20; pointer-events: none; transition: opacity 1s;">
-        <a-scene xr-mode-ui="enabled: false">
+        <a-scene xr-mode-ui="enabled: false" contextual-thumbsticks>
             <a-entity id="vr-sky"></a-entity>
             <a-entity id="audio-treadmill"></a-entity>
             <a-entity id="ambient-pool"></a-entity>
+            <a-entity id="camera-rig" position="0 0 0">
 
-            <a-entity id="rig" position="0 0 0">
                 <a-entity id="camera" camera position="0 1.6 0" look-controls="pointerLockEnabled: false">
-                    <!-- <a-cursor raycaster="objects: .raycastable" color="#00f0ff"></a-cursor> -->
-
                     <a-entity id="vr-camera-hud" position="-0.3 0 -2" scale="3 3 3" visible="true">
                         <a-entity id="vr-hud-radar" position="0 0.25 0" class="raycastable"></a-entity>
                         <a-entity id="vr-hud-panel" position="0 -0.15 0" class="raycastable"></a-entity>
                     </a-entity>
-
                 </a-entity>
-            </a-entity>
 
-            <a-entity id="left-hand" hand-controls="hand: left" hand-tracking-controls="hand: left"
-                raycaster="objects: .raycastable">
-                <a-entity wrist-ui></a-entity>
-            </a-entity>
+                <a-entity id="leftHand" hand-controls="hand: left" hand-tracking-controls="hand: left"
+                    raycaster="objects: .raycastable">
+                    <a-entity wrist-ui></a-entity>
+                </a-entity>
 
-            <a-entity id="right-hand" laser-controls="hand: right" hand-tracking-controls="hand: right"
-                raycaster="objects: .raycastable; far: 20">
-            </a-entity>
+                <a-entity id="rightHand" laser-controls="hand: right" hand-tracking-controls="hand: right"
+                    raycaster="objects: .raycastable; far: 20">
+                </a-entity>
+
             </a-entity>
         </a-scene>
     </div>

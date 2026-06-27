@@ -2,7 +2,7 @@ var APP_DATA = {
   "scenes": [
     {
       "id": "0-alte-schachtschleuse-waltrop-panorama-fd470a64",
-      "name": "Alte Schachtschleuse Waltrop Panorama (fd470a64)",
+      "name": "Alte Schachtschleuse Waltrop",
       "levels": [
         {
           "tileSize": 256,
@@ -44,7 +44,7 @@ var APP_DATA = {
     },
     {
       "id": "1-alte-nationalgalerie-berlin-mitte-360-grad-panorama-160101-ako-9721706d",
-      "name": "Alte Nationalgalerie, Berlin-Mitte, 360 Grad Panorama, 160101, ako (9721706d)",
+      "name": "Alte Nationalgalerie, Berlin-Mitte, 360 Grad",
       "levels": [
         {
           "tileSize": 256,
@@ -88,7 +88,7 @@ var APP_DATA = {
     },
     {
       "id": "2-aldara-parks-fb9879b8",
-      "name": "Aldara parks (fb9879b8)",
+      "name": "Aldara parks",
       "levels": [
         {
           "tileSize": 256,
@@ -132,7 +132,7 @@ var APP_DATA = {
     },
     {
       "id": "3-adliswil-hauptplatz-panosphere-20200205-6b80eadf",
-      "name": "Adliswil Hauptplatz panosphere 20200205 (6b80eadf)",
+      "name": "Adliswil Hauptplatz",
       "levels": [
         {
           "tileSize": 256,
@@ -180,7 +180,7 @@ var APP_DATA = {
     },
     {
       "id": "4-360-panorama-vor-stiftskirche-stmaria-magdalena-in-flaesheim-cdf21d31",
-      "name": "360° Panorama vor Stiftskirche St.Maria Magdalena in Flaesheim (cdf21d31)",
+      "name": "vor Stiftskirche St.Maria Magdalena in Flaesheim",
       "levels": [
         {
           "tileSize": 256,
@@ -228,7 +228,7 @@ var APP_DATA = {
     },
     {
       "id": "5-35c3-panorama-0a90f77e",
-      "name": "35C3 Panorama (0a90f77e)",
+      "name": "35C3",
       "levels": [
         {
           "tileSize": 256,
@@ -276,7 +276,7 @@ var APP_DATA = {
     },
     {
       "id": "6-20170218-equirectangular-dc-people-and-places-3780-32132214284-a8a6b6b3",
-      "name": "2017.02.18 Equirectangular DC People and Places 3780 (32132214284) (a8a6b6b3)",
+      "name": "DC People and Places",
       "levels": [
         {
           "tileSize": 256,
@@ -320,7 +320,7 @@ var APP_DATA = {
     },
     {
       "id": "7-laon-cathedral-interior-360x180-picardy-france---diliff-3a010205",
-      "name": "Laon Cathedral Interior 360x180, Picardy, France - Diliff (3a010205)",
+      "name": "Laon Cathedral Interior, Picardy, France",
       "levels": [
         {
           "tileSize": 256,
@@ -368,7 +368,7 @@ var APP_DATA = {
     },
     {
       "id": "8-soissons-cathedral-interior-360x180-picardy-france---diliff-4f49edd5",
-      "name": "Soissons Cathedral Interior 360x180, Picardy, France - Diliff (4f49edd5)",
+      "name": "Soissons Cathedral Interior, Picardy, France",
       "levels": [
         {
           "tileSize": 256,
@@ -416,7 +416,7 @@ var APP_DATA = {
     },
     {
       "id": "9-amphiteater-im-mauerpark-berlin-360x180-1705280617-ako-70f04f6e",
-      "name": "Amphiteater im Mauerpark, Berlin, 360x180, 1705280617, ako (70f04f6e)",
+      "name": "Amphiteater im Mauerpark, Berlin",
       "levels": [
         {
           "tileSize": 256,
