@@ -4,4 +4,5 @@ server/.env
 Google/
 .exe
 .env
+.vs
 zrok2.exe
