@@ -37,7 +37,6 @@ import { Utils } from '../../../utilities/Utils.js';
 
 const execAsync = promisify(exec);
 
-// Define __dirname for ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -108,8 +107,6 @@ export class StableAudioGradioProvider extends BaseAudioProvider {
     async init() {
         this.ambientsSettings = await Utils.loadDictionary(this._internalDictPath, this.logger);
         this.logger.log(`[AudioProvider] Strategy ready. Dictionary entries: ${Object.keys(this.ambientsSettings.ambients).length}`);
-
-        // Pre-warm the connection
         await this._getGradio();
     }
 
@@ -122,25 +119,19 @@ export class StableAudioGradioProvider extends BaseAudioProvider {
      * @private
      */
     _calibrateTask(task) {
-
-        // Load Definitions for Audio
         const { type, envType, regenOpts } = task;
 
-        let steps = 75; // Default for objects
+        let steps = 75;
         let noiseLevel = 0.1;
-        // 1. Calculate Steps based on Intent
         if (type === 'ambient' && this.ambientsSettings.ambients) {
             const ambientParams = this.ambientsSettings.ambients[(envType || "generic").toLowerCase()]?.params;
             steps = ambientParams?.steps || 100;
         }
 
-        // 2. Translate Feedback Rating into Noise Floor
         if (regenOpts) {
             if (regenOpts.fromScratch) {
                 noiseLevel = 0.1;
             } else if (regenOpts.rating !== undefined) {
-                // Higher rating = request for more intensive change = higher noise added
-                // Math: Translate 1-10 magnitude to 0.1 - 1.0 Gradio noise (Aligns with Tweak -> Nuke)
                 noiseLevel = Math.max(0.1, regenOpts.rating / 10);
             }
         }
@@ -158,211 +149,223 @@ export class StableAudioGradioProvider extends BaseAudioProvider {
      * @returns {Promise<{buffer: Buffer|null, duration: number|string}>} The generated audio buffer and tracking duration.
      */
     async generate(task, executionContext) {
-        const { signal, socket, progressCallback } = executionContext;
-        const { prompt, type, id: taskId, nodeId, locationContext, regenOpts, navEpoch, envType } = task;
+        const { signal, progressCallback } = executionContext;
+        const { prompt, type, id: taskId, locationContext, regenOpts, envType } = task;
 
-        const { steps, noiseLevel } = this._calibrateTask(task);
+        const { steps } = this._calibrateTask(task);
+        const startTime = Date.now();
 
-        return new Promise(async (resolve) => {
-            let submission = null;
-            const startTime = Date.now();
+        let submission = null;
+        let tempWavPath = null;
+        let timeoutId = null;
 
-            const timeoutId = setTimeout(() => {
+        try {
+            await this._getGradio();
+            if (!this.gradioClient) {
+                return { buffer: null, duration: 0 };
+            }
+
+            const promptParams = await this._assemblePrompt(prompt, type, envType, locationContext);
+
+            const { tempWavPath: wavPath, ...regenParams } = await this._regParams(regenOpts, promptParams.negativePrompt);
+            tempWavPath = wavPath;
+
+            const finalParams = { ...promptParams, ...regenParams };
+
+            this.logger.log(`[PROMPT PARAMS] ${JSON.stringify(finalParams, null, 2)}, tempWavPath: ${tempWavPath}`);
+            this.logger.log(`[AudioProvider] Submitting ${type.toUpperCase()}: ${taskId} (CFG: ${finalParams.CFGScore})`);
+
+            submission = this.gradioClient.submit("/generate", [
+                finalParams.qualityPrompt,
+                finalParams.negativePrompt,
+                0,
+                48,
+                finalParams.CFGScore,
+                steps,
+                0,
+                -1,
+                "dpmpp-3m-sde",
+                finalParams.sigmaMin,
+                finalParams.sigmaMax,
+                finalParams.CFGRescale,
+                !!regenOpts?.useInit,
+                finalParams.uploadPath ? handle_file(finalParams.uploadPath) : null,
+                regenOpts?.noiseLevel || 0.1
+            ]);
+
+            const processAudio = this._genProgress(submission, signal, type, progressCallback);
+
+            const timeoutPromise = new Promise((_, reject) => {
+                timeoutId = setTimeout(() => {
+                    if (submission) submission.cancel().catch(() => { });
+                    reject(new Error("TASK_TIMEOUT"));
+                }, 180000);
+            });
+
+            const wavBuffer = await Promise.race([processAudio, timeoutPromise]);
+
+            return {
+                buffer: wavBuffer || null,
+                duration: wavBuffer ? ((Date.now() - startTime) / 1000).toFixed(2) : 0
+            };
+
+        } catch (e) {
+            if (e.message === "TASK_TIMEOUT") {
                 this.logger.warn(`[AudioProvider] Task ${taskId} timed out. Force-releasing.`);
-                if (submission) submission.cancel().catch(() => { });
-                resolve({ buffer: null, duration: 0 });
-            }, 180000);
+            } else {
+                this.logger.error(`[AudioProvider Fatal] ${e.message}`);
+            }
+            return { buffer: null, duration: 0 };
 
-            try {
-                await this._getGradio();
-                const client = this.gradioClient;
-                if (!client) {
-                    clearTimeout(timeoutId);
-                    return resolve({ buffer: null, duration: 0 });
-                }
+        } finally {
+            if (timeoutId) clearTimeout(timeoutId);
+            if (tempWavPath) fs.unlink(tempWavPath).catch(() => { });
+        }
+    }
 
-                // 1. SMART PROMPTING LOGIC
-                let qualityPrompt = "";
-                let negativePrompt = "";
-                let CFGScore = 7;
-                let CFGRescale = 0;
-                let sigmaMin = 0.03;
-                let sigmaMax = 500;
-                let cleanPrompt = prompt.replace(/[a-zA-Z0-9]{15,}/g, '')
-                    .replace(/_/g, ' ').replace(/\./g, '')
-                    .replace(/[^a-zA-Z0-9\s-,]/g, ' ').replace(/\s+/g, ' ')
-                    .trim().toLowerCase() || "sound effect";
+    async _assemblePrompt(prompt, type, envType, locationContext) {
+        let qualityPrompt = "";
+        let negativePrompt = "";
+        let CFGScore = 7;
+        let CFGRescale = 0;
+        let sigmaMin = 0.03;
+        let sigmaMax = 500;
+        let cleanPrompt = prompt.replace(/[a-zA-Z0-9]{15,}/g, '')
+            .replace(/_/g, ' ').replace(/\./g, '')
+            .replace(/[^a-zA-Z0-9\s-,]/g, ' ').replace(/\s+/g, ' ')
+            .trim().toLowerCase() || "sound effect";
 
-                if (type.startsWith('object')) {
-                    let specificModifiers = "";
-                    if (type === 'object_human') {
-                        CFGScore = 4;
-                        const hasVoices = /walla|chatter|speech|talk|babble|efforts/i.test(cleanPrompt);
-                        if (hasVoices) CFGRescale = 0.5;
-                    } else if (type === 'object_organic') {
-                        CFGScore = 5;
-                        specificModifiers = "natural sound, distinct intermittent textures, professional Foley sound effect";
-                    } else {
-                        CFGScore = 7;
-                        CFGRescale = 0.5;
-                        specificModifiers = "professional Foley sound effect";
-                    }
+        if (type.startsWith('object')) {
+            let specificModifiers = "";
+            if (type === 'object_human') {
+                CFGScore = 4;
+                const hasVoices = /walla|chatter|speech|talk|babble|efforts/i.test(cleanPrompt);
+                if (hasVoices) CFGRescale = 0.5;
+            } else if (type === 'object_organic') {
+                CFGScore = 5;
+                specificModifiers = "natural sound, distinct intermittent textures, professional Foley sound effect";
+            } else {
+                CFGScore = 7;
+                CFGRescale = 0.5;
+                specificModifiers = "professional Foley sound effect";
+            }
 
-                    qualityPrompt = `clear, realistic, authentic field recording, ${cleanPrompt}, ${locationContext}, ${specificModifiers}, seamless loop, cinematic SFX, high quality, 44.1kHz`;
+            qualityPrompt = `clear, realistic, authentic field recording, ${cleanPrompt}, ${locationContext}, ${specificModifiers}, seamless loop, cinematic SFX, high quality, 44.1kHz`;
 
-                    const baseNegative = "music, melody, rhythm, synth, instrument, static, distorted, low quality, silence, mute, empty";
-                    negativePrompt = (type === 'object_organic' || type === 'object_human')
-                        ? `${baseNegative}, engine, motor, machine, mechanical, rain, broadband noise`
-                        : baseNegative;
-                } else {
-                    // Ambient logic using Research Dictionary
-                    const lowerEnv = (envType || "generic").toLowerCase();
-                    const ambientParams = this.ambientsSettings.ambients[lowerEnv] || { params: {}, prompts: {} };
-                    qualityPrompt = `${cleanPrompt}, ${ambientParams.prompts?.positive_modifiers || ""}, ${this.ambientsSettings.base_positive_prompt}`;
-                    negativePrompt = `${this.ambientsSettings.base_negative_prompt}, ${ambientParams.prompts?.negative_modifiers || ""}`;
-                    CFGScore = ambientParams.params?.CFGScore;
-                    CFGRescale = ambientParams.params?.CFGRescale;
-                    sigmaMin = ambientParams.params?.sigmaMin;
-                    sigmaMax = ambientParams.params?.sigmaMax;
-                    this.logger.log(`[Audio Settings] [${envType},${CFGScore},${CFGRescale},${sigmaMin},${sigmaMax}]`)
-                }
+            const baseNegative = "music, melody, rhythm, synth, instrument, static, distorted, low quality, silence, mute, empty";
+            negativePrompt = (type === 'object_organic' || type === 'object_human')
+                ? `${baseNegative}, engine, motor, machine, mechanical, rain, broadband noise`
+                : baseNegative;
+        } else {
+            const lowerEnv = (envType || "generic").toLowerCase();
+            const ambientParams = this.ambientsSettings.ambients[lowerEnv] || { params: {}, prompts: {} };
+            qualityPrompt = `${cleanPrompt}, ${ambientParams.prompts?.positive_modifiers || ""}, ${this.ambientsSettings.base_positive_prompt} `;
+            negativePrompt = `${this.ambientsSettings.base_negative_prompt}, ${ambientParams.prompts?.negative_modifiers || ""} `;
+            CFGScore = ambientParams.params?.CFGScore;
+            CFGRescale = ambientParams.params?.CFGRescale;
+            sigmaMin = ambientParams.params?.sigmaMin;
+            sigmaMax = ambientParams.params?.sigmaMax;
+            this.logger.log(`[Audio Settings][${envType}, ${CFGScore}, ${CFGRescale}, ${sigmaMin}, ${sigmaMax}]`)
+        }
 
-                // Audio-to-Audio (Regen) injection
-                if (regenOpts?.feedback) {
-                    negativePrompt = `${regenOpts.feedback}, ${negativePrompt}`;
-                }
+        return {
+            "qualityPrompt": qualityPrompt,
+            "negativePrompt": negativePrompt,
+            "CFGScore": CFGScore,
+            "CFGRescale": CFGRescale,
+            "sigmaMin": sigmaMin,
+            "sigmaMax": sigmaMax
+        }
+    }
 
-                let uploadPath = regenOpts?.path || null;
-                let tempWavPath = null;
+    async _regParams(regenOpts, negativePrompt) {
+        let tempWavPath = null;
+        if (regenOpts?.feedback) {
+            negativePrompt = `${regenOpts.feedback}, ${negativePrompt} `;
+        }
 
-                if (uploadPath) {
-                    const ext = path.extname(uploadPath).toLowerCase();
-                    const validFormats = ['.wav', '.ogg', '.mp3', '.webm'];
+        let uploadPath = regenOpts?.path || null;
 
-                    // 1. Whitelist Validation
-                    if (!validFormats.includes(ext)) {
-                        this.logger.error(`[AudioProvider] Invalid upload format rejected: ${ext}`);
-                        uploadPath = null;
-                    }
-                    // 2. Intercept and Transcode valid compressed formats
-                    else if (ext !== '.wav') {
-                        tempWavPath = `${uploadPath}_init_${Date.now()}.wav`;
+        if (uploadPath) {
+            const ext = path.extname(uploadPath).toLowerCase();
+            const validFormats = ['.wav', '.ogg', '.mp3', '.webm'];
 
-                        try {
-                            this.logger.log(`[AudioProvider] Transcoding ${ext} to WAV for PyTorch...`);
-                            // Force a strict 44.1kHz stereo WAV
-                            await execAsync(`ffmpeg -i "${uploadPath}" -ar 44100 -ac 2 "${tempWavPath}" -y`);
-                            uploadPath = tempWavPath; // Swap the path to the newly created WAV
-                        } catch (e) {
-                            this.logger.error(`[AudioProvider] FFmpeg init conversion failed: ${e.message}`);
-                            uploadPath = null; // Prevent sending a broken path to Gradio
-                        }
-                    }
-                }
-
-                this.logger.log(`[AudioProvider] Submitting ${type.toUpperCase()}: ${taskId} (CFG: ${CFGScore})`);
-
-                submission = client.submit("/generate", [
-                    qualityPrompt,
-                    negativePrompt,
-                    0,
-                    48,
-                    CFGScore,
-                    steps,
-                    0,
-                    -1,
-                    "dpmpp-3m-sde",
-                    sigmaMin,
-                    sigmaMax,
-                    CFGRescale,
-                    !!regenOpts?.useInit,
-                    uploadPath ? handle_file(uploadPath) : null,
-                    regenOpts?.noiseLevel || 0.1
-                ]);
-
-                let wavBuffer = null;
+            if (!validFormats.includes(ext)) {
+                this.logger.error(`[AudioProvider] Invalid upload format rejected: ${ext} `);
+                uploadPath = null;
+            }
+            else if (ext !== '.wav') {
+                tempWavPath = `${uploadPath}_init_${Date.now()}.wav`;
 
                 try {
-                    for await (const msg of submission) {
-                        // User navigation abort check
-                        if (signal?.aborted && type.startsWith('object')) {
-                            submission.cancel().catch(() => { });
-                            break;
+                    this.logger.log(`[AudioProvider] Transcoding ${ext} to WAV for PyTorch...`);
+                    await execAsync(`ffmpeg -i "${uploadPath}" -ar 44100 -ac 2 "${tempWavPath}" -y`);
+                    uploadPath = tempWavPath;
+                } catch (e) {
+                    this.logger.error(`[AudioProvider] FFmpeg init conversion failed: ${e.message}`);
+                    uploadPath = null;
+                }
+            }
+        }
+
+        return {
+            "negativePrompt": negativePrompt,
+            "uploadPath": uploadPath,
+            "tempWavPath": tempWavPath
+        };
+    }
+
+    async _genProgress(submission, signal, type, progressCallback) {
+        let wavBuffer = null
+        try {
+            for await (const msg of submission) {
+                if (signal?.aborted && type.startsWith('object')) {
+                    submission.cancel().catch(() => { });
+                    break;
+                }
+                if (msg.type === "data") {
+                    const audioPath = msg.data?.[0]?.path || msg.data?.[0];
+                    if (audioPath) wavBuffer = await fs.readFile(audioPath);
+                }
+                let currentProgress = -1;
+                if (msg.type === "status") {
+                    const pData = msg.progress_data?.[0];
+                    if (pData) {
+                        if (typeof pData.progress === 'number') {
+                            currentProgress = pData.progress;
                         }
-
-                        // 1. Capture the Data
-                        if (msg.type === "data") {
-                            const audioPath = msg.data?.[0]?.path || msg.data?.[0];
-                            if (audioPath) wavBuffer = await fs.readFile(audioPath);
-                        }
-
-                        // 2. Progress Extraction
-                        let currentProgress = -1;
-
-                        // Check the status object for tracking arrays
-                        if (msg.type === "status") {
-                            const pData = msg.progress_data?.[0];
-                            if (pData) {
-                                // Sometimes Gradio sends a direct decimal
-                                if (typeof pData.progress === 'number') {
-                                    currentProgress = pData.progress;
-                                }
-                                // Most of the time, Gradio tracks iterations (e.g., Step 10 of 75)
-                                else if (typeof pData.index === 'number' && typeof pData.length === 'number' && pData.length > 0) {
-                                    currentProgress = pData.index / pData.length;
-                                }
-                            }
-                        }
-
-                        // Fallback: Check if the description string contains a fraction (e.g., "45/100")
-                        if (currentProgress < 0 && (msg.desc || msg.stage)) {
-                            const text = msg.desc || msg.stage;
-                            const m = text.match(/(\d+)\/(\d+)/);
-                            if (m && parseInt(m[2]) > 0) {
-                                currentProgress = parseInt(m[1]) / parseInt(m[2]);
-                            }
-                        }
-
-                        if (currentProgress >= 0) {
-                            if (progressCallback) progressCallback(currentProgress);
-                            else if (socket) {
-                                socket.emit('pipeline_progress', {
-                                    id: taskId,
-                                    stage: 'audio processing',
-                                    progress: currentProgress,
-                                    nodeId,
-                                    navEpoch,
-                                    taskData: task
-                                });
-                            }
-                        }
-
-                        // Forces Node.js to resolve the Promise
-                        if (msg.type === "status" && msg.stage === "complete") {
-                            break;
+                        else if (typeof pData.index === 'number' && typeof pData.length === 'number' && pData.length > 0) {
+                            currentProgress = pData.index / pData.length;
                         }
                     }
-                } catch (streamError) {
-                    this.logger.error(`[AudioProvider] Stream Error Shielded: ${streamError.message}`);
                 }
-
-                clearTimeout(timeoutId);
-
-                if (tempWavPath) {
-                    fs.unlink(tempWavPath).catch(() => { });
+                if (currentProgress < 0 && (msg.desc || msg.stage)) {
+                    const text = msg.desc || msg.stage;
+                    const m = text.match(/(\d+)\/(\d+)/);
+                    if (m && parseInt(m[2]) > 0) {
+                        currentProgress = parseInt(m[1]) / parseInt(m[2]);
+                    }
                 }
-
-                if (wavBuffer) {
-                    resolve({ buffer: wavBuffer, duration: ((Date.now() - startTime) / 1000).toFixed(2) });
-                } else {
-                    resolve({ buffer: null, duration: 0 });
+                if (currentProgress >= 0) {
+                    if (progressCallback) progressCallback(currentProgress);
+                    else if (socket) {
+                        socket.emit('pipeline_progress', {
+                            id: taskId,
+                            stage: 'audio processing',
+                            progress: currentProgress,
+                            nodeId,
+                            navEpoch,
+                            taskData: task
+                        });
+                    }
                 }
-            } catch (e) {
-                clearTimeout(timeoutId);
-                if (tempWavPath) fs.unlink(tempWavPath).catch(() => { })
-                this.logger.error(`[AudioProvider Fatal] ${e.message}`);
-                resolve({ buffer: null, duration: 0 });
+                if (msg.type === "status" && msg.stage === "complete") {
+                    break;
+                }
             }
-        });
+        } catch (streamError) {
+            this.logger.error(`[AudioProvider] Stream Error Shielded: ${streamError.message}`);
+        }
+        return wavBuffer;
     }
 }

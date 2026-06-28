@@ -99,7 +99,7 @@ export class PipelineService {
     checkBatchCompletion() {
         if (this.gpuManager.backgroundQueue.length === 0 && !this.gpuManager.isBusy() && this.pipelineStartTime) {
             const totalTime = ((Date.now() - this.pipelineStartTime) / 1000).toFixed(2);
-            this.logger.log(`[Pipeline] Batch ${this.activeBatchNodeId} processed in ${totalTime}s`);
+            this.logger.log(`[Pipeline] Batch ${this.activeBatchNodeId} processed in ${totalTime}s`, "green");
         }
     }
 
@@ -188,7 +188,6 @@ export class PipelineService {
 
         this.aiEngine.getTasksForMovement(nodeId, lat, lng, isAnchor, locationContext, mainLayers)
             .then(async (tasks) => {
-                // Persistence: Cache spidered node results if provided
                 if (dbPayload && !await this.cacheManager.getNode(nodeId)) {
                     dbPayload.objects = tasks.filter(t => t.visualMetadata).map(t => t.visualMetadata);
                     await this.cacheManager.saveNode(nodeId, dbPayload);
@@ -230,7 +229,6 @@ export class PipelineService {
         const fullTask = { ...task, socket, navEpoch, signal };
         const audioKey = task.audioContentId || task.id;
 
-        // Bypass cache check if AI Engine flag requires regeneration
         if (task.isRegen) {
             this._emitStage(socket, fullTask, 'queued (regen)', 0.0);
             this.gpuManager.queueBackgroundTask(fullTask);
@@ -300,6 +298,7 @@ export class PipelineService {
             const safeSignal = task.persistent ? task.signal : null;
             const result = await this.aiEngine.generateAudio(task, safeSignal, task.socket, progressCallback);
             if (result?.buffer) {
+                this.logger.log(`[Pipeline] Audio file generation completed in ${result.duration} seconds`, "green");
                 await this.cacheManager.saveAudio(audioKey, result.buffer);
                 this._emitReadyEvent(task, audioKey);
                 success = true;
