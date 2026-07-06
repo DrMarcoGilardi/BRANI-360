@@ -10,89 +10,90 @@
         "Please contact Marco.Gilardi@uws.ac.uk for commercial licensing details.",
         "-------------------------------------------------------------------------"
     ],
-    "base_positive_prompt": "clean, perfect seamless loop, infinite, continuous, constant volume, no fade, high quality, 44.1kHz, realistic stereo field recording",
+    "base_positive_prompt": "clean, perfect seamless loop, infinite, continuous, constant volume, no fade, high quality, immersive spatial stereo, 44.1kHz, spatial panning, 3D binaural soundscape, realistic stereo field recording",
     "base_negative_prompt": "synthetic, frying, music, melody, fade out, fading, tail, ending, static, hiss, harsh wind, outro, volume drop, decaying, empty, distorted, low quality, mono, low bit rate, radio static",
-    "ambients":[
-    {
-        "id": "nature",
-        "prompts": {
-            "positive_modifiers": "natural, outddors, open",
-            "negative_modifiers": "crickets, drone, mechanical, engine, traffic, cars, city, hum, road, white noise, drums, rhythm, metallic, clicking"
+    "ambients": [
+        {
+            "id": "nature",
+            "prompts": {
+                "positive_modifiers": "natural, outddors, open",
+                "negative_modifiers": "crickets, drone, mechanical, engine, traffic, cars, city, hum, road, white noise, drums, rhythm, metallic, clicking"
+            },
+            "params": {
+                "CFGScore": 6.0,
+                "CFGRescale": 0.3,
+                "sigmaMin": 0.03,
+                "sigmaMax": 250,
+                "requestedSteps": 130
+            }
         },
-        "params": {
-            "CFGScore": 6.0,
-            "CFGRescale": 0.3,
-            "sigmaMin":0.03,
-            "sigmaMax":250,
-            "requestedSteps": 130
+        {
+            "id": "beach_sea",
+            "prompts": {
+                "positive_modifiers": "beach, sea, outddors, open",
+                "negative_modifiers": "crickets, mechanical, engine, traffic, cars, city, hum, road, drums, metallic, clicking"
+            },
+            "params": {
+                "CFGScore": 5.0,
+                "CFGRescale": 0,
+                "sigmaMin": 0.03,
+                "sigmaMax": 500,
+                "requestedSteps": 100
+            }
+        },
+        {
+            "id": "desert",
+            "prompts": {
+                "positive_modifiers": "outddors, open, desert, quiet",
+                "negative_modifiers": "white noise"
+            },
+            "params": {
+                "CFGScore": 6.5,
+                "CFGRescale": 0.5,
+                "sigmaMin": 0.03,
+                "sigmaMax": 500,
+                "requestedSteps": 100
+            }
+        },
+        {
+            "id": "suburban",
+            "prompts": {
+                "positive_modifiers": "quiet, suburban neighborhood",
+                "negative_modifiers": "heavy traffic, dense crowd, industrial, drone, white noise"
+            },
+            "params": {
+                "CFGScore": 5.5,
+                "CFGRescale": 0.3,
+                "sigmaMin": 0.03,
+                "sigmaMax": 500,
+                "requestedSteps": 115
+            }
+        },
+        {
+            "id": "city",
+            "prompts": {
+                "positive_modifiers": "open, urban, city",
+                "negative_modifiers": "silence, white noise"
+            },
+            "params": {
+                "CFGScore": 15,
+                "CFGRescale": 0.5,
+                "sigmaMin": 0.03,
+                "sigmaMax": 20,
+                "requestedSteps": 100
+            }
+        },
+        {
+            "id": "generic",
+            "prompts": {
+                "positive_modifiers": "background environment",
+                "negative_modifiers": ""
+            },
+            "params": {
+                "CFGScore": 6.5,
+                "CFGRescale": 0,
+                "requestedSteps": 100
+            }
         }
-    },
-    {
-        "id": "beach_sea",
-        "prompts": {
-            "positive_modifiers": "beach, sea, outddors, open",
-            "negative_modifiers": "crickets, mechanical, engine, traffic, cars, city, hum, road, drums, metallic, clicking"
-        },
-        "params": {
-            "CFGScore": 5.0,
-            "CFGRescale": 0,
-            "sigmaMin":0.03,
-            "sigmaMax":500,
-            "requestedSteps": 100
-        }
-    },
-    {
-        "id": "desert",
-        "prompts": {
-            "positive_modifiers": "outddors, open, desert, quiet",
-            "negative_modifiers": "white noise"
-        },
-        "params": {
-            "CFGScore": 6.5,
-            "CFGRescale": 0.5,
-            "sigmaMin":0.03,
-            "sigmaMax":500,
-            "requestedSteps": 100
-        }                        
-    }, 
-    {
-        "id": "suburban",
-        "prompts": {
-            "positive_modifiers": "quiet, suburban neighborhood",
-            "negative_modifiers": "heavy traffic, dense crowd, industrial, drone, white noise"
-        },
-        "params": {
-            "CFGScore": 5.5,
-            "CFGRescale": 0.3,
-            "sigmaMin":0.03,
-            "sigmaMax":500,
-            "requestedSteps": 115
-        }
-    },
-    {
-        "id": "city",
-        "prompts": {
-            "positive_modifiers": "open, urban, city",
-            "negative_modifiers": "silence, white noise"
-        },
-        "params": {
-            "CFGScore": 15,
-            "CFGRescale": 0.5,
-            "sigmaMin":0.03,
-            "sigmaMax":20,
-            "requestedSteps": 100
-        } 
-    },
-    {
-        "id": "generic",
-        "prompts": {
-            "positive_modifiers": "background environment",
-            "negative_modifiers": ""
-        },
-        "params": {
-            "CFGScore": 6.5,
-            "CFGRescale": 0,
-            "requestedSteps": 100
-        } 
-    }
-]}
+    ]
+}

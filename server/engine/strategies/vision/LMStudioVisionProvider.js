@@ -28,6 +28,10 @@
 
 import { BaseVisionProvider } from './BaseVisionProvider.js';
 import axios from 'axios';
+import { exec } from 'child_process';
+import util from 'util';
+
+const execAsync = util.promisify(exec);
 
 /**
  * EXAMPLE STRATEGY IMPLEMENTATION  
@@ -57,6 +61,7 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
 
         this.port = config.LM_STUDIO_PORT;
         this.model = config.VLM_MODEL_ID;
+        this.targetDevice = config.LM_LINK_TARGET_DEVICE;
 
         this.promptAmbient = config.VLM_PROMPT_AMBIENT;
         this.promptSpatial = config.VLM_PROMPT_SPATIAL;
@@ -119,6 +124,41 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
      */
     async init() {
         if (this.port && this.model) {
+            if (this.targetDevice) {
+                this.logger.log(`[VisionProvider] Routing LM Link traffic to remote machine: ${this.targetDevice}...`);
+                try {
+                    let deviceListOutput = "";
+                    try {
+                        const { stdout } = await execAsync('lms link list');
+                        deviceListOutput = stdout;
+                    } catch (listError) {
+                        const { stderr } = await execAsync('lms link set-preferred-device DUMMY_DEVICE').catch(e => e);
+                        deviceListOutput = stderr;
+                    }
+
+                    const safeTargetName = this.targetDevice.replace(/^["']+|["']+$/g, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`- ([a-f0-9]+) \\(${safeTargetName}\\)`, 'i');
+                    const match = deviceListOutput.match(regex);
+
+                    if (match && match[1]) {
+                        const deviceId = match[1];
+                        this.logger.log(`[VisionProvider] Found matching ID: ${deviceId}`);
+
+                        const { stdout: setOut, stderr: setErr } = await execAsync(`lms link set-preferred-device ${deviceId}`);
+
+                        if (setErr) {
+                            this.logger.warn(`[VisionProvider] LM Link CLI Warning: ${setErr.trim()}`);
+                        } else {
+                            this.logger.log(`[VisionProvider] LM Link successfully routed. Traffic will go to ${this.targetDevice}.`);
+                        }
+                    } else {
+                        this.logger.warn(`[VisionProvider] Could not find device "${this.targetDevice}" in the LM Link network. Falling back to local execution.`);
+                    }
+
+                } catch (error) {
+                    this.logger.error(`[VisionProvider] Failed to route LM Link traffic. Error: ${error.message}`);
+                }
+            }
             this.logger.log(`[VisionProvider] LM Studio Strategy active.`);
             this.logger.log(`[VisionProvider] Model: ${this.model} at http://localhost:${this.port}`);
         }
@@ -128,7 +168,7 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
      * @async
      * @method analyse
      * @memberof LMStudioVisionProvider
-     * @description Executes multimodal analysis to extract sonic layers from an image buffer.
+     * @description Executes multimodal analysis to extract sound layers from an image buffer.
      * @param {Buffer} buffer - Raw equirectangular image data.
      * @param {string} context - Geocoded location string.
      * @param {Object} options - Strategy configuration parameters containing requested layers and topology info.
@@ -179,7 +219,7 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
      * @returns {Promise<Array>} An array of processed ambient audio intents.
      */
     async _processAmbientLayer(buffer, locationContext, layerName, config) {
-        const dynamicPrompt = `Analyze acoustics at ${locationContext}. STRICTLY return JSON: {"reverb": "outside|inside|wet|dry", "description": "foley-grounded description", "type":"nature|city|suburban"}`;
+        const dynamicPrompt = `Analyze acoustics at ${locationContext}. STRICTLY return JSON: {"reverb": "outside|inside|wet|dry", "description": "foley-grounded description", "type":"nature|beach_sea|desert|city|suburban|desert|generic"}`;
         const vlmResponse = await this._callLMStudio(this.promptAmbient, dynamicPrompt, buffer, locationContext);
 
         if (!vlmResponse || !vlmResponse.reverb) return [];
