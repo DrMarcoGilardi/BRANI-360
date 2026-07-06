@@ -32,6 +32,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+
 import { BaseAudioProvider } from './BaseAudioProvider.js';
 import { Utils } from '../../../utilities/Utils.js';
 
@@ -68,7 +69,9 @@ export class StableAudioGradioProvider extends BaseAudioProvider {
         this.logger = logger || console;
         this.gradioClient = null;
         this.ambientsSettings = {};
-        this._internalDictPath = path.join(__dirname, 'prompts', 'AmbientSettings.json');
+        this._internalAmbDictPath = path.join(__dirname, '../../prompts', 'AmbientSettings.json');
+        this.objectsSettings = {};
+        this._internalObjDictPath = path.join(__dirname, '../../prompts', 'ObjectSettings.json');
 
         if (!this.api) {
             this.logger.error('[AudioProvider] Missing STABLE_AUDIO_API.');
@@ -105,8 +108,12 @@ export class StableAudioGradioProvider extends BaseAudioProvider {
      * @returns {Promise<void>}
      */
     async init() {
-        this.ambientsSettings = await Utils.loadDictionary(this._internalDictPath, this.logger);
-        this.logger.log(`[AudioProvider] Strategy ready. Dictionary entries: ${Object.keys(this.ambientsSettings.ambients).length}`);
+        this.ambientsSettings = await Utils.loadAmbientsDictionary(this._internalAmbDictPath, this.logger);
+        this.logger.log(`[AudioProvider] Strategy ready. Ambients dictionary entries: ${Object.keys(this.ambientsSettings.ambients).length}`);
+
+        this.objectsSettings = await Utils.loadObjectsDictionary(this._internalObjDictPath, this.logger);
+        this.logger.log(`[AudioProvider] Strategy ready. Objects dictionary entries: ${Object.keys(this.objectsSettings.objects).length}`);
+
         await this._getGradio();
     }
 
@@ -151,8 +158,6 @@ export class StableAudioGradioProvider extends BaseAudioProvider {
     async generate(task, executionContext) {
         const { signal, progressCallback } = executionContext;
         const { prompt, type, id: taskId, locationContext, regenOpts, envType } = task;
-
-        const { steps } = this._calibrateTask(task);
         const startTime = Date.now();
 
         let submission = null;
@@ -172,16 +177,13 @@ export class StableAudioGradioProvider extends BaseAudioProvider {
 
             const finalParams = { ...promptParams, ...regenParams };
 
-            this.logger.log(`[PROMPT PARAMS] ${JSON.stringify(finalParams, null, 2)}, tempWavPath: ${tempWavPath}`);
-            this.logger.log(`[AudioProvider] Submitting ${type.toUpperCase()}: ${taskId} (CFG: ${finalParams.CFGScore})`);
-
-            submission = this.gradioClient.submit("/generate", [
-                finalParams.qualityPrompt,
+            console.log(`[AudioProvider] Submitting ${type.toUpperCase()}:`, [
+                finalParams.positivePrompt,
                 finalParams.negativePrompt,
                 0,
                 48,
                 finalParams.CFGScore,
-                steps,
+                finalParams.requestedSteps,
                 0,
                 -1,
                 "dpmpp-3m-sde",
@@ -190,7 +192,25 @@ export class StableAudioGradioProvider extends BaseAudioProvider {
                 finalParams.CFGRescale,
                 !!regenOpts?.useInit,
                 finalParams.uploadPath ? handle_file(finalParams.uploadPath) : null,
-                regenOpts?.noiseLevel || 0.1
+                (regenOpts ? Math.max(0.1, regenOpts.rating / 10) : .1)
+            ]);
+
+            submission = this.gradioClient.submit("/generate", [
+                finalParams.positivePrompt,
+                finalParams.negativePrompt,
+                0,
+                48,
+                finalParams.CFGScore,
+                finalParams.requestedSteps,
+                0,
+                -1,
+                "dpmpp-3m-sde",
+                finalParams.sigmaMin,
+                finalParams.sigmaMax,
+                finalParams.CFGRescale,
+                !!regenOpts?.useInit,
+                finalParams.uploadPath ? handle_file(finalParams.uploadPath) : null,
+                (regenOpts ? Math.max(0.1, regenOpts.rating / 10) : .1)
             ]);
 
             const processAudio = this._genProgress(submission, signal, type, progressCallback);
@@ -224,57 +244,33 @@ export class StableAudioGradioProvider extends BaseAudioProvider {
     }
 
     async _assemblePrompt(prompt, type, envType, locationContext) {
-        let qualityPrompt = "";
+        let positivePrompt = "";
         let negativePrompt = "";
-        let CFGScore = 7;
-        let CFGRescale = 0;
-        let sigmaMin = 0.03;
-        let sigmaMax = 500;
+
         let cleanPrompt = prompt.replace(/[a-zA-Z0-9]{15,}/g, '')
             .replace(/_/g, ' ').replace(/\./g, '')
             .replace(/[^a-zA-Z0-9\s-,]/g, ' ').replace(/\s+/g, ' ')
             .trim().toLowerCase() || "sound effect";
 
+        let stabeAudioParams = {
+        };
+
         if (type.startsWith('object')) {
-            let specificModifiers = "";
-            if (type === 'object_human') {
-                CFGScore = 4;
-                const hasVoices = /walla|chatter|speech|talk|babble|efforts/i.test(cleanPrompt);
-                if (hasVoices) CFGRescale = 0.5;
-            } else if (type === 'object_organic') {
-                CFGScore = 5;
-                specificModifiers = "natural sound, distinct intermittent textures, professional Foley sound effect";
-            } else {
-                CFGScore = 7;
-                CFGRescale = 0.5;
-                specificModifiers = "professional Foley sound effect";
-            }
-
-            qualityPrompt = `clear, realistic, authentic field recording, ${cleanPrompt}, ${locationContext}, ${specificModifiers}, seamless loop, cinematic SFX, high quality, 44.1kHz`;
-
-            const baseNegative = "music, melody, rhythm, synth, instrument, static, distorted, low quality, silence, mute, empty";
-            negativePrompt = (type === 'object_organic' || type === 'object_human')
-                ? `${baseNegative}, engine, motor, machine, mechanical, rain, broadband noise`
-                : baseNegative;
+            const lowerObj = (type || "generic").toLowerCase();
+            stabeAudioParams = this.objectsSettings.objects[lowerObj] || { params: {}, prompts: {} };
+            positivePrompt = `${cleanPrompt}, ${stabeAudioParams.prompts?.positive_modifiers || ""}, ${this.objectsSettings.base_positive_prompt} `;
+            negativePrompt = `${this.objectsSettings.base_negative_prompt}, ${stabeAudioParams.prompts?.negative_modifiers || ""} `;
         } else {
             const lowerEnv = (envType || "generic").toLowerCase();
-            const ambientParams = this.ambientsSettings.ambients[lowerEnv] || { params: {}, prompts: {} };
-            qualityPrompt = `${cleanPrompt}, ${ambientParams.prompts?.positive_modifiers || ""}, ${this.ambientsSettings.base_positive_prompt} `;
-            negativePrompt = `${this.ambientsSettings.base_negative_prompt}, ${ambientParams.prompts?.negative_modifiers || ""} `;
-            CFGScore = ambientParams.params?.CFGScore;
-            CFGRescale = ambientParams.params?.CFGRescale;
-            sigmaMin = ambientParams.params?.sigmaMin;
-            sigmaMax = ambientParams.params?.sigmaMax;
-            this.logger.log(`[Audio Settings][${envType}, ${CFGScore}, ${CFGRescale}, ${sigmaMin}, ${sigmaMax}]`)
+            stabeAudioParams = this.ambientsSettings.ambients[lowerEnv] || { params: {}, prompts: {} };
+            positivePrompt = `${cleanPrompt}, ${stabeAudioParams.prompts?.positive_modifiers || ""}, ${this.ambientsSettings.base_positive_prompt} `;
+            negativePrompt = `${this.ambientsSettings.base_negative_prompt}, ${stabeAudioParams.prompts?.negative_modifiers || ""} `;
         }
 
         return {
-            "qualityPrompt": qualityPrompt,
+            "positivePrompt": positivePrompt,
             "negativePrompt": negativePrompt,
-            "CFGScore": CFGScore,
-            "CFGRescale": CFGRescale,
-            "sigmaMin": sigmaMin,
-            "sigmaMax": sigmaMax
+            ...stabeAudioParams?.params
         }
     }
 

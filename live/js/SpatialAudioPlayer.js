@@ -126,7 +126,6 @@ export class SpatialAudioPlayer {
         return null;
     }
 
-    // --- PERSISTENT AUDIO (FOREGROUND & BACKGROUND) ---
     /**
      * @method registerPersistentAnchor
      * @memberof SpatialAudioPlayer
@@ -146,9 +145,7 @@ export class SpatialAudioPlayer {
         if (!targetMap) return;
 
         if (targetMap.has(nodeId)) {
-            const current = targetMap.get(nodeId);
-            if (current.entity) this._cleanupEntity(current);
-            targetMap.delete(nodeId);
+            return;
         }
 
         const safeBuffer = this.getSafeArrayBuffer(bufferData);
@@ -182,6 +179,7 @@ export class SpatialAudioPlayer {
      * @param {Array<Object>} mixRatios - Array of objects dictating {id, weight}.
      */
     updatePersistentVolumes(mixRatios) {
+        console.log(JSON.stringify(mixRatios));
         const manifest = this.semanticProvider?.getLayerManifest() || {};
 
         for (const [layerId, layerMap] of this.audioSources.entries()) {
@@ -229,8 +227,6 @@ export class SpatialAudioPlayer {
             this.mutedPersistent.add(nodeId);
             isNowMuted = true;
         }
-
-        // Apply mute/unmute transition across all dynamic maps
         for (const layerMap of this.audioSources.values()) {
             if (layerMap.has(nodeId)) {
                 const anchorData = layerMap.get(nodeId);
@@ -245,7 +241,6 @@ export class SpatialAudioPlayer {
         return isNowMuted;
     }
 
-    // --- TRANSIENT / SPATIAL AUDIO ---
     /**
      * @method playObjectSound
      * @memberof SpatialAudioPlayer
@@ -296,7 +291,7 @@ export class SpatialAudioPlayer {
             loop: true,
             volume: initialGain,
             distanceModel: 'inverse',
-            refDistance: .5,
+            refDistance: 1,
             maxDistance: 100,
             rolloffFactor: 1,
             positional: true
@@ -334,7 +329,6 @@ export class SpatialAudioPlayer {
     _cleanupEntity(data) {
         const el = data?.entity;
         if (el) {
-            // Stop any running crossfades before destroying the object
             if (el._fadeInterval) {
                 clearInterval(el._fadeInterval);
                 el._fadeInterval = null;
@@ -375,14 +369,23 @@ export class SpatialAudioPlayer {
         if (scene) {
             const allEntities = scene.querySelectorAll('a-entity[sound]');
             allEntities.forEach(el => {
-                if (el.id.startsWith('object-') || (this.manifest && Object.keys(this.manifest).some(layer => el.id.startsWith(`${layer}-`)))) {
+                if (el.id.startsWith('object-')) {
                     this._cleanupEntity({ entity: el });
+                    return;
+                }
+
+                if (this.manifest) {
+                    const matchedLayer = Object.keys(this.manifest).find(layer => el.id.startsWith(`${layer}-`));
+
+                    if (matchedLayer) {
+                        const behavior = this.manifest[matchedLayer].behavior;
+                        if (behavior !== 'neighbor') {
+                            this._cleanupEntity({ entity: el });
+                        }
+                    }
                 }
             });
         }
-
-        this.mutedSpatial.clear();
-        this.mutedPersistent.clear();
     }
 
     /**
@@ -473,7 +476,6 @@ export class SpatialAudioPlayer {
         console.log("[Audio] Fully purged all audio layers on exit.");
     }
 
-    // --- LIFECYCLE ---
     /**
      * @method startGarbageCollector
      * @memberof SpatialAudioPlayer

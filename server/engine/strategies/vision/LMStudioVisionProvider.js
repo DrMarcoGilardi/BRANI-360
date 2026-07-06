@@ -26,12 +26,20 @@
  * -------------------------------------------------------------------------
  */
 
-import { BaseVisionProvider } from './BaseVisionProvider.js';
 import axios from 'axios';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url'
 import { exec } from 'child_process';
-import util from 'util';
+import { promisify } from 'util';
 
-const execAsync = util.promisify(exec);
+import { BaseVisionProvider } from './BaseVisionProvider.js';
+import { Utils } from '../../../utilities/Utils.js';
+
+const execAsync = promisify(exec);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * EXAMPLE STRATEGY IMPLEMENTATION  
@@ -69,6 +77,10 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
         if (!this.port || !this.model) {
             this.logger.error('[VisionProvider] Missing LM Studio configuration.');
         }
+        this._internalAmbientsDictPath = path.join(__dirname, '../../prompts', 'AmbientSettings.json');
+        this._internalObjectsDictPath = path.join(__dirname, '../../prompts', 'ObjectSettings.json');
+        this.biomeIds = '';
+        this.objectsIds = '';
     }
 
     /**
@@ -94,10 +106,11 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
 
         'spatial': async (buffer, locationContext, layerName) => {
 
+
             const foleyGlossary = "{'Crowds': ['walla', 'babble', 'chatter', 'efforts'], 'Weather': ['gust', 'howl', 'leaf rustle', 'drizzle'], 'Environments': ['atmos', 'drone', 'wash'], 'Vehicular': ['pass-by', 'doppler', 'idle', 'rumble'], 'Texture': ['cloth rustle', 'scuff', 'crunch', 'clatter', 'thud'], 'Quality Modifier': ['dry', 'slapback', 'proximity', 'transient']}";
             const dynamicPrompt = `Analyze visual sound sources at ${locationContext}. STRICTLY return JSON: {"spatial_objects": [{"label": "string", "category": "human|mechanical|organic", "h": 0, "p": 0, "dist": 0}]}, Format the "label" STRICTLY as '[Object], [Foley Term], [Quality Modifier]'.`;
 
-            const vlmResponse = await this._callLMStudio(this.promptSpatial, dynamicPrompt, buffer, locationContext, foleyGlossary);
+            const vlmResponse = await this._callLMStudio(this.promptSpatial, dynamicPrompt, buffer, locationContext, { foleyGlossary: foleyGlossary, soundCategory: this.objectsIds });//'human | voice | organic | mechanical'
 
             if (!vlmResponse || !vlmResponse.spatial_objects) return [];
 
@@ -123,6 +136,12 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
      * @returns {Promise<void>}
      */
     async init() {
+        const ambientsSettings = await Utils.loadAmbientsDictionary(this._internalAmbientsDictPath, this.logger);
+        this.biomeIds = Object.keys(ambientsSettings?.ambients).join('|');
+
+        const objectsSettings = await Utils.loadObjectsDictionary(this._internalObjectsDictPath, this.logger);
+        this.objectsIds = Object.keys(objectsSettings?.objects).map(key => key.replace('object_', '')).join('|');
+
         if (this.port && this.model) {
             if (this.targetDevice) {
                 this.logger.log(`[VisionProvider] Routing LM Link traffic to remote machine: ${this.targetDevice}...`);
@@ -206,7 +225,6 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
         }
     }
 
-    // --- Helper Methods ---
     /**
      * @async
      * @method _processAmbientLayer
@@ -219,8 +237,8 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
      * @returns {Promise<Array>} An array of processed ambient audio intents.
      */
     async _processAmbientLayer(buffer, locationContext, layerName, config) {
-        const dynamicPrompt = `Analyze acoustics at ${locationContext}. STRICTLY return JSON: {"reverb": "outside|inside|wet|dry", "description": "foley-grounded description", "type":"nature|beach_sea|desert|city|suburban|desert|generic"}`;
-        const vlmResponse = await this._callLMStudio(this.promptAmbient, dynamicPrompt, buffer, locationContext);
+        const dynamicPrompt = `Analyze acoustics at ${locationContext}. STRICTLY return JSON: {"reverb": "outside|inside|wet|dry", "description": "foley-grounded description", "type":"${this.biomeIds}"}`;
+        const vlmResponse = await this._callLMStudio(this.promptAmbient, dynamicPrompt, buffer, locationContext, { ambientBiomes: this.biomeIds }); // 'nature|beach_sea|desert|city|suburban|generic'
 
         if (!vlmResponse || !vlmResponse.reverb) return [];
 
@@ -259,18 +277,28 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
      * @async
      * @method _callLMStudio
      * @memberof LMStudioVisionProvider
-     * @description Prevents binary corruption by formatting a buffer into base64.
-     * @param {Buffer|ArrayBuffer|string} buffer - The source image data.
-     * @returns {string} Base64 encoded image string.
+     * @description Formats the system prompt, converts the image buffer to base64, and sends a chat completion request to a local LM Studio Vision-Language Model (VLM). Includes automatic JSON extraction and exponential backoff retry logic for server/network errors.
+     * @param {string} promptTemplate - The base system prompt containing placeholders for context variables.
+     * @param {string} dynamicPrompt - The dynamic user-provided prompt to instruct the VLM.
+     * @param {Buffer} buffer - The raw image buffer to be analyzed by the vision model.
+     * @param {string} locationContext - Contextual information about the location to inject into the template.
+     * @param {Object} [contextOptions={}] - Optional context parameters for prompt injection.
+     * @param {string} [contextOptions.foleyGlossary=''] - Specific foley terms to replace `{foley_terms}` in the template. Spatial sounds only.
+     * @param {string} [contextOptions.soundCategory=''] - Sound classification category to replace `{sound_category}`. Spatial sounds only.
+     * @param {string} [contextOptions.ambientBiomes=''] - Biome information to replace `{ambient_biomes}`. Abmient sound only.
+     * @param {number} [maxRetries=3] - Maximum number of retry attempts for 500-level or network connection errors.
+     * @returns {Promise<Object>} A promise that resolves to the parsed JSON object from the VLM's response, or an empty object `{}` if the request ultimately fails.
      * @private
      */
-    async _callLMStudio(promptTemplate, dynamicPrompt, buffer, locationContext, foleyGlossary = '', maxRetries = 3) {
+    async _callLMStudio(promptTemplate, dynamicPrompt, buffer, locationContext, { foleyGlossary = '', soundCategory = '', ambientBiomes = '' }, maxRetries = 3) {
         const baseUrl = `http://localhost:${this.port}`;
         const base64Image = this._bufferToBase64(buffer);
 
         const groundedSystemPrompt = promptTemplate
             .replace("{location_context}", locationContext)
-            .replace("{foley_terms}", foleyGlossary);
+            .replace("{foley_terms}", foleyGlossary)
+            .replace("{sound_category}", soundCategory)
+            .replace("{ambient_biomes}", ambientBiomes);
 
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
@@ -308,7 +336,6 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
                     continue;
                 }
 
-                // If we run out of retries, log the final failure and return empty
                 this.logger.error(`[LM Studio Request Failed] Final failure after ${attempt} attempts: ${e.message}`);
                 return {};
             }

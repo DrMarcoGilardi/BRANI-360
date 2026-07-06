@@ -52,14 +52,14 @@ export class Utils {
     /**
      * @static
      * @async
-     * @method loadDictionary
+     * @method loadAmbientsDictionary
      * @memberof Utils
-     * @description Loads a JSON research dictionary and maps it for fast backend lookup.
+     * @description Loads a JSON ambients dictionary and maps it for fast backend lookup.
      * @param {string} filePath - Absolute path to the JSON file.
      * @param {Object} [logger=console] - System logger for error reporting.
      * @returns {Promise<Object>} The mapped dictionary.
      */
-    static async loadDictionary(filePath, logger = console) {
+    static async loadAmbientsDictionary(filePath, logger = console) {
         try {
             const raw = await fs.readFile(filePath, 'utf8');
             const data = JSON.parse(raw);
@@ -82,6 +82,42 @@ export class Utils {
         } catch (e) {
             logger.error(`[DictionaryUtils] Failed to load ${filePath}: ${e.message}`);
             return { ambients: {}, positivePrompt: "", negativePrompt: "" };
+        }
+    }
+
+    /**
+     * @static
+     * @async
+     * @method loadObjecsDictionary
+     * @memberof Utils
+     * @description Loads a JSON objects dictionary and maps it for fast backend lookup.
+     * @param {string} filePath - Absolute path to the JSON file.
+     * @param {Object} [logger=console] - System logger for error reporting.
+     * @returns {Promise<Object>} The mapped dictionary.
+     */
+    static async loadObjectsDictionary(filePath, logger = console) {
+        try {
+            const raw = await fs.readFile(filePath, 'utf8');
+            const data = JSON.parse(raw);
+            const dict = {};
+
+            // Expected schema: { "objects": [ { "id": "human", ... } ] }
+            if (data && data.objects) {
+                data.objects.forEach(entry => {
+                    if (entry.id) {
+                        dict[entry.id.toLowerCase()] = entry;
+                    }
+                });
+            }
+
+            return {
+                objects: dict,
+                base_positive_prompt: data.base_positive_prompt || "",
+                base_negative_prompt: data.base_negative_prompt || ""
+            };
+        } catch (e) {
+            logger.error(`[DictionaryUtils] Failed to load ${filePath}: ${e.message}`);
+            return { objects: {}, positivePrompt: "", negativePrompt: "" };
         }
     }
 

@@ -149,7 +149,7 @@ export class AcousticTreadmill {
         const localLayers = Object.entries(manifest).filter(([_, conf]) => conf.behavior === 'local');
         const neighborLayers = Object.entries(manifest).filter(([_, conf]) => conf.behavior === 'neighbor');
 
-        const validNeighbors = (currentNearbyAnchors || []).filter(a => a.nodeId);
+        const validNeighbors = (currentNearbyAnchors || []).filter(a => a.nodeId && String(a.nodeId) !== String(currentNodeId));
 
         let mixTargets = [...validNeighbors];
         if (currentIsAnchor) {

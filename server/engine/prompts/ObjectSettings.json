@@ -1,0 +1,73 @@
+{
+    "_license": [
+        "ABBA-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio Generation on Networks of 360° Images",
+        "Copyright (C) 2026 Dr Marco Gilardi, University of the West of Scotland.",
+        "This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License version 3 or later.",
+        "-------------------------------------------------------------------------",
+        "COMMERCIAL LICENSING",
+        "ABBA-360 is dual-licensed. The above AGPLv3 license applies to open-source and academic research use.",
+        "If you wish to integrate this software into a closed-source or commercial application, you must obtain a proprietary commercial license.",
+        "Please contact Marco.Gilardi@uws.ac.uk for commercial licensing details.",
+        "-------------------------------------------------------------------------"
+    ],
+    "base_positive_prompt": "clear, realistic, authentic field recording, seamless loop, immersive spatial stereo, spatial panning, cinematic SFX, 3D binaural sound, high quality, 44.1kHz",
+    "base_negative_prompt": "synthetic, frying, music, melody, fade out, fading, tail, ending, static, hiss, harsh wind, outro, volume drop, decaying, empty, distorted, low quality, mono, low bit rate, radio static",
+    "objects": [
+        {
+            "id": "object_human",
+            "prompts": {
+                "positive_modifiers": "natural, open",
+                "negative_modifiers": "engine, motor, machine, mechanical, drone, broadband noise"
+            },
+            "params": {
+                "CFGScore": 4.0,
+                "CFGRescale": 0,
+                "sigmaMin": 0.03,
+                "sigmaMax": 500,
+                "requestedSteps": 100
+            }
+        },
+        {
+            "id": "object_voice",
+            "prompts": {
+                "positive_modifiers": "natural, open, outdoor",
+                "negative_modifiers": "engine, motor, machine, mechanical, drone, broadband noise"
+            },
+            "params": {
+                "CFGScore": 4.0,
+                "CFGRescale": 0.5,
+                "sigmaMin": 0.03,
+                "sigmaMax": 500,
+                "requestedSteps": 130
+            }
+        },
+        {
+            "id": "object_organic",
+            "prompts": {
+                "positive_modifiers": "natural sound, distinct intermittent textures, professional Foley sound effect",
+                "negative_modifiers": "engine, motor, machine, mechanical, drone, broadband noise"
+            },
+            "params": {
+                "CFGScore": 5.0,
+                "CFGRescale": 0,
+                "sigmaMin": 0.03,
+                "sigmaMax": 500,
+                "requestedSteps": 100
+            }
+        },
+        {
+            "id": "object_mechanical",
+            "prompts": {
+                "positive_modifiers": "professional Foley sound effect",
+                "negative_modifiers": ""
+            },
+            "params": {
+                "CFGScore": 7.0,
+                "CFGRescale": 0.5,
+                "sigmaMin": 0.03,
+                "sigmaMax": 500,
+                "requestedSteps": 75
+            }
+        }
+    ]
+}

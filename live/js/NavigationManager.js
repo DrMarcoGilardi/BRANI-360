@@ -72,11 +72,9 @@ export class NavigationManager {
         this.navEpoch = 0;
         this.nodeTimeout = null;
 
-        // Ensure these are initialized to prevent undefined errors in UI interactions
         this.currentIsAnchor = false;
         this.currentNearbyAnchors = [];
 
-        // Delegate semantic meaning and behavior to the injected strategy
         if (!semanticProvider) throw new Error("SemanticProvider is required.");
         this.semanticProvider = semanticProvider;
 
@@ -92,7 +90,6 @@ export class NavigationManager {
      */
     async _init() {
         try {
-            // Initialize whichever visual engine was injected
             await this.viewer.init();
             this.setupListeners();
         } catch (e) {
@@ -107,21 +104,17 @@ export class NavigationManager {
      * @description Binds generic, cross-provider event listeners bridging visual transitions to the internal Navigation state machine.
      */
     setupListeners() {
-        // Standardized POV sync
         this.viewer.on('pov_changed', (pov) => {
             document.dispatchEvent(new CustomEvent('app:pov_changed', { detail: pov }));
         });
 
-        // Listen for VR headset removal to sync VR -> Map
         document.addEventListener('app:sync_camera_intent', (e) => {
             const pov = e.detail;
-            // Evaluates the new Capabilities Pattern cleanly
             if (pov && this.viewer.supportsCameraSync) {
                 this.viewer.syncCamera(pov);
             }
         });
 
-        // Listen for VR Chevron clicks to navigate
         document.addEventListener('app:navigation_intent', (e) => {
             const nextNodeId = e.detail.nodeId;
             if (nextNodeId && this.currentNodeId !== nextNodeId) {
@@ -148,7 +141,6 @@ export class NavigationManager {
                 this.networkService.abortObjectFetches();
                 this.player.clearSpatialObjects();
 
-                this.player.updatePersistentVolumes([]);
                 this.ui.resetPipeline();
 
                 if (nodeId) {
@@ -193,8 +185,6 @@ export class NavigationManager {
 
             this.player.clearSpatialObjects();
 
-            this.player.updatePersistentVolumes([]);
-
             this.ui.resetPipeline();
 
             clearTimeout(this.nodeTimeout);
@@ -236,13 +226,6 @@ export class NavigationManager {
                     const nodeData = await this.radar._getNode(nodeId);
                     cachedData.links = nodeData ? nodeData.links : [];
                 }
-
-                // const currentIsAnchor = await this.radar.isAnchorNode(nodeId);
-                // cachedData.type = currentIsAnchor ? 'anchor' : 'standard';
-
-                // cachedData.nearbyAnchors = await this.radar.findNearestAnchors(nodeId, 8);
-                // const nearbyAnchorIds = cachedData.nearbyAnchors.map(a => a.nodeId || a.id);
-                // cachedData.graphData = await this.radar.buildVisualGraph(nodeId, nearbyAnchorIds);
 
                 this._applyNavigationState(nodeId, cachedData, location, currentEpoch, originNodeId);
 
@@ -310,30 +293,34 @@ export class NavigationManager {
      */
     _applyNavigationState(nodeId, data, location, epoch, originNodeId, isSlowPath = false) {
         const isAnchor = data.type === 'anchor' || data.type === 'end';
-
         const manifest = this.semanticProvider.getLayerManifest();
         const activeLayers = Object.keys(manifest);
         const neighborLayers = Object.keys(manifest).filter(layerId => manifest[layerId].behavior === 'neighbor');
-
         const wantsBackground = neighborLayers.length > 0;
 
-        const nearbyAnchorIds = wantsBackground ? data.nearbyAnchors.map(a => a.nodeId || a.id) : [];
-
-        const nearbyAnchorPayloads = wantsBackground ? data.nearbyAnchors.map(a => ({
+        const networkAnchors = data.nearbyAnchors || [];
+        const networkAnchorPayloads = wantsBackground ? networkAnchors.map(a => ({
             nodeId: a.nodeId || a.id,
             hops: a.hops,
             requestedLayers: neighborLayers
         })) : [];
 
+        let audioAnchors = data.nearbyAnchors;
+
+        if (!audioAnchors || audioAnchors.length === 0) {
+            audioAnchors = this.currentNearbyAnchors || [];
+        }
+
+        const audioAnchorIds = wantsBackground ? audioAnchors.map(a => a.nodeId || a.id) : [];
+
         this.currentIsAnchor = isAnchor;
-        this.currentNearbyAnchors = wantsBackground ? data.nearbyAnchors : [];
+        this.currentNearbyAnchors = wantsBackground ? networkAnchors : [];
 
         this.ui.setNodeInfo(nodeId, isAnchor);
         if (data.graphData) this.ui.drawRadarGraph(data.graphData, nodeId);
 
-        this.treadmill.reset(nodeId, nearbyAnchorIds, isAnchor);
-
-        this.treadmill.refreshMix(nodeId, isAnchor, this.currentNearbyAnchors, this.radar);
+        this.treadmill.reset(nodeId, audioAnchorIds, isAnchor);
+        this.treadmill.refreshMix(nodeId, isAnchor, audioAnchors, this.radar);
 
         if (this.currentNodeId === nodeId) {
             document.dispatchEvent(new CustomEvent('nav:node_applied', {
@@ -347,7 +334,7 @@ export class NavigationManager {
             navEpoch: epoch,
             isAnchor: isAnchor,
             location: location || data.location,
-            nearbyAnchors: nearbyAnchorPayloads,
+            nearbyAnchors: networkAnchorPayloads,
             requestedLayers: activeLayers,
             dbPayload: isSlowPath ? data : null
         });

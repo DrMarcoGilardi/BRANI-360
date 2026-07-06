@@ -92,7 +92,9 @@
             "params": {
                 "CFGScore": 6.5,
                 "CFGRescale": 0,
-                "requestedSteps": 100
+                "sigmaMin": 0.03,
+                "sigmaMax": 500,
+                "requestedSteps": 75
             }
         }
     ]
