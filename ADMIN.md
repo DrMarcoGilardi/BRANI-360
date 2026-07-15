@@ -1,9 +1,9 @@
-# ABBA-360 `.env` Variables Editor Guide
+# BRANI-360 `.env` Variables Editor Guide
 
 **It is strongly recommended to use the editor to avoid accidentally deleting environment variables required for the core workflow.**
 
 ## What is the `.env` Editor Dashboard?
-The **ABBA-360 `.env` Variables Editor** is a secure, graphical web interface designed to help developers visually manage, organize, and document server environment variables. 
+The **BRANI-360 `.env` Variables Editor** is a secure, graphical web interface designed to help developers visually manage, organize, and document server environment variables. 
 
 Directly editing raw `.env` files can often lead to syntax errors, accidental deletions, or disorganized configurations. This dashboard solves those issues by providing a structured layout where you can group variables, add live documentation, safely edit complex multi-line strings, lock critical architecture, and instantly sync changes back to the live server.
 
