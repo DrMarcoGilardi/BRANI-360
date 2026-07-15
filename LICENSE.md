@@ -1,4 +1,4 @@
-AGON-360 Copyright (C) 2026 Dr Marco Gilardi, University of the West of Scotland. Licensed under the AGPLv3
+BRANI-360 Copyright (C) 2026 Dr Marco Gilardi, University of the West of Scotland. Licensed under the AGPLv3
 
 Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
 
