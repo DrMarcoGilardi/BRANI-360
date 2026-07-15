@@ -1,6 +1,6 @@
 # AGON-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio-Generation on Networks of 360° Images  
 ## Introduction  
-Welcome to the ABBA-360 research sandbox.  
+Welcome to the AGON-360 research sandbox.  
 This system is designed as a **strictly agnostic orchestration engine** for AI generation of spatial audio from interconnected 360° images.  
 The system is setup to run from GitHub Pages using zrok to connect to the server, or run to locally.  
 
@@ -25,7 +25,7 @@ The sandbox is designed to explore four key research pillars:
 
 Because the architecture strictly separates the **engine** from the **meaning**, the sandbox can be used to explore broad research questions, such as:  
 
-**What approach to prompting VLMs and latent diffusion models yields the highest perceptual accuracy?** By forcing models to adhere to strict schema constraints (e.g., routing intents to `local`, `neighbor`, or `object` behaviors) and utilizing real-time feedback loops, ABBA-360 provides a controlled environment to study which linguistic architectures best bridge the gap between visual interpretation and 3D sound generation.  
+**What approach to prompting VLMs and latent diffusion models yields the highest perceptual accuracy?** By forcing models to adhere to strict schema constraints (e.g., routing intents to `local`, `neighbor`, or `object` behaviors) and utilizing real-time feedback loops, AGON-360 provides a controlled environment to study which linguistic architectures best bridge the gap between visual interpretation and 3D sound generation.  
 
 **How do we construct semantic manifests that maximize perceptual realism?** Because the engine’s behavior is externalized into data-driven dictionaries, researchers can define entirely new semantic realities in a single file. Researchers can test how different base weights, layer definitions, and persistence rules affect the user's perception of authenticity—without touching a single line of backend code.  
 
@@ -46,7 +46,7 @@ Because the architecture strictly separates the **engine** from the **meaning**,
 ## Project Structure
 
 ```text
-abba360_v0/
+360_v0/
 ├── client/                     # ** Frontend Environment **
 │   ├── index.html
 |   ├── css/
@@ -125,12 +125,12 @@ The frontend dynamically resolves the backend connection URL. It prioritizes the
 
 If none of the above criteria are met (no local host, no custom tunnel, no valid Zrok token configured), the application will throw an error to the browser console:
 
-> **ABBA-360 Error:** No valid backend connection found. Please provide a `?tunnel=` URL parameter, use a `?token=` parameter, or set your `ZROK_UNIQUE_NAME_HERE` in `client.js`.
+> **AGON-360 Error:** No valid backend connection found. Please provide a `?tunnel=` URL parameter, use a `?token=` parameter, or set your `ZROK_UNIQUE_NAME_HERE` in `client.js`.
 ---
 ## Local Installation & Testing with Out-Of-The-Box Implementation
  
- ABAA-360 can be run entirely locally for testing, development, and peer review.
- However, ABBA-360 is designed to be hosted via GitHub Pages and connected to a backend via secure tunnels (like zrok or ngrok). 
+ AGON-360 can be run entirely locally for testing, development, and peer review.
+ However, AGON-360 is designed to be hosted via GitHub Pages and connected to a backend via secure tunnels (like zrok or ngrok). 
  Zrok is the falback tunnel service if none is provided via the `?tuneel` URL parameter. 
  To use zrok set the `?token=` URL parameter to pass the random zrok token, or, if you prefer a static token, set a unique name in zrok and replace `ZROK_UNIQUE_NAME_HERE` in `client.js`.   
 
@@ -186,7 +186,7 @@ Because the frontend utilizes ES6 modules (`type="module"`), the `index.html` fi
 > **Note**: *It is strongly recommended to use the [admin editor](ADMIN.md) to safely edit the .env file and to avoid accidentally deleting environment variables required for the core workflow.*
 
 ### What is the `.env` Editor Dashboard?
-The **ABBA-360 `.env` Variables Editor** is a secure, graphical web interface designed to help developers visually manage, organize, and document server environment variables. 
+The **AGON-360 `.env` Variables Editor** is a secure, graphical web interface designed to help developers visually manage, organize, and document server environment variables. 
 
 Directly editing raw `.env` files can often lead to syntax errors, accidental deletions, or disorganized configurations. This dashboard solves those issues by providing a structured layout where you can group variables, add live documentation, safely edit complex multi-line strings, and instantly sync changes back to the live server.
 
@@ -241,12 +241,12 @@ PYTHON_EXEC = "python3"
 ---
 ## Implementation Guide: Building Custom Strategies
 
-ABBA-360 is built entirely on the **Strategy Pattern**. This means the core engine (which handles WebSocket syncing, AI queueing, and UI rendering) never directly touches a specific API, map SDK, or AI model. Instead, it talks to **Base Classes** (abstract interfaces). 
+AGON-360 is built entirely on the **Strategy Pattern**. This means the core engine (which handles WebSocket syncing, AI queueing, and UI rendering) never directly touches a specific API, map SDK, or AI model. Instead, it talks to **Base Classes** (abstract interfaces). 
 
 To add a new mapping SDK, a new AI Vision model, or a new acoustic logic system, you do **not** edit the core orchestrator. Instead, you create a "Concrete Class" that extends a Base Class.
 
 ### 1. The Strict Contract System
-Because JavaScript does not have native `interface` keywords, ABBA-360 enforces architecture via strict runtime contracts. If you look inside any Base Class (e.g., `BaseViewerProvider.js` or `BaseSemanticProvider.js`), you will see methods that look like this:
+Because JavaScript does not have native `interface` keywords, AGON-360 enforces architecture via strict runtime contracts. If you look inside any Base Class (e.g., `BaseViewerProvider.js` or `BaseSemanticProvider.js`), you will see methods that look like this:
 
 ```javascript
 getCurrentNodeId() { 
@@ -320,7 +320,7 @@ export class CustomViewerProvider extends BaseViewerProvider {
         // Initialize your custom 3D map SDK
         this.myMap = new CustomMapSDK(this.containerId);
         
-        // Translate the SDK's native events into ABBA-360's agnostic events
+        // Translate the SDK's native events into AGON-360's agnostic events
         this.myMap.onMove(() => {
             const heading = this.myMap.getHeading();
             const pitch = this.myMap.getPitch();
