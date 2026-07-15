@@ -1,5 +1,5 @@
 /*
- * ABBA-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio Generation on Networks of 360° Images
+ * BRANI-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio Generation on Networks of 360° Images
  * Copyright (C) 2026 Dr Marco Gilardi, University of the West of Scotland.
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  * 
  * -------------------------------------------------------------------------
  * COMMERCIAL LICENSING
- * ABBA-360 is dual-licensed. The above AGPLv3 license applies to open-source 
+ * BRANI-360 is dual-licensed. The above AGPLv3 license applies to open-source 
  * and academic research use. If you wish to integrate this software into a 
  * closed-source or commercial application, you must obtain a proprietary 
  * commercial license. 
@@ -43,7 +43,7 @@ const TUNNEL_URL = isLocalhost ? 'http://localhost:3000' :
     tunnel ? tunnel :
         (nodeToken && nodeToken !== "ZROK_UNIQUE_NAME") ? `https://${nodeToken}.shares.zrok.io` : //<--- If not custon tunnel is provided it defaults to a zrok tunnel
             (() => {
-                const errorMsg = "ABBA-360 Error: No valid backend connection found. Please set your ZROK_UNIQUE_NAME_HERE, provide a ?tunnel= URL parameter, or use a ?token= parameter.";
+                const errorMsg = "BRANI-360 Error: No valid backend connection found. Please set your ZROK_UNIQUE_NAME_HERE, provide a ?tunnel= URL parameter, or use a ?token= parameter.";
                 console.error(errorMsg);
                 throw new Error(errorMsg); //<--- If neither token or unique name are set then it throws an error
             })();

@@ -1,5 +1,5 @@
 /*
- * ABBA-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio Generation on Networks of 360° Images
+ * BRANI-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio Generation on Networks of 360° Images
  * Copyright (C) 2026 Dr Marco Gilardi, University of the West of Scotland.
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  * 
  * -------------------------------------------------------------------------
  * COMMERCIAL LICENSING
- * ABBA-360 is dual-licensed. The above AGPLv3 license applies to open-source 
+ * BRANI-360 is dual-licensed. The above AGPLv3 license applies to open-source 
  * and academic research use. If you wish to integrate this software into a 
  * closed-source or commercial application, you must obtain a proprietary 
  * commercial license. 
@@ -78,7 +78,7 @@ export class VRSceneController {
         try {
             import('./vr-plugin/vr-behaviours-plugin.js')
                 .then(() => {
-                    console.log("[ABBA-360] Custom behaviour VR logic loaded successfully.");
+                    console.log("[BRANI-360] Custom behaviour VR logic loaded successfully.");
                 })
                 .catch(() => {
                 });

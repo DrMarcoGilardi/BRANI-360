@@ -6,7 +6,7 @@ To protect the intellectual property of the core orchestration framework and mai
 
 1. No Code Contributions to the Core Engine (Pull Requests Are Closed)
 
-We do not accept external code contributions via Pull Requests for the ABBA-360 core orchestration files. ABBA-360 operates under a dual-licensing model: it is released publicly under the AGPLv3 for open-source and academic research, but is also available under a proprietary license for commercial entities.
+We do not accept external code contributions via Pull Requests for the BRANI-360 core orchestration files. BRANI-360 operates under a dual-licensing model: it is released publicly under the AGPLv3 for open-source and academic research, but is also available under a proprietary license for commercial entities.
 
 To legally offer commercial licenses, the project maintainer must retain 100% of the copyright to the core codebase. This includes core orchestration files such as the PipelineService, NavigationManager, and AcousticTreadmill. Accepting external code from the community introduces copyright fragmentation. To keep things simple and legally sound, all code in this upstream repository is authored and maintained strictly by the original creator.
 
@@ -14,7 +14,7 @@ Any Pull Requests submitted targeting the core engine will be automatically clos
 
 2. Custom Strategies Belong to You (Host Them Separately)
 
-ABBA-360 is designed as a strictly agnostic orchestration engine utilizing the Strategy Pattern.
+BRANI-360 is designed as a strictly agnostic orchestration engine utilizing the Strategy Pattern.
 
 If you write a custom implementation, you do not need to submit it to this repository. The system uses dynamic dependency injection, reading your .env file at boot to dynamically import your requested JavaScript classes.
 
@@ -36,6 +36,6 @@ Research Discussions: Feel free to use the Issues tab to discuss how you are usi
 
 You are completely free to fork this repository to build out your local research environments.
 
-Important Licensing Reminder: If you fork the repository, modify the core ABBA-360 engine code, and deploy it over a network (e.g., hosting the Node.js backend to serve users), the AGPLv3 license legally requires you to open-source your modified version under the exact same AGPLv3 terms.
+Important Licensing Reminder: If you fork the repository, modify the core BRANI-360 engine code, and deploy it over a network (e.g., hosting the Node.js backend to serve users), the AGPLv3 license legally requires you to open-source your modified version under the exact same AGPLv3 terms.
 
 Enjoy experimenting with the sandbox, and please report any core bugs you find via the Issues tab.
