@@ -46,7 +46,7 @@ Because the architecture strictly separates the **engine** from the **meaning**,
 ## Project Structure
 
 ```text
-360_v0/
+brani-360_v0/
 ├── client/                     # ** Frontend Environment **
 │   ├── index.html
 |   ├── css/
