@@ -1,6 +1,6 @@
 Contributing to AGON-360
 
-First, thank you for your interest in the ABBA-360 research sandbox!
+First, thank you for your interest in the AGON-360 research sandbox!
 
 To protect the intellectual property of the core orchestration framework and maintain its specific licensing structure, please read the following strict guidelines before interacting with the repository.
 
