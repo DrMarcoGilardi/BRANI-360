@@ -76,6 +76,7 @@ export class Utils {
 
             return {
                 ambients: dict,
+                vlm_system_prompt_template: data.vlm_system_prompt_template || "",
                 base_positive_prompt: data.base_positive_prompt || "",
                 base_negative_prompt: data.base_negative_prompt || ""
             };
@@ -112,6 +113,7 @@ export class Utils {
 
             return {
                 objects: dict,
+                vlm_system_prompt_template: data.vlm_system_prompt_template || "",
                 base_positive_prompt: data.base_positive_prompt || "",
                 base_negative_prompt: data.base_negative_prompt || ""
             };

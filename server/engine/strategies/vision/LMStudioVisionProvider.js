@@ -35,6 +35,7 @@ import { promisify } from 'util';
 
 import { BaseVisionProvider } from './BaseVisionProvider.js';
 import { Utils } from '../../../utilities/Utils.js';
+import { log } from 'console';
 
 const execAsync = promisify(exec);
 
@@ -71,14 +72,13 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
         this.model = config.VLM_MODEL_ID;
         this.targetDevice = config.LM_LINK_TARGET_DEVICE;
 
-        this.promptAmbient = config.VLM_PROMPT_AMBIENT;
-        this.promptSpatial = config.VLM_PROMPT_SPATIAL;
+        this.promptAmbient = ''; //config.VLM_PROMPT_AMBIENT;
+        this.promptSpatial = ''; //config.VLM_PROMPT_SPATIAL;
 
         if (!this.port || !this.model) {
             this.logger.error('[VisionProvider] Missing LM Studio configuration.');
         }
-        this._internalAmbientsDictPath = path.join(__dirname, '../../prompts', 'AmbientSettings.json');
-        this._internalObjectsDictPath = path.join(__dirname, '../../prompts', 'ObjectSettings.json');
+
         this.biomeIds = '';
         this.objectsIds = '';
     }
@@ -106,11 +106,18 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
 
         'spatial': async (buffer, locationContext, layerName) => {
 
-
             const foleyGlossary = "{'Crowds': ['walla', 'babble', 'chatter', 'efforts'], 'Weather': ['gust', 'howl', 'leaf rustle', 'drizzle'], 'Environments': ['atmos', 'drone', 'wash'], 'Vehicular': ['pass-by', 'doppler', 'idle', 'rumble'], 'Texture': ['cloth rustle', 'scuff', 'crunch', 'clatter', 'thud'], 'Quality Modifier': ['dry', 'slapback', 'proximity', 'transient']}";
-            const dynamicPrompt = `Analyze visual sound sources at ${locationContext}. STRICTLY return JSON: {"spatial_objects": [{"label": "string", "category": "human|mechanical|organic", "h": 0, "p": 0, "dist": 0}]}, Format the "label" STRICTLY as '[Object], [Foley Term], [Quality Modifier]'.`;
+            const dynamicPrompt = `Analyze visual sound sources at ${locationContext}. STRICTLY return JSON: {"spatial_objects": [{"label": "string", "category": "${this.objectsIds}", "h": 0, "p": 0, "dist": 0}]}, Format the "label" STRICTLY as '[Object], [Foley Term], [Quality Modifier]'.`;
 
-            const vlmResponse = await this._callLMStudio(this.promptSpatial, dynamicPrompt, buffer, locationContext, { foleyGlossary: foleyGlossary, soundCategory: this.objectsIds });//'human | voice | organic | mechanical'
+            const vlmResponse = await this._callLMStudio(
+                this.promptSpatial,
+                dynamicPrompt,
+                buffer,
+                locationContext,
+                {
+                    foleyGlossary: foleyGlossary,
+                    soundCategory: this.objectsIds //'human | voice | organic | mechanical'
+                });
 
             if (!vlmResponse || !vlmResponse.spatial_objects) return [];
 
@@ -136,11 +143,16 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
      * @returns {Promise<void>}
      */
     async init() {
-        const ambientsSettings = await Utils.loadAmbientsDictionary(this._internalAmbientsDictPath, this.logger);
-        this.biomeIds = Object.keys(ambientsSettings?.ambients).join('|');
+        this.logger.log("[LM STUDIO VP INITIALISATION]");
+        this._internalObjectsDictPath = path.join(__dirname, '../../prompts', 'ObjectSettings.json');
+        this.objectsSettings = await Utils.loadObjectsDictionary(this._internalObjectsDictPath, this.logger);
+        this.promptSpatial = this.objectsSettings?.vlm_system_prompt_template;
+        this.objectsIds = Object.keys(this.objectsSettings?.objects).map(key => key.replace('object_', '')).join('|');
 
-        const objectsSettings = await Utils.loadObjectsDictionary(this._internalObjectsDictPath, this.logger);
-        this.objectsIds = Object.keys(objectsSettings?.objects).map(key => key.replace('object_', '')).join('|');
+        this._internalAmbientsDictPath = path.join(__dirname, '../../prompts', 'AmbientSettings.json');
+        this.ambientsSettings = await Utils.loadAmbientsDictionary(this._internalAmbientsDictPath, this.logger);
+        this.promptAmbient = this.ambientsSettings?.vlm_system_prompt_template;
+        this.biomeIds = Object.keys(this.ambientsSettings?.ambients).join('|');
 
         if (this.port && this.model) {
             if (this.targetDevice) {
@@ -237,9 +249,15 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
      * @returns {Promise<Array>} An array of processed ambient audio intents.
      */
     async _processAmbientLayer(buffer, locationContext, layerName, config) {
-        const dynamicPrompt = `Analyze acoustics at ${locationContext}. STRICTLY return JSON: {"reverb": "outside|inside|wet|dry", "description": "foley-grounded description", "type":"${this.biomeIds}"}`;
-        const vlmResponse = await this._callLMStudio(this.promptAmbient, dynamicPrompt, buffer, locationContext, { ambientBiomes: this.biomeIds }); // 'nature|beach_sea|desert|city|suburban|generic'
-
+        const dynamicPrompt = `Analyze acoustics at ${locationContext}. STRICTLY return JSON: {"reverb": "outside|inside", "description": "foley-grounded description", "type":"${this.biomeIds}"}`;
+        const vlmResponse = await this._callLMStudio(
+            this.promptAmbient,
+            dynamicPrompt,
+            buffer,
+            locationContext,
+            { ambientBiomes: this.biomeIds } // 'nature|beach_sea|desert|city|suburban|generic'
+        );
+        this.logger.log(JSON.stringify(vlmResponse));
         if (!vlmResponse || !vlmResponse.reverb) return [];
 
         return [{
@@ -352,8 +370,8 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
      * @private
      */
     _buildAudioReadyAmbient(data, context) {
-        const desc = (data.description || "ambient soundscape").trim();
-        const reverb = (data.reverb || "natural").trim();
+        const desc = data.description.trim();
+        const reverb = data.reverb.trim();
         return `${desc}, ${reverb} acoustics, recorded at ${context}, realistic clean field recording, high quality`;
     }
 
@@ -367,7 +385,7 @@ export class LMStudioVisionProvider extends BaseVisionProvider {
      * @private
      */
     _buildAudioReadySpatial(obj, context) {
-        const label = (obj.label || "sound source").trim();
+        const label = obj.label.trim();
         return `${label}, recorded at ${context}, clear distinct point-source clean sound, professional foley`;
     }
 
