@@ -1,6 +1,6 @@
-# Commercial Licensing for AGON-360
+# Commercial Licensing for BRANI-360
 
-AGON-360 operates under a **dual-licensing model**. By default, the core orchestration framework is licensed under the **GNU Affero General Public License v3.0 (AGPLv3)** for open-source, academic, and research purposes. 
+BRANI-360 operates under a **dual-licensing model**. By default, the core orchestration framework is licensed under the **GNU Affero General Public License v3.0 (AGPLv3)** for open-source, academic, and research purposes. 
 
 To legally offer this dual-license, Dr Marco Gilardi and University of the West of Scotland retain 100% of the copyright to the core codebase. We do not accept external code contributions to the core engine.
 
@@ -13,7 +13,7 @@ The AGPLv3 is a strong copyleft license designed for network software. If you fo
 *   Incorporate the ABBA-360 core engine into a proprietary, closed-source enterprise product.
 *   Keep your modifications to the core orchestration files private and legally protected.
 
-*Note: AGON-360 uses the Strategy Pattern. If you simply write custom strategies (e.g., a custom `VisionProvider` or `NodeSelectionStrategy`), those files belong entirely to you. However, if your proprietary application relies on running the ABBA-360 core backend over a network, you still require a commercial license for the core framework.*
+*Note: BRANI-360 uses the Strategy Pattern. If you simply write custom strategies (e.g., a custom `VisionProvider` or `NodeSelectionStrategy`), those files belong entirely to you. However, if your proprietary application relies on running the BRANI-360 core backend over a network, you still require a commercial license for the core framework.*
 
 ## What Does the Commercial License Include?
 
