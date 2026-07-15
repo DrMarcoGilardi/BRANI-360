@@ -1,4 +1,4 @@
-# AGON-360: An Agnostic Browser-Based Research Sandbox Architecture for AI **A**udio-**G**eneration **o**n **N**etworks of **360**° Images  
+# AGON-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio-Generation on Networks of 360° Images  
 ## Introduction  
 Welcome to the AGON-360 research sandbox.  
 This system is designed as a **strictly agnostic orchestration engine** for AI generation of spatial audio from interconnected 360° images.  
