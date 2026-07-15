@@ -1,4 +1,4 @@
-Contributing to ABBA-360
+Contributing to AGON-360
 
 First, thank you for your interest in the ABBA-360 research sandbox!
 
