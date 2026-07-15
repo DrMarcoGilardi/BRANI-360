@@ -6,11 +6,11 @@ To legally offer this dual-license, Dr Marco Gilardi and University of the West 
 
 ## Why Do I Need a Commercial License?
 
-The AGPLv3 is a strong copyleft license designed for network software. If you fork this repository, modify the core ABBA-360 engine (e.g., `PipelineService`, `NavigationManager`, `AcousticTreadmill`), and deploy it over a network to serve users, the AGPLv3 legally requires you to open-source your entire modified version under the exact same AGPLv3 terms.
+The AGPLv3 is a strong copyleft license designed for network software. If you fork this repository, modify the core BRANI-360 engine (e.g., `PipelineService`, `NavigationManager`, `AcousticTreadmill`), and deploy it over a network to serve users, the AGPLv3 legally requires you to open-source your entire modified version under the exact same AGPLv3 terms.
 
 **You MUST purchase a Commercial License if you intend to:**
-*   Deploy ABBA-360 as part of a commercial Software-as-a-Service (SaaS) or backend network infrastructure without open-sourcing your entire application.
-*   Incorporate the ABBA-360 core engine into a proprietary, closed-source enterprise product.
+*   Deploy BRANI-360 as part of a commercial Software-as-a-Service (SaaS) or backend network infrastructure without open-sourcing your entire application.
+*   Incorporate the BRANI-360 core engine into a proprietary, closed-source enterprise product.
 *   Keep your modifications to the core orchestration files private and legally protected.
 
 *Note: BRANI-360 uses the Strategy Pattern. If you simply write custom strategies (e.g., a custom `VisionProvider` or `NodeSelectionStrategy`), those files belong entirely to you. However, if your proprietary application relies on running the BRANI-360 core backend over a network, you still require a commercial license for the core framework.*
@@ -19,7 +19,7 @@ The AGPLv3 is a strong copyleft license designed for network software. If you fo
 
 Purchasing a commercial license grants you:
 *   **A Non-Viral License:** Exemption from the AGPLv3 requirement to open-source your proprietary code.
-*   **Perpetual Use:** The right to use the licensed version of ABBA-360 indefinitely in your commercial products.
+*   **Perpetual Use:** The right to use the licensed version of BRANI-360 indefinitely in your commercial products.
 *   **Warranties & Indemnification:** Standard commercial legal protections not offered under the open-source AGPLv3.
 
 ## How to Purchase
