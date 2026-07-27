@@ -1,7 +1,8 @@
 {
   "type": "module",
   "name": "brani-360",
-  "version": "2.0.0",
+  "license": "AGPL-3.0-only",
+  "version": "1.0.0",
   "description": "BRANI-360: Agnostic Browser-Based Research Sandbox Architecture for AI Sound-Generation in Networks of 360 Images",
   "main": "server.js",
   "plugins": [
