@@ -1,0 +1,43 @@
+name: Bug Report
+description: Report a bug or issue in the core BRANI-360 orchestration engine.
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please provide as much detail as possible.
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Exact steps to reproduce the behavior.
+      placeholder: |
+        1. Start the server with...
+        2. Trigger the navigation manager by...
+        3. See error...
+    validations:
+      required: true
+  - type: textarea
+    id: env-config
+    attributes:
+      label: Environment Configuration (.env)
+      description: Paste your relevant .env settings here. **CRITICAL: Remove all API keys, passwords, and sensitive secrets before posting!**
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Server / Client Logs
+      description: Paste any relevant error logs or terminal output.
+      render: bash
+    validations:
+      required: true

@@ -1,0 +1,39 @@
+name: Share a Custom Strategy
+description: Share a link to a custom implementation (e.g., node selection, mapping SDK) you built for BRANI-360.
+title: "[STRATEGY] "
+labels: ["community-strategy"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Did you build a cool custom strategy for BRANI-360? Share it with the community here! 
+        *Remember: Custom strategies belong to you and should be hosted in your own separate repository.*
+  - type: input
+    id: strategy-name
+    attributes:
+      label: Strategy Name
+      description: What is the name of your custom strategy? (e.g., OpenAIImageSource, CustomA*Navigation)
+    validations:
+      required: true
+  - type: input
+    id: repo-url
+    attributes:
+      label: Repository URL
+      description: Link to your GitHub repository where the strategy is hosted.
+      placeholder: https://github.com/your-username/your-strategy-repo
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What does this strategy do? How does it benefit the research community?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: BRANI-360 Version Compatibility
+      description: What version(s) of BRANI-360 is this tested against?
+    validations:
+      required: false

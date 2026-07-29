@@ -1,0 +1,31 @@
+name: Code Proposal / Feature Request
+description: Suggest an improvement, new feature, or submit code patches for the core engine.
+title: "[PROPOSAL] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Note on Code Contributions:** To maintain single-copyright ownership for our dual-licensing model, we do not accept Pull Requests. However, you can propose code changes here. If approved, the maintainer will manually implement the logic into the core codebase.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Please describe the issue, missing feature, or bottleneck you are trying to resolve.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution & Code Snippets
+      description: Describe your proposed solution. If you have already written the code, please paste the patches or snippets here.
+      render: javascript
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Copyright Acknowledgment
+      options:
+        - label: I understand that by submitting code here, I am offering it as a proposal for the maintainer to recreate and integrate under the project's single-copyright model.
+          required: true

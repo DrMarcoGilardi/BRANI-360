@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Read the Contribution Rules
+    url: https://github.com/uwscct/BRANI-360/blob/main/CONTRIBUTING.md
+    about: Please review our dual-license and single-copyright policies before contributing.

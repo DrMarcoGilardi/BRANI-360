@@ -1,0 +1,30 @@
+name: Idea for Further Development
+description: Brainstorm new features, discuss research questions, or propose high-level architectural ideas.
+title: "[IDEA] "
+labels: ["discussion", "idea"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Welcome to the idea board! Use this form to discuss high-level concepts, future development roadmap ideas, or how BRANI-360 can be adapted for new research questions (e.g., AI hallucination prevention, cognitive thresholds).
+  - type: textarea
+    id: idea-summary
+    attributes:
+      label: The Idea / Topic
+      description: Provide a clear and concise summary of your idea or the research question you want to discuss.
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Context & Research Value
+      description: Why is this valuable? How does it improve the BRANI-360 orchestration engine or aid the broader research community?
+    validations:
+      required: true
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Potential Approach (Optional)
+      description: If you have thoughts on how this could theoretically be achieved using our Strategy Pattern architecture, share them here!
+    validations:
+      required: false
