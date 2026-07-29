@@ -1,7 +1,9 @@
 # BRANI-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio-Generation on Networks of 360° Images  
 ## Introduction  
 Welcome to the BRANI-360 research sandbox.  
-This software is released under AGPLv3 and commercial licencing. Please read the CONTRIBUTING.md file to know how to contribute to this project/
+
+This software is released under AGPLv3 and commercial licencing. Please read the CONTRIBUTING.md file to know how to contribute to this project.
+
 This system is designed as a **strictly agnostic orchestration engine** for AI generation of spatial audio from interconnected 360° images.  
 The system is setup to run from GitHub Pages using zrok to connect to the server, or run to locally.  
 
