@@ -1,5 +1,8 @@
 # BRANI-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio-Generation on Networks of 360° Images  
-## Introduction  
+## Introduction 
+
+*BRANI: noun pl. [ masculine ] /'brani/ Italian for tracks or songs.*
+
 Welcome to the BRANI-360 research sandbox.  
 
 This software is released under AGPLv3 and commercial licencing. Please read the CONTRIBUTING.md file to know how to contribute to this project.
