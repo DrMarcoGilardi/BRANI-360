@@ -37,8 +37,16 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: Server / Client Logs
-      description: Paste any relevant error logs or terminal output.
+      label: Server Logs
+      description: Paste any relevant error logs or terminal output from the server.
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Client Logs
+      description: Paste any relevant error from the client browser.
       render: bash
     validations:
       required: true
