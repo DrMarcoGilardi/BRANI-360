@@ -1,7 +1,8 @@
 name: Bug Report
 description: Report a bug or issue in the core BRANI-360 orchestration engine.
 title: "[BUG] "
-labels: ["bug"]
+labels: 
+  - bug
 body:
   - type: markdown
     attributes:
@@ -26,7 +27,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: env-config
+    id: env_config
     attributes:
       label: Environment Configuration (.env)
       description: Paste your relevant .env settings here. **CRITICAL: Remove all API keys, passwords, and sensitive secrets before posting!**
