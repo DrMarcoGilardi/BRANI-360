@@ -1,0 +1,9 @@
+[SYSTEM] Log initialized at 2026-08-05T08:59:54.486Z
+[10:59:54 AM] [CacheManager] VLM Cache path: /home/mgilardi/GitHub/BRANI-360/server/infrastructure/undefined/VLM_cache
+[10:59:54 AM] [CacheManager] Audio Cache path: /home/mgilardi/GitHub/BRANI-360/server/infrastructure/undefined/audio_cache
+[10:59:54 AM] [CacheManager] Image Cache path: /home/mgilardi/GitHub/BRANI-360/server/infrastructure/undefined/image_cache
+[10:59:54 AM] [CacheManager] Initializing database at /home/mgilardi/GitHub/BRANI-360/server/infrastructure/undefined/cache.db
+[10:59:54 AM] [CacheManager] Database initialized and tables verified.
+[10:59:54 AM] [ERROR] [AIEngine] Auto-Discovery Failed: Cannot find module '/home/mgilardi/GitHub/BRANI-360/server/engine/strategies/imagesource/undefined.js' imported from /home/mgilardi/GitHub/BRANI-360/server/engine/AIEngine.js
+[10:59:54 AM] [Server] For the .env admin dashboard open http://localhost:undefined/admin
+[10:59:54 AM] [Server] Online at port undefined

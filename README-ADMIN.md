@@ -2,6 +2,36 @@
 
 **It is strongly recommended to use the editor to avoid accidentally deleting environment variables required for the core workflow.**
 
+![BRANI-360 Admin Dashboard Screenshot](./docs/images/admin_screeshot.png)
+
+## Table of Contents
+
+- [What is the `.env` Editor Dashboard?](#what-is-the-env-editor-dashboard)
+  - [Key Features](#key-features)
+- [Accessing the Editor Dashboard](#accessing-the-editor-dashboard)
+- [Variable Locking & Core Protection](#variable-locking--core-protection)
+- [How to Add Elements](#how-to-add-elements)
+  - [Adding a New Environment Variable](#adding-a-new-environment-variable)
+  - [Adding a New Section Header](#adding-a-new-section-header)
+- [How to Remove Elements](#how-to-remove-elements)
+  - [Deleting a Variable or Section](#deleting-a-variable-or-section)
+- [Organizing Your Workspace](#organizing-your-workspace)
+  - [Moving Items Up & Down](#moving-items-up--down)
+  - [Moving a Variable to a Different Section (Long-Distance Move)](#moving-a-variable-to-a-different-section-long-distance-move)
+  - [Collapsing Sections](#collapsing-sections)
+- [Saving Your Changes](#saving-your-changes)
+- [Environment Variables Dictionary](#environment-variables-dictionary)
+  - [Core variables](#core-variables)
+  - [CORE CONFIG [CORE]](#core-config-core)
+  - [SERVER STRATEGIES [CORE]](#server-strategies-core)
+  - [CLIENT STRATEGIES [CORE]](#client-strategies-core)
+  - [AUDIO PARAMETERS [CORE]](#audio-parameters-core)
+  - [Non-[CORE] variables](#non-core-variables)
+  - [KEYS AND TOKENS](#keys-and-tokens)
+  - [AI APIS AND PROMPTS](#ai-apis-and-prompts)
+  - [CLIENT STRATEGY PARAMETERS](#client-strategy-parameters)
+  - [PYTHON SCRIPTS [OPTIONAL]](#python-scripts-optional)
+
 ## What is the `.env` Editor Dashboard?
 The **BRANI-360 `.env` Variables Editor** is a secure, graphical web interface designed to help developers visually manage, organize, and document server environment variables. 
 
@@ -16,7 +46,7 @@ Directly editing raw `.env` files can often lead to syntax errors, accidental de
 ---
 ## Accessing the Editor Dashboard
 
-To access the editor dashboard start the server then go to http://localhost:3000/admin where 3000 is the port used by your server.
+To access the editor dashboard start the server, then go to http://localhost:3000/admin where 3000 is the port, used by your server.
 If you changed the port change that value to your port.
 The server console will give the correct address at start in a message coloured in cyan.  
 Example: <span style="color: #3a96dd;"> [09:24:31] [Server] For the .env admin dashboard open http://localhost:3000/admin </span>
@@ -133,7 +163,7 @@ The variables below are core and are used by the core infrastructure classes to 
 ### CLIENT STRATEGIES [CORE]
 *These variables control the frontend behavior, dictating how the client renders the tour and interprets topological data.*
 
-* **`CLIENT_VIEWER_PROVIDER`**: The provider handling the frontend landing page and the rendering of 360° images (e.g., `MarzipanoViewerProvider`or `MapillaryViewerProvider`).
+* **`CLIENT_VIEWER_PROVIDER`**: The provider handling the frontend landing page and the rendering of 360° images (e.g., `MarzipanoViewerProvider` or `MapillaryViewerProvider`).
 * **`CLIENT_TOPOLOGY_PROVIDER`**: The provider responsible for mapping and discovering how different 360° image nodes connect to one another.
 * **`CLIENT_VR_LOADER_PROVIDER`**: The provider responsible for loading the 360° images specifically for WebVR environments.
 * **`CLIENT_NODE_SELECTION_STRATEGY`**: The logic used to determine which nodes trigger background sound generation (e.g., `AcousticHorizonStrategy`).
@@ -141,7 +171,7 @@ The variables below are core and are used by the core infrastructure classes to 
 * **`CLIENT_SEMANTIC_LAYERS`**: A comma-separated list of the semantic layers utilized by the semantic provider (e.g., `spatial, horizon`).
 
 ### AUDIO PARAMETERS  [CORE] 
-*Variables for AcousticTreadmil, SpatialAudioPlayer, and strategies. These variables set the default volume levels within the client's Spatial Audio Player and the spatial continuity of the 360 images.*  
+*Variables for AcousticTreadmill, SpatialAudioPlayer, and strategies. These variables set the default volume levels within the client's Spatial Audio Player and the spatial continuity of the 360 images.*  
 
 * **`SPATIALLY_CONTINUOUS`**: (`true`/`false`) Determines if the nodes represent a contiguous physical walkthrough, or disconnected jumps between different locations. Used by the Acoustic Treadmill and Horizon strategies.
 * **`NEIGHBOR_GAIN`**: The volume level for ambient, background soundscapes.
