@@ -2,7 +2,7 @@
 
 **It is strongly recommended to use the editor to avoid accidentally deleting environment variables required for the core workflow.**
 
-![BRANI-360 Admin Dashboard Screenshot](./docs/images/admin_screeshot.png)
+![BRANI-360 Admin Dashboard Screenshot](./docs/images/admin_screenshot.png)
 
 ## Table of Contents
 
