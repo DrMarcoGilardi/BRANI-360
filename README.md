@@ -1,5 +1,7 @@
 # BRANI-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio-Generation on Networks of 360° Images  
 
+[![Watch the BRANI-360 Demo](./docs/images/BRANI-360_demo.png)](https://youtu.be/NicJ22GHQ8A)
+
 ## Table of Contents
 
 - [Introduction](#introduction)
