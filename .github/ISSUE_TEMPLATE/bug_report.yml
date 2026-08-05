@@ -35,7 +35,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: logs
+    id: server_logs
     attributes:
       label: Server Logs
       description: Paste any relevant error logs or terminal output from the server.
@@ -43,7 +43,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: logs
+    id: client_logs
     attributes:
       label: Client Logs
       description: Paste any relevant error from the client browser.
