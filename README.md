@@ -1,4 +1,47 @@
 # BRANI-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio-Generation on Networks of 360° Images  
+
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Project Structure](#project-structure)
+- [Connection Configuration](#connection-configuration)
+  - [Error Handling](#error-handling)
+- [Local Installation & Testing with Out-Of-The-Box Implementation](#local-installation--testing-with-out-of-the-box-implementation)
+  - [1. Local Backend Setup (Node.js)](#1-local-backend-setup-nodejs)
+  - [2. Frontend Setup (Client)](#2-frontend-setup-client)
+- [`.env` Variables Editor Guide](#env-variables-editor-guide)
+  - [What is the `.env` Editor Dashboard?](#what-is-the-env-editor-dashboard)
+  - [Key Features](#key-features)
+  - [Accessing the Editor Dashboard](#accessing-the-editor-dashboard)
+- [How to Configure Strategies (`.env`)](#how-to-configure-strategies-env)
+- [Implementation Guide: Building Custom Strategies](#implementation-guide-building-custom-strategies)
+  - [1. The Strict Contract System](#1-the-strict-contract-system)
+  - [2. Step-by-Step: Implementing a Custom Strategy](#2-step-by-step-implementing-a-custom-strategy)
+- [Provided Concrete Examples (Out-of-the-Box Examples)](#provided-concrete-examples-out-of-the-box-examples)
+  - [1. Mapillary & MapLibre GL (Visuals & Topology)](#1-mapillary--maplibre-gl-visuals--topology)
+  - [2. Geoapify (Context Grounding)](#2-geoapify-context-grounding)
+  - [3. Marzipano (Local 360 tours)](#3-marzipano-local-360-tours)
+  - [3. LM Studio (Vision-Language Analysis)](#3-lm-studio-vision-language-analysis)
+  - [4. Stable Audio / Gradio / Pinokio (Audio Synthesis)](#4-stable-audio--gradio--pinokio-audio-synthesis)
+  - [5. Python Adapters (Custom AI Fallbacks)](#5-python-adapters-custom-ai-fallbacks)
+- [Core Payload Contracts](#core-payload-contracts)
+  - [1. The Vision Payload (`VisionProvider.analyse()`)](#1-the-vision-payload-visionprovideranalyse)
+  - [2. The Audio Task Payload (`AudioProvider.generate()`)](#2-the-audio-task-payload-audioprovidergenerate)
+  - [3. The Client-to-Server Payload (`spatial_sync`)](#3-the-client-to-server-payload-spatial_sync)
+  - [4. The Server-to-Client Completion Payload (`instance_ready` / `node_ready`)](#4-the-server-to-client-completion-payload-instance_ready--node_ready)
+  - [5. The Topology Graph Payload (`BaseTopologyProvider.getNode()`)](#5-the-topology-graph-payload-basetopologyprovidergetnode)
+- [Server-Side Strategies (The AI Engine)](#server-side-strategies-the-ai-engine)
+  - [1. `ImageSourceProvider`](#1-imagesourceprovider)
+  - [2. `ContextProvider`](#2-contextprovider)
+  - [3. `VisionProvider`](#3-visionprovider)
+  - [4. `AudioProvider`](#4-audioprovider)
+- [Client-Side Strategies (UI & Map Abstractions)](#client-side-strategies-ui--map-abstractions)
+  - [1. `BaseViewerProvider`](#1-baseviewerprovider)
+  - [2. `BaseTopologyProvider`](#2-basetopologyprovider)
+  - [3. `NodeSelectionStrategy`](#3-nodeselectionstrategy)
+  - [4. `BaseSemanticProvider`](#4-basesemanticprovider)
+  - [5. `BaseVRLoader`](#5-basevrloader)
+
 ## Introduction 
 
 *BRANI: noun pl. [ masculine ] /'brani/ Italian for tracks or songs.*
@@ -8,7 +51,7 @@ Welcome to the BRANI-360 research sandbox.
 This software is released under AGPLv3 and commercial licencing. Please read the CONTRIBUTING.md file to know how to contribute to this project.
 
 This system is designed as a **strictly agnostic orchestration engine** for AI generation of spatial audio from interconnected 360° images.  
-The system is setup to run from GitHub Pages using zrok to connect to the server, or run to locally.  
+The system is setup to run from GitHub Pages using zrok to connect to the server, or run locally.  
 
 The purpose of the system is to provide a controlled research sandbox to study AI audio generation across graph-based spatial networks (e.g., interconnected 360° panoramas).  
 The sandbox is designed to explore four key research pillars:  
@@ -113,7 +156,7 @@ brani-360_v0/
 └── docs/                       # Auto-generated Documentation
 ```
 
-**You do not need to edit the core orchestration files** (like `PipelineService`, `NavigationManager`, `NetworkService`, `SoketController` etc).  The entire system is built on the **Strategy Pattern**. You simply need to write new Strategy classes to connect your own image sources, node selection algorithms, models, APIs, or mapping SDKs, and then activate them in the `.env` file.  
+**You do not need to edit the core orchestration files** (like `PipelineService`, `NavigationManager`, `NetworkService`, `SocketController` etc).  The entire system is built on the **Strategy Pattern**. You simply need to write new Strategy classes to connect your own image sources, node selection algorithms, models, APIs, or mapping SDKs, and then activate them in the `.env` file.  
 You should only implement the concrete strategies for the strategy pattern, you should not need to change any other file other than the `.env` and the `TUNNEL` constant at the top of the `client.js` file. 
 
 ---
@@ -137,7 +180,7 @@ If none of the above criteria are met (no local host, no custom tunnel, no valid
  
  BRANI-360 can be run entirely locally for testing, development, and peer review.
  However, BRANI-360 is designed to be hosted via GitHub Pages and connected to a backend via secure tunnels (like zrok or ngrok). 
- Zrok is the falback tunnel service if none is provided via the `?tuneel` URL parameter. 
+ Zrok is the fallback tunnel service if none is provided via the `?tunnel` URL parameter. 
  To use zrok set the `?token=` URL parameter to pass the random zrok token, or, if you prefer a static token, set a unique name in zrok and replace `ZROK_UNIQUE_NAME_HERE` in `client.js`.   
 
 ### 1. Local Backend Setup (Node.js)
@@ -378,12 +421,12 @@ The system uses Mapillary as the default provider for 360-degree street-level im
 * **`GeoapifyContextProvider` (Server):** A reverse-geocoding adapter. It takes the raw Lat/Lng coordinates from the client and converts them into a human-readable location string (e.g., "Times Square, New York"). This string grounds the VLM prompt to ensure region-accurate sonic generation. It also passes the mapillary key to the system config.
 
 ### 3. Marzipano (Local 360 tours)
-The system uses Marzipano and a physics based graph visualisation to read local 360 torus.
+The system uses Marzipano and a physics based graph visualisation to read local 360 tours.
 * **`MarzipanoViewerProvider` (Client):** Wraps Marzipano to render the tour graph and WebGL viewer, translating user clicks into agnostic `pov_changed` and `node_changed` events.
 * **`MarzipanoTopologyProvider` (Client):** Queries the Marzipano data.js file to extract the navigation graph (edges/links) so the Acoustic Treadmill can calculate distances to neighboring panoramas.
 * **`MarzipanoVRLoader` (Client):** Displays the high-resolution equirectangular tiles to paint onto the WebXR A-Frame sphere.
 * **`MarzipanoSource` (Server):** Stitches the Marzipano tiles together to produce a raw image buffer for the current panorama ID and passes it to the AI Engine for VLM analysis. Image providers must match in client and server.
-* **`MarzipanoContextProvider` (Server):** Returns "Unknown Location" this can be edited to give the exact location of the tour. It also passes the tour path tho the system config.
+* **`MarzipanoContextProvider` (Server):** Returns "Unknown Location" this can be edited to give the exact location of the tour. It also passes the tour path to the system config.
 
 ### 3. LM Studio (Vision-Language Analysis)
 * **`LMStudioVisionProvider` (Server):** An adapter for communicating with locally hosted Vision-Language Models (like LLaVA or Qwen-VL) via LM Studio's local server. It structures system prompts based on semantic layers (spatial, ambient, horizon) and parses the JSON output to locate sound sources in the 360 frame.
