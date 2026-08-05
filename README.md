@@ -232,7 +232,7 @@ Because the frontend utilizes ES6 modules (`type="module"`), the `index.html` fi
 ---
 ## `.env` Variables Editor Guide
 
-> **Note**: *It is strongly recommended to use the [admin editor](ADMIN.md) to safely edit the .env file and to avoid accidentally deleting environment variables required for the core workflow.*
+> **Note**: *It is strongly recommended to use the [admin editor](README-ADMIN.md) to safely edit the .env file and to avoid accidentally deleting environment variables required for the core workflow.*
 
 ### What is the `.env` Editor Dashboard?
 The **BRANI-360 `.env` Variables Editor** is a secure, graphical web interface designed to help developers visually manage, organize, and document server environment variables. 
@@ -256,7 +256,7 @@ Example: <span style="color: #3a96dd;"> [09:24:31] [Server] For the .env admin d
 
 ## How to Configure Strategies (`.env`)
 
-> **Note**: *It is strongly recommended to use the [admin editor](ADMIN.md) application to safely edit the .env file and to avoid accidentally deleting environment variables required for the core workflow.*
+> **Note**: *It is strongly recommended to use the [admin editor](README-ADMIN.md) application to safely edit the .env file and to avoid accidentally deleting environment variables required for the core workflow.*
 
 The system uses dynamic dependency injection. It reads your `.env` file at boot and dynamically imports the exact JavaScript classes you request.  To use a custom strategy, place your file in the appropriate directory, **ensure the class name matches the filename exactly**, and update your `.env` using the admin editor application:
 
@@ -404,7 +404,7 @@ When you refresh the browser, `client.js` will dynamically read the `.env` over 
 
 ## Provided Concrete Examples (Out-of-the-Box Examples)
 
-To help you get started, the repository includes several fully functional, concrete implementations of the strategy interfaces.  These demonstrate how to wrap real-world APIs and local models. The system is configured to run with the client run locally or hosted on GitHub pages. Change the .env file using the **[admin editor](ADMIN.md)** to swap examples.
+To help you get started, the repository includes several fully functional, concrete implementations of the strategy interfaces.  These demonstrate how to wrap real-world APIs and local models. The system is configured to run with the client run locally or hosted on GitHub pages. Change the .env file using the **[admin editor](README-ADMIN.md)** to swap examples.
 
 > **Place your API keys in the `.env` file**. The out-of-the-box code requires a Mapillary API token and a Geoapify API key, you can get them from `https://www.mapillary.com/dashboard/developers` and `https://www.geoapify.com/get-started-with-maps-api/`.  
 
