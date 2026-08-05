@@ -41,12 +41,12 @@ body:
       description: Paste any relevant error logs or terminal output from the server.
       render: bash
     validations:
-      required: false
+      required: true
   - type: textarea
     id: client_logs
     attributes:
       label: Client Logs
-      description: Paste any relevant error from the client browser.
+      description: Paste any relevant error from the client browser console.
       render: bash
     validations:
-      required: false
+      required: true
