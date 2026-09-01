@@ -1,7 +1,9 @@
 # BRANI-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio-Generation on Networks of 360° Images  
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![ORCID](https://img.shields.io/badge/ORCID-0000--0001--8220--7432-green.svg?logo=orcid)](https://orcid.org/0000-0001-8220-7432)
+[![GitHub repo size](https://img.shields.io/github/repo-size/DrMarcoGilardi/brani-360)](https://github.com/DrMarcoGilardi/brani-360)
 [![GitHub package.json version](https://img.shields.io/github/package-json/v/DrMarcoGilardi/brani-360)](https://github.com/DrMarcoGilardi/brani-360) 
 [![GitHub last commit](https://img.shields.io/github/last-commit/DrMarcoGilardi/brani-360)](https://github.com/DrMarcoGilardi/brani-360) 
 [![GitHub stars](https://img.shields.io/github/stars/DrMarcoGilardi/brani-360)](https://github.com/DrMarcoGilardi/brani-360/stargazers)
