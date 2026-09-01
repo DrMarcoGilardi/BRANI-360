@@ -4,6 +4,7 @@
 
 ## Table of Contents
 
+- [Abstract](#abstract)
 - [Introduction](#introduction)
 - [Project Structure](#project-structure)
 - [Connection Configuration](#connection-configuration)
@@ -43,6 +44,12 @@
   - [3. `NodeSelectionStrategy`](#3-nodeselectionstrategy)
   - [4. `BaseSemanticProvider`](#4-basesemanticprovider)
   - [5. `BaseVRLoader`](#5-basevrloader)
+
+## Abstract
+
+The integration of Vision-Language Models (VLMs) and latent diffusion models offers novel pathways for generating dynamic spatial audio. However, investigating these multimodal intersections across complex spatial networks requires a highly controlled, adaptable environment. We introduce BRANI-360, an open-source, agnostic orchestration engine and research sandbox designed to generate and map AI-driven spatial audio across interconnected 360° image graphs. By decoupling the core computational engine from semantic meaning via externalised, data-driven manifests, BRANI-360 enables researchers to define and complex acoustic soundscape without altering backend architecture. The system facilitates the translation of raw visual data into distinct semantic layers (local sooundscape, neighboring soundscape, and specific objects sounds) to explore four key research pillars: semantic interpretation and AI optimization, acoustically informed topology and biome mapping, strategic node-selection modeling, and user agency.  
+
+The sandbox provides a versatile framework for benchmarking purely mathematical graph traversal against context-aware algorithms, optimizing linguistic constraints to minimize AI hallucination, and evaluating perceptual authenticity in user immersion. Furthermore, BRANI-360 supports diverse interdisciplinary applications, ranging from the reconstruction of historical acoustic ecologies and visual-based biodiversity prediction to human-centric studies on spatial memory, dynamic exposure therapy for anxiety disorders, and enhanced navigational accessibility for visually impaired users. Ultimately, BRANI-360 serves as a foundational tool for exploring the perceptual, technical, and psychological dimensions of AI-generated spatial soundscapes.
 
 ## Introduction 
 
