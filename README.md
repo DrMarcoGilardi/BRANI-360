@@ -1,5 +1,8 @@
 # BRANI-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio-Generation on Networks of 360° Images  
- 
+
+[![License](https://img.shields.io/github/license/DrMarcoGilardi/BRANI-360)](https://github.com/DrMarcoGilardi/BRANI-360/blob/main/LICENSE)
+![Downloads](https://img.shields.io/github/downloads/DrMarcoGilardi/BRANI-360/total)
+
 **Dr Marco Gilardi - University of the West of Scotland**  
   
 **Cite as**: Please use the "Cite this Repository" function on the right panel, under the "About" section, to get the correct citation of this repo.
