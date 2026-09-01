@@ -1,7 +1,8 @@
 # BRANI-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio-Generation on Networks of 360° Images  
 
 Dr Marco Gilardi - University of the West of Scotland  
-** Cite as**: Gilardi, M. (2026) BRANI-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio-Generation on Networks of 360° Images (v1) [Computer Program]. Available from:  DOI:
+  
+**Cite as**: Gilardi, M. (2026) BRANI-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio-Generation on Networks of 360° Images (v1) [Computer Program]. Available from:  DOI:
 
 [![Watch the BRANI-360 Demo](./docs/images/BRANI-360_demo.png)](https://youtu.be/NicJ22GHQ8A)
 
