@@ -2,7 +2,11 @@
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![ORCID](https://img.shields.io/badge/ORCID-0000--0001--8220--7432-green.svg?logo=orcid)](https://orcid.org/0000-0001-8220-7432)
+[![GitHub package.json version](https://img.shields.io/github/package-json/v/DrMarcoGilardi/brani-360)](https://github.com/DrMarcoGilardi/brani-360) 
+[![GitHub last commit](https://img.shields.io/github/last-commit/DrMarcoGilardi/brani-360)](https://github.com/DrMarcoGilardi/brani-360) 
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![GitHub stars](https://img.shields.io/github/stars/DrMarcoGilardi/brani-360)](https://github.com/DrMarcoGilardi/brani-360/stargazers)
+
 
 **Dr Marco Gilardi - University of the West of Scotland**  
   
