@@ -1,4 +1,4 @@
-(./docs/images/BRANI-360_demo.png)
+![](./docs/images/BRANI-360_demo.png)
 # BRANI-360: An Agnostic Browser-Based Research Sandbox Architecture for AI Audio-Generation on Networks of 360° Images  
 
 [![ORCID](https://img.shields.io/badge/ORCID-0000--0001--8220--7432-green.svg?logo=orcid)](https://orcid.org/0000-0001-8220-7432)
