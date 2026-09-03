@@ -9,6 +9,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/DrMarcoGilardi/brani-360)](https://github.com/DrMarcoGilardi/brani-360/stargazers)
 
 **Dr Marco Gilardi**  
+
 **University of the West of Scotland - Faculty of Computing, Sciences, and Engineering - Department of Computing and Digital Technologies**  
   
 **Cite as**: Please use the "Cite this Repository" widget on GitHub's right panel, under the "About" section, to get the correct citation of this repo.
