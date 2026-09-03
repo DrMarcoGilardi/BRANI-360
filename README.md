@@ -10,7 +10,7 @@
 
 **Dr Marco Gilardi - University of the West of Scotland**  
   
-**Cite as**: Please use the "Cite this Repository" widget on the right panel, under the "About" section, to get the correct citation of this repo.
+**Cite as**: Please use the "Cite this Repository" widget on GitHub's right panel, under the "About" section, to get the correct citation of this repo.
 
 [![Watch the BRANI-360 Demo](./docs/images/BRANI-360_demo.png)](https://youtu.be/NicJ22GHQ8A)
 
