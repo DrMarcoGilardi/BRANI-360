@@ -10,7 +10,7 @@ We do not accept external code contributions via Pull Requests for the BRANI-360
 
 To legally offer commercial licenses, the project maintainer must retain 100% of the copyright to the core codebase. This includes core orchestration files such as the PipelineService, NavigationManager, and AcousticTreadmill. Accepting external code from the community introduces copyright fragmentation. To keep things simple and legally sound, all code in this upstream repository is authored and maintained strictly by the original creator.
 
-Any Pull Requests submitted targeting the core engine will be automatically closed. You are, however, free to fork the project so long the licencing structure is maintained and the original repository is credited.
+Any Pull Requests submitted targeting the core engine will be automatically closed. You are, however, free to fork the project so long the AGPLv3 licencing structure is maintained and the original repository is credited.
 
 2. Custom Strategies Belong to You (Host Them Separately)
 
