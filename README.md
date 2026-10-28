@@ -80,11 +80,11 @@ The system is setup to run from GitHub Pages using zrok to connect to the server
 The purpose of the system is to provide a controlled research sandbox to study AI audio generation across graph-based spatial networks (e.g., interconnected 360° panoramas).  
 The sandbox is designed to explore four key research pillars:  
 
-**I. Semantic Interpretation & AI Optimization** 
+**I. Semantic Interpretation and AI Optimization** 
 * **Agnostic Mapping:** Exploring how effectively Vision-Language Models (VLMs) can translate raw visual data into abstract semantic layers (e.g., `local` environments vs. `neighboring` topologies).  
 * **Prompt Engineering:** Experimenting with linguistic constraints and schema validation to minimize AI hallucination during VLM analysis and latent diffusion audio generation.  
 
-**II. Acoustically Informed Topologies & Biome Mapping** 
+**II. Acoustically Informed Topologies and Biome Mapping** 
 * **Contextual Sound Propagation:** Moving beyond purely mathematical distance to dictate sound behavior based on the physical reality of the space (e.g., how sound travels differently in a dense forest vs. a concrete urban canyon).  
 * **Multimodal Data Integration:** Exploring the use of geographic or satellite data (e.g., NASA Landsat, ESA Sentinel) to automatically classify biomes across a 360° image network and dynamically adjust the graph's acoustic properties.
 
